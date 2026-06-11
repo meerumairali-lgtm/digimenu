@@ -2,21 +2,30 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('')
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (password !== confirm) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    const { error } = await supabase.auth.updateUser({ password })
+
     if (error) {
       setError(error.message)
       setLoading(false)
@@ -27,37 +36,36 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 400, margin: '100px auto', padding: '0 20px' }}>
-      <h1 style={{ marginBottom: 24 }}>Welcome back</h1>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 15 }}
-        />
+      <h1 style={{ marginBottom: 8 }}>Set new password</h1>
+      <p style={{ color: '#666', fontSize: 14, marginBottom: 24 }}>
+        Choose a strong password for your account.
+      </p>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="New password"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
           style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 15 }}
         />
+        <input
+          type="password"
+          placeholder="Confirm new password"
+          value={confirm}
+          onChange={e => setConfirm(e.target.value)}
+          required
+          style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 15 }}
+        />
         {error && <p style={{ color: 'red', fontSize: 14 }}>{error}</p>}
-        <div style={{ textAlign: 'right', marginTop: -4 }}>
-          <Link href="/forgot-password" style={{ fontSize: 13, color: '#666' }}>Forgot password?</Link>
-        </div>
         <button
           type="submit"
           disabled={loading}
           style={{ padding: '12px', borderRadius: 8, background: '#000', color: '#fff', border: 'none', fontSize: 15, cursor: 'pointer' }}
         >
-          {loading ? 'Logging in...' : 'Log in'}
+          {loading ? 'Updating...' : 'Update password'}
         </button>
       </form>
-      <p style={{ marginTop: 16, fontSize: 14 }}>Don't have an account? <Link href="/signup">Sign up</Link></p>
     </div>
   )
 }

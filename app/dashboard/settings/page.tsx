@@ -3,6 +3,30 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const THEMES = [
+  { id: 'light', label: 'Light', bg: '#ffffff', accent: '#f97316' },
+  { id: 'dark', label: 'Dark', bg: '#111111', accent: '#f97316' },
+  { id: 'gold', label: 'Gold', bg: '#1a1200', accent: '#d4a017' },
+  { id: 'vibrant', label: 'Vibrant', bg: '#0f172a', accent: '#f97316' },
+]
+
+const CURRENCIES = [
+  { code: 'PKR', label: 'PKR — Pakistani Rupee' },
+  { code: 'USD', label: 'USD — US Dollar' },
+  { code: 'EUR', label: 'EUR — Euro' },
+  { code: 'GBP', label: 'GBP — British Pound' },
+  { code: 'AED', label: 'AED — UAE Dirham' },
+  { code: 'SAR', label: 'SAR — Saudi Riyal' },
+  { code: 'INR', label: 'INR — Indian Rupee' },
+]
+
+const LAYOUTS = [
+  { id: 'classic', label: 'Classic', desc: 'Clean list, no images', icon: '☰' },
+  { id: 'list', label: 'List', desc: 'Rows with small thumbnail', icon: '▤' },
+  { id: 'cards', label: 'Cards', desc: 'Grid with big images', icon: '⊞' },
+  { id: 'swipe', label: 'Swipe', desc: 'Horizontal carousel', icon: '⟺' },
+]
+
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -10,7 +34,8 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState('')
   const [form, setForm] = useState({
     name: '', slug: '', tagline: '', phone: '',
-    address: '', email: '', whatsapp: '', instagram: '', facebook: ''
+    address: '', email: '', whatsapp: '', instagram: '', facebook: '',
+    theme: 'light', currency: 'PKR', layout: 'classic'
   })
   const supabase = createClient()
   const router = useRouter()
@@ -30,6 +55,9 @@ export default function SettingsPage() {
         whatsapp: data.whatsapp || '',
         instagram: data.instagram || '',
         facebook: data.facebook || '',
+        theme: data.theme || 'light',
+        currency: data.currency || 'PKR',
+        layout: data.layout || 'classic',
       })
       setLoading(false)
     }
@@ -140,12 +168,80 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Theme */}
+        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Menu Theme</h3>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>How your public menu page looks to customers</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+            {THEMES.map(t => (
+              <div
+                key={t.id}
+                onClick={() => setForm({ ...form, theme: t.id })}
+                style={{
+                  cursor: 'pointer', borderRadius: 10, overflow: 'hidden',
+                  border: form.theme === t.id ? '2px solid #f97316' : '2px solid transparent',
+                  outline: form.theme === t.id ? '1px solid #f97316' : '1px solid #e5e5e5',
+                }}
+              >
+                <div style={{ background: t.bg, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 24, height: 4, borderRadius: 2, background: t.accent, opacity: 0.8 }} />
+                </div>
+                <div style={{ padding: '6px 8px', background: '#fff', textAlign: 'center' }}>
+                  <span style={{ fontSize: 12, fontWeight: form.theme === t.id ? 600 : 400, color: form.theme === t.id ? '#f97316' : '#555' }}>
+                    {t.label}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Layout */}
+        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Menu Layout</h3>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>How items are displayed to customers</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {LAYOUTS.map(l => (
+              <div
+                key={l.id}
+                onClick={() => setForm({ ...form, layout: l.id })}
+                style={{
+                  cursor: 'pointer', borderRadius: 10, padding: '14px 16px',
+                  border: form.layout === l.id ? '2px solid #f97316' : '2px solid #e5e5e5',
+                  background: form.layout === l.id ? '#fff4ed' : '#fff',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{l.icon}</div>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: form.layout === l.id ? '#f97316' : '#333' }}>{l.label}</p>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: '#888' }}>{l.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Currency */}
+        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Currency</h3>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: '#888' }}>Shown next to prices on your menu</p>
+          <select
+            value={form.currency}
+            onChange={e => setForm({ ...form, currency: e.target.value })}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            {CURRENCIES.map(c => (
+              <option key={c.code} value={c.code}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+
         {error && <p style={{ color: 'red', fontSize: 14 }}>{error}</p>}
-        {success && <p style={{ color: 'green', fontSize: 14 }}>{success}</p>}
+        {success && <p style={{ color: '#16a34a', fontSize: 14 }}>{success}</p>}
 
         <button type="submit" disabled={saving} style={{
-          padding: '12px', borderRadius: 8, background: '#000',
-          color: '#fff', border: 'none', fontSize: 15, cursor: 'pointer'
+          padding: '12px', borderRadius: 8, background: '#f97316',
+          color: '#fff', border: 'none', fontSize: 15, cursor: 'pointer',
+          fontWeight: 600, marginBottom: 40
         }}>
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

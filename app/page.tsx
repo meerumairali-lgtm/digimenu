@@ -1,146 +1,184 @@
+import Link from 'next/link'
+import FeaturesCarousel from './FeaturesCarousel'
+
 export default function Home() {
   return (
-    <main style={{ fontFamily: "'DM Sans', sans-serif", background: "#0f0f0f", color: "#f5f0e8", minHeight: "100vh" }}>
+    <main style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: "#ffffff", color: "#111111", minHeight: "100vh" }}>
 
       {/* NAV */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 2rem", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, background: "#0f0f0f", zIndex: 100 }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", color: "#c8a96e" }}>Digi<span style={{ color: "#f5f0e8" }}>Menu</span></div>
-        <a href="#" style={{ background: "#c8a96e", color: "#0f0f0f", padding: "8px 20px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, textDecoration: "none" }}>Get Started Free</a>
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 2rem", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)", zIndex: 100 }}>
+        <div style={{ fontSize: "20px", fontWeight: 700, color: "#f97316" }}>
+          Digi<span style={{ color: "#111" }}>Menu</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <Link href="/login" style={{ fontSize: "14px", color: "#666", textDecoration: "none" }}>
+            Log in
+          </Link>
+          <Link href="/signup" style={{ background: "#f97316", color: "#fff", padding: "8px 20px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, textDecoration: "none" }}>
+            Get started free
+          </Link>
+        </div>
       </nav>
 
       {/* HERO */}
-      <section style={{ padding: "5rem 2rem 4rem", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(200,169,110,0.1)", border: "1px solid rgba(200,169,110,0.3)", color: "#c8a96e", fontSize: "12px", fontWeight: 500, letterSpacing: "1.5px", textTransform: "uppercase" as const, padding: "6px 16px", borderRadius: "20px", marginBottom: "2rem" }}>
+      <section style={{ padding: "6rem 2rem 5rem", textAlign: "center", borderBottom: "1px solid #f0f0f0", background: "#fff" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff4ed", border: "1px solid #fed7aa", color: "#f97316", fontSize: "12px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" as const, padding: "6px 16px", borderRadius: "20px", marginBottom: "2rem" }}>
           ✦ Now live in 12+ countries
         </div>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(36px, 6vw, 58px)", fontWeight: 700, lineHeight: 1.1, marginBottom: "1.5rem" }}>
+        <h1 style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.05, marginBottom: "1.5rem", letterSpacing: "-2px", color: "#111" }}>
           Your restaurant,<br />
-          <em style={{ color: "#c8a96e", fontStyle: "italic" }}>online in minutes.</em><br />
+          <span style={{ color: "#f97316" }}>online in minutes.</span><br />
           Not months.
         </h1>
-        <p style={{ fontSize: "17px", color: "rgba(245,240,232,0.55)", maxWidth: "480px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-          A beautiful digital menu for the price of a burger a month. No coding. No expensive web agency. Just scan & eat.
+        <p style={{ fontSize: "18px", color: "#666", maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
+          A beautiful digital menu for the price of a burger a month. No coding. No expensive web agency. Just scan & order.
         </p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
-          <a href="#" style={{ background: "#c8a96e", color: "#0f0f0f", padding: "14px 28px", borderRadius: "8px", fontSize: "15px", fontWeight: 500, textDecoration: "none" }}>Create your menu free →</a>
-          <a href="/spicy-box" style={{ background: "transparent", color: "#f5f0e8", padding: "14px 28px", borderRadius: "8px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}>See a live example</a>
+          <Link href="/signup" style={{ background: "#f97316", color: "#fff", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 600, textDecoration: "none" }}>
+            Create your menu free →
+          </Link>
+          <Link href="/menu/spicy-box" style={{ background: "#fff", color: "#111", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 500, textDecoration: "none", border: "1px solid #e5e5e5" }}>
+            See a live example
+          </Link>
         </div>
-<p style={{ marginTop: "1.2rem", fontSize: "12px", color: "rgba(245,240,232,0.3)" }}>Setup in under 5 minutes · Cancel anytime</p>      </section>
+        <p style={{ marginTop: "1.2rem", fontSize: "13px", color: "#aaa" }}>
+          Setup in under 5 minutes · No credit card required
+        </p>
+      </section>
 
       {/* STATS */}
-      <div style={{ padding: "1.5rem 2rem", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", gap: "3rem", flexWrap: "wrap" as const }}>
-        {[["2,400+", "Restaurants live"], ["47", "Countries"], ["$4.99", "Starting per month"], ["5 min", "To go live"]].map(([num, label]) => (
+      <div style={{ padding: "2.5rem 2rem", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", gap: "4rem", flexWrap: "wrap" as const, background: "#fafafa" }}>
+        {[
+          ["2,400+", "Restaurants live"],
+          ["47", "Countries"],
+          ["$4.99", "Per month"],
+          ["5 min", "To go live"],
+        ].map(([num, label]) => (
           <div key={label} style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "26px", color: "#c8a96e" }}>{num}</div>
-            <div style={{ fontSize: "12px", color: "rgba(245,240,232,0.4)", marginTop: "2px" }}>{label}</div>
+            <div style={{ fontSize: "30px", fontWeight: 800, color: "#f97316", letterSpacing: "-1px" }}>{num}</div>
+            <div style={{ fontSize: "13px", color: "#888", marginTop: "4px" }}>{label}</div>
           </div>
         ))}
       </div>
 
       {/* FEATURES */}
-      <section style={{ padding: "4rem 2rem" }}>
-        <div style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#c8a96e", marginBottom: "0.8rem" }}>Why DigiMenu</div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "#f5f0e8", marginBottom: "1rem" }}>Everything a restaurant<br />actually needs</h2>
-        <p style={{ fontSize: "15px", color: "rgba(245,240,232,0.5)", maxWidth: "420px", lineHeight: 1.7, marginBottom: "3rem" }}>No bloated website builder. Just the features that bring customers in.</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "12px", overflow: "hidden" }}>
-          {[
-            ["🔗", "Your own URL", "digimenu.com/yourrestaurant — share it anywhere, print it everywhere."],
-            ["📱", "QR Code included", "Auto-generated QR code. Print, stick on table, done."],
-            ["🍽️", "Beautiful menu", "Categories, photos, descriptions, prices. Stunning on any phone."],
-            ["💬", "WhatsApp & socials", "One tap to WhatsApp you, follow on Instagram, find you on maps."],
-            ["⚡", "Instant updates", "Change a price or add a dish — live in seconds."],
-            ["🌍", "Works worldwide", "Built for small businesses from Karachi to London to New York."],
-          ].map(([icon, title, desc]) => (
-            <div key={title} style={{ background: "#0f0f0f", padding: "1.8rem 1.5rem" }}>
-              <div style={{ width: "40px", height: "40px", background: "rgba(200,169,110,0.1)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem", fontSize: "20px" }}>{icon}</div>
-              <h3 style={{ fontSize: "15px", fontWeight: 500, color: "#f5f0e8", marginBottom: "0.5rem" }}>{title}</h3>
-              <p style={{ fontSize: "13px", color: "rgba(245,240,232,0.45)", lineHeight: 1.6 }}>{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
+        <FeaturesCarousel />
 
       {/* HOW IT WORKS */}
-      <section style={{ padding: "4rem 2rem", background: "#141414", borderTop: "1px solid rgba(255,255,255,0.07)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#c8a96e", marginBottom: "0.8rem" }}>How it works</div>
-          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "#f5f0e8" }}>From zero to live menu<br />in 3 simple steps</h2>
+      <section style={{ padding: "6rem 2rem", background: "#fafafa", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
+        <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 3.5rem" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#f97316", marginBottom: "0.8rem" }}>How it works</div>
+          <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", letterSpacing: "-1px" }}>
+            From zero to live menu<br />in 3 simple steps
+          </h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "2rem", marginTop: "3rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {[
-            ["1", "Sign up", "Create your account and choose your restaurant's unique URL in minutes."],
+            ["1", "Sign up free", "Create your account and choose your restaurant's unique URL in minutes."],
             ["2", "Build your menu", "Add categories, dishes, prices, photos and contact details easily."],
             ["3", "Print & share", "Download your QR code, stick it on your table, share your link everywhere."],
           ].map(([num, title, desc]) => (
-            <div key={num} style={{ textAlign: "center" }}>
-              <div style={{ width: "48px", height: "48px", background: "rgba(200,169,110,0.1)", border: "1px solid rgba(200,169,110,0.3)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", fontFamily: "Georgia, serif", fontSize: "20px", color: "#c8a96e" }}>{num}</div>
-              <h3 style={{ fontSize: "15px", fontWeight: 500, color: "#f5f0e8", marginBottom: "0.5rem" }}>{title}</h3>
-              <p style={{ fontSize: "13px", color: "rgba(245,240,232,0.45)", lineHeight: 1.6 }}>{desc}</p>
+            <div key={String(num)} style={{ textAlign: "center" }}>
+              <div style={{ width: "52px", height: "52px", background: "#fff4ed", border: "2px solid #fed7aa", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.2rem", fontSize: "20px", fontWeight: 800, color: "#f97316" }}>
+                {num}
+              </div>
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111", marginBottom: "0.5rem" }}>{title}</h3>
+              <p style={{ fontSize: "14px", color: "#888", lineHeight: 1.6, margin: 0 }}>{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* PRICING */}
-      <section style={{ padding: "4rem 2rem", textAlign: "center" }}>
-        <div style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#c8a96e", marginBottom: "0.8rem" }}>Pricing</div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "#f5f0e8", marginBottom: "0.5rem" }}>Less than a burger a month</h2>
-        <p style={{ fontSize: "15px", color: "rgba(245,240,232,0.5)", marginBottom: "3rem" }}>Honest, simple pricing. Cancel anytime.</p>
-        <div style={{ maxWidth: "420px", margin: "0 auto", background: "#141414", border: "1px solid rgba(200,169,110,0.5)", borderRadius: "16px", padding: "2.5rem 2rem", textAlign: "left", position: "relative" }}>
-          <div style={{ position: "absolute", top: "-13px", left: "50%", transform: "translateX(-50%)", background: "#c8a96e", color: "#0f0f0f", fontSize: "11px", fontWeight: 500, padding: "4px 18px", borderRadius: "20px", whiteSpace: "nowrap" as const }}>
+      <section style={{ padding: "6rem 2rem", textAlign: "center", background: "#fff" }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#f97316", marginBottom: "0.8rem" }}>Pricing</div>
+        <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", marginBottom: "0.5rem", letterSpacing: "-1px" }}>
+          Less than a burger a month
+        </h2>
+        <p style={{ fontSize: "16px", color: "#888", marginBottom: "3rem" }}>
+          Honest, simple pricing. Cancel anytime.
+        </p>
+
+        <div style={{ maxWidth: "440px", margin: "0 auto", background: "#fff", border: "2px solid #f97316", borderRadius: "20px", padding: "2.5rem 2rem", textAlign: "left", position: "relative", boxShadow: "0 20px 60px rgba(249,115,22,0.1)" }}>
+          <div style={{ position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", background: "#f97316", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "5px 20px", borderRadius: "20px", whiteSpace: "nowrap" as const, letterSpacing: "0.5px" }}>
             Everything included
           </div>
 
-          {/* One time fee */}
-          <div style={{ marginBottom: "1.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-            <div style={{ fontSize: "12px", color: "rgba(245,240,232,0.4)", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.5rem" }}>One-time setup</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "36px", color: "#f5f0e8", lineHeight: 1 }}>
-              <sup style={{ fontSize: "18px", verticalAlign: "top", marginTop: "6px", color: "#c8a96e" }}>$</sup>17.90
+          <div style={{ marginBottom: "1.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid #f0f0f0" }}>
+            <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.5rem" }}>One-time setup</div>
+            <div style={{ fontSize: "44px", fontWeight: 800, color: "#111", lineHeight: 1, letterSpacing: "-2px" }}>
+              <sup style={{ fontSize: "20px", color: "#f97316", verticalAlign: "top", marginTop: "10px", fontWeight: 700 }}>$</sup>17.90
             </div>
-            <p style={{ fontSize: "13px", color: "rgba(245,240,232,0.45)", marginTop: "0.5rem" }}>Pay once. Your menu page is created, configured and ready to share.</p>
+            <p style={{ fontSize: "13px", color: "#888", margin: "8px 0 0" }}>
+              Pay once. Your menu page is created, configured and ready to share.
+            </p>
           </div>
 
-          {/* Monthly fee */}
-          <div style={{ marginBottom: "1.8rem" }}>
-            <div style={{ fontSize: "12px", color: "rgba(245,240,232,0.4)", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.5rem" }}>Then just</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "36px", color: "#f5f0e8", lineHeight: 1 }}>
-              <sup style={{ fontSize: "18px", verticalAlign: "top", marginTop: "6px", color: "#c8a96e" }}>$</sup>4.99<sub style={{ fontSize: "14px", color: "rgba(245,240,232,0.4)" }}>/month</sub>
+          <div style={{ marginBottom: "2rem" }}>
+            <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.5rem" }}>Then just</div>
+            <div style={{ fontSize: "44px", fontWeight: 800, color: "#111", lineHeight: 1, letterSpacing: "-2px" }}>
+              <sup style={{ fontSize: "20px", color: "#f97316", verticalAlign: "top", marginTop: "10px", fontWeight: 700 }}>$</sup>4.99
+              <sub style={{ fontSize: "15px", color: "#aaa", fontWeight: 400, letterSpacing: 0 }}>/month</sub>
             </div>
-            <p style={{ fontSize: "13px", color: "rgba(245,240,232,0.45)", marginTop: "0.5rem" }}>Less than a coffee. Keep your menu live, updated and always accessible.</p>
+            <p style={{ fontSize: "13px", color: "#888", margin: "8px 0 0" }}>
+              Less than a coffee. Keep your menu live, updated and always accessible.
+            </p>
           </div>
 
-          {/* Features */}
-          <ul style={{ listStyle: "none", display: "flex", flexDirection: "column" as const, gap: "8px", marginBottom: "2rem" }}>
+          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", display: "flex", flexDirection: "column" as const, gap: "10px" }}>
             {[
               "Your own URL — digimenu.com/yourname",
               "QR code you can print anywhere",
               "Unlimited categories & menu items",
+              "4 menu layouts + 4 themes",
               "WhatsApp, socials & contact info",
               "Instant updates anytime",
               "Mobile-perfect on every device",
             ].map(f => (
-              <li key={f} style={{ fontSize: "13px", color: "rgba(245,240,232,0.6)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "#c8a96e", fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
+              <li key={f} style={{ fontSize: "14px", color: "#444", display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ color: "#f97316", fontWeight: 700, flexShrink: 0, fontSize: "16px" }}>✓</span>{f}
               </li>
             ))}
           </ul>
 
-          <button style={{ width: "100%", padding: "14px", borderRadius: "8px", fontSize: "15px", fontWeight: 500, cursor: "pointer", border: "none", background: "#c8a96e", color: "#0f0f0f" }}>
+          <Link href="/signup" style={{ display: "block", padding: "15px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, background: "#f97316", color: "#fff", textDecoration: "none", textAlign: "center" as const }}>
             Get your menu now →
-          </button>
+          </Link>
         </div>
-        <p style={{ marginTop: "1.5rem", fontSize: "13px", color: "rgba(245,240,232,0.3)" }}>All plans include a one-time setup fee · 7-day free trial</p>
+        <p style={{ marginTop: "1.5rem", fontSize: "13px", color: "#bbb" }}>
+          7-day free trial · Cancel anytime · No hidden fees
+        </p>
+      </section>
+
+      {/* CTA BANNER */}
+      <section style={{ margin: "0 2rem 5rem", background: "#f97316", borderRadius: "20px", padding: "4rem 2rem", textAlign: "center" }}>
+        <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 800, color: "#fff", marginBottom: "1rem", letterSpacing: "-1px" }}>
+          Ready to take your menu digital?
+        </h2>
+        <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.8)", marginBottom: "2rem" }}>
+          Join thousands of restaurants already using DigiMenu.
+        </p>
+        <Link href="/signup" style={{ display: "inline-block", background: "#fff", color: "#f97316", padding: "15px 36px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
+          Start for free →
+        </Link>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ padding: "2rem", borderTop: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: "1rem" }}>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", color: "#c8a96e" }}>DigiMenu <span style={{ color: "rgba(245,240,232,0.4)", fontFamily: "'DM Sans', sans-serif", fontSize: "14px" }}>· Digital menus for everyone</span></div>
-        <div style={{ display: "flex", gap: "1.5rem" }}>
-          {["About", "Contact", "Privacy"].map(l => <a key={l} href="#" style={{ fontSize: "13px", color: "rgba(245,240,232,0.35)", textDecoration: "none" }}>{l}</a>)}
+      <footer style={{ padding: "2rem", borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: "1rem" }}>
+        <div style={{ fontSize: "18px", fontWeight: 700, color: "#f97316" }}>
+          DigiMenu <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Digital menus for everyone</span>
         </div>
-        <p style={{ fontSize: "12px", color: "rgba(245,240,232,0.2)", width: "100%" }}>© 2025 DigiMenu. Built with ❤️ for small restaurants worldwide.</p>
+        <div style={{ display: "flex", gap: "1.5rem" }}>
+          {["About", "Contact", "Privacy"].map(l => (
+            <a key={l} href="#" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>{l}</a>
+          ))}
+        </div>
+        <p style={{ fontSize: "12px", color: "#ccc", width: "100%", margin: 0 }}>
+          © 2025 DigiMenu. Built for small restaurants worldwide.
+        </p>
       </footer>
 
     </main>
-  );
+  )
 }
