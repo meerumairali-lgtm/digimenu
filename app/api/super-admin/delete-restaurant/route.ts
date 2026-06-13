@@ -1,0 +1,28 @@
+import { createClient } from '@/lib/supabase/server'
+import { logAuditAction } from '@/lib/audit'
+import { NextResponse } from 'next/server'
+
+export async function POST(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user || user.email !== 'meerumairali@gmail.com') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id, name } = await req.json()
+
+  await supabase.from('menu_items').delete().eq('restaurant_id', id)
+  await supabase.from('categories').delete().eq('restaurant_id', id)
+  await supabase.from('restaurants').delete().eq('id', id)
+
+  await logAuditAction({
+    admin_email: user.email,
+    action: 'delete',
+    target_type: 'restaurant',
+    target_id: id,
+    target_name: name,
+  })
+
+  return NextResponse.json({ success: true })
+}

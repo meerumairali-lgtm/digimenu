@@ -1,0 +1,205 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import RestaurantActions from './RestaurantActions'
+import {
+  ArrowLeft,
+  ExternalLink,
+  MapPin,
+  Phone,
+  Mail,
+  MessageCircle,
+  Share2,
+  Globe,
+  Palette,
+  LayoutTemplate,
+  DollarSign,
+  Hash,
+  User,
+  Calendar,
+} from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const SUPER_ADMIN_EMAIL = 'meerumairali@gmail.com'
+
+export default async function RestaurantDetailPage({
+  params,
+}: {
+  params: { id: string }
+}) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+    redirect('/dashboard')
+  }
+
+  const { data: restaurant } = await supabase
+    .from('restaurants')
+    .select('*')
+    .eq('id', params.id)
+    .single()
+
+  if (!restaurant) notFound()
+
+  const [{ count: categoryCount }, { count: itemCount }] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true })
+      .eq('restaurant_id', restaurant.id),
+    supabase
+      .from('menu_items')
+      .select('*', { count: 'exact', head: true })
+      .eq('restaurant_id', restaurant.id),
+  ])
+
+  const infoRows = [
+    { label: 'Restaurant ID', value: restaurant.id, icon: Hash, mono: true },
+    { label: 'User ID', value: restaurant.user_id, icon: User, mono: true },
+    {
+      label: 'Created',
+      value: new Date(restaurant.created_at).toLocaleString('en-GB'),
+      icon: Calendar,
+    },
+    { label: 'Address', value: restaurant.address, icon: MapPin },
+    { label: 'Phone', value: restaurant.phone, icon: Phone },
+    { label: 'Email', value: restaurant.email, icon: Mail },
+    { label: 'WhatsApp', value: restaurant.whatsapp, icon: MessageCircle },
+   { label: 'Instagram', value: restaurant.instagram, icon: Share2 },
+{ label: 'Facebook', value: restaurant.facebook, icon: Globe },
+    { label: 'Theme', value: restaurant.theme, icon: Palette },
+    { label: 'Layout', value: restaurant.layout, icon: LayoutTemplate },
+    { label: 'Currency', value: restaurant.currency, icon: DollarSign },
+  ]
+
+  return (
+    <div className="max-w-4xl">
+      {/* Back */}
+      <Link
+        href="/super-admin/restaurants"
+        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-6 transition-colors"
+      >
+        <ArrowLeft size={15} />
+        Back to Restaurants
+      </Link>
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-bold text-white">
+              {restaurant.name}
+            </h1>
+
+            {restaurant.is_suspended ? (
+              <span className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1 rounded-full">
+                Suspended
+              </span>
+            ) : (
+              <span className="text-xs bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-1 rounded-full">
+                Active
+              </span>
+            )}
+          </div>
+
+          {restaurant.tagline && (
+            <p className="text-gray-400 text-sm">{restaurant.tagline}</p>
+          )}
+        </div>
+
+        {/* FIXED LINK */}
+        <Link
+          href={`/menu/${restaurant.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <ExternalLink size={14} />
+          View Public Menu
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Info */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+              Restaurant Details
+            </h2>
+
+            <div className="space-y-3">
+              {infoRows.map((row) => {
+                if (!row.value) return null
+                const Icon = row.icon
+
+                return (
+                  <div key={row.label} className="flex items-start gap-3">
+                    <Icon
+                      size={15}
+                      className="text-gray-500 mt-0.5 flex-shrink-0"
+                    />
+
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500">{row.label}</p>
+                      <p
+                        className={`text-sm text-white break-all ${
+                          row.mono
+                            ? 'font-mono text-xs text-gray-300'
+                            : ''
+                        }`}
+                      >
+                        {row.value}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Stats */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+              Statistics
+            </h2>
+
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Categories</span>
+                <span className="text-sm font-semibold text-white">
+                  {categoryCount ?? 0}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Menu Items</span>
+                <span className="text-sm font-semibold text-white">
+                  {itemCount ?? 0}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Plan</span>
+                <span className="text-xs bg-gray-700 text-gray-400 px-2 py-1 rounded-full">
+                  Free
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <RestaurantActions
+            restaurantId={restaurant.id}
+            isSuspended={restaurant.is_suspended}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
