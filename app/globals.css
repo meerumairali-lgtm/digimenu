@@ -23,6 +23,12 @@ body {
 
 :root {
   color-scheme: light;
+  --brand-navy: #0D1B2A;
+  --brand-navy-mid: #112240;
+  --brand-navy-surface: #1A3A5C;
+  --brand-blue: #38BDF8;
+  --brand-blue-light: #7DD3FC;
+  --brand-blue-mist: #E0F2FE;
 }
 
 body {

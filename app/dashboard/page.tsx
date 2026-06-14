@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import DashboardNav from "./DashboardNav";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -31,10 +33,10 @@ export default async function DashboardPage() {
     .eq("restaurant_id", restaurant.id);
 
   const { count: availableCount } = await supabase
-    .from('menu_items')
-    .select('*', { count: 'exact', head: true })
-    .eq('restaurant_id', restaurant.id)
-    .eq('is_available', true)
+    .from("menu_items")
+    .select("*", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant.id)
+    .eq("is_available", true);
 
   const menuUrl = `/menu/${restaurant.slug}`;
 
@@ -54,28 +56,36 @@ export default async function DashboardPage() {
               href={menuUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-slate-700 underline underline-offset-2 hover:text-slate-900"
+              className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
             >
               {`${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${menuUrl}`}
             </a>
           </p>
         </div>
 
+        {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
           <Link
             href="/dashboard/menu"
-            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors"
+            className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
           >
-            <p className="text-xs text-slate-400 mb-1">Categories</p>
-            <p className="text-2xl font-semibold text-slate-900">
+            <p className="text-xs text-sky-600 mb-1">Categories</p>
+            <p className="text-2xl font-semibold text-[#0D1B2A]">
               {categoryCount ?? 0}
             </p>
           </Link>
 
-          <Link href="/dashboard/menu" className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors">
-            <p className="text-xs text-slate-400 mb-1">Menu items</p>
-            <p className="text-2xl font-semibold text-slate-900">{availableCount ?? 0}
-              <span className="text-sm font-normal text-slate-400"> / {itemCount ?? 0}</span>
+          <Link
+            href="/dashboard/menu"
+            className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
+          >
+            <p className="text-xs text-sky-600 mb-1">Menu items</p>
+            <p className="text-2xl font-semibold text-[#0D1B2A]">
+              {availableCount ?? 0}
+              <span className="text-sm font-normal text-slate-400">
+                {" "}
+                / {itemCount ?? 0}
+              </span>
             </p>
           </Link>
 
@@ -83,9 +93,9 @@ export default async function DashboardPage() {
             href={menuUrl}
             target="_blank"
             rel="noreferrer"
-            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors"
+            className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
           >
-            <p className="text-xs text-slate-400 mb-1">Status</p>
+            <p className="text-xs text-sky-600 mb-1">Status</p>
             <p className="text-lg font-semibold text-green-600 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
               Live
@@ -97,17 +107,25 @@ export default async function DashboardPage() {
           Quick actions
         </p>
 
+        {/* Quick actions */}
         <div className="grid sm:grid-cols-3 gap-3">
-          <Link href="/dashboard/menu" className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors">
+          <Link
+            href="/dashboard/menu"
+            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-colors"
+          >
             <p className="text-xs text-slate-400 mb-1">Menu items</p>
-            <p className="text-2xl font-semibold text-slate-900">{itemCount ?? 0}</p>
+            <p className="text-2xl font-semibold text-[#0D1B2A]">
+              {itemCount ?? 0}
+            </p>
           </Link>
 
           <Link
             href="/dashboard/qr"
-            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition-all"
+            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all"
           >
-            <p className="font-medium text-slate-900 text-sm">Get QR code</p>
+            <p className="font-medium text-[#0D1B2A] text-sm">
+              Get QR code
+            </p>
             <p className="text-xs text-slate-400 mt-0.5">
               Download and print for your tables
             </p>
@@ -115,9 +133,11 @@ export default async function DashboardPage() {
 
           <Link
             href="/dashboard/settings"
-            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition-all"
+            className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all"
           >
-            <p className="font-medium text-slate-900 text-sm">Settings</p>
+            <p className="font-medium text-[#0D1B2A] text-sm">
+              Settings
+            </p>
             <p className="text-xs text-slate-400 mt-0.5">
               Profile, social links, contact info
             </p>

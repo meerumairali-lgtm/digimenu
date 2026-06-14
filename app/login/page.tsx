@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Eye, EyeOff } from 'lucide-react'
+import Navbar from '@/app/components/Navbar'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,19 +31,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ colorScheme: 'light' }}>
-      {/* Header */}
-      <header className="border-b border-gray-100 px-6 py-4">
-        <Link href="/" className="flex items-center gap-2 w-fit">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">D</div>
-          <span className="font-bold text-gray-900 text-lg">DigiMenu</span>
-        </Link>
-      </header>
+      <Navbar />
 
-      {/* Main */}
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
-          <p className="text-gray-500 text-sm mb-8">Sign in to your DigiMenu account</p>
+          <p className="text-gray-500 text-sm mb-8">Sign in to your Menuberg account</p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div>
@@ -52,7 +47,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
               />
             </div>
 
@@ -65,7 +60,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
                 />
                 <button
                   type="button"
@@ -76,7 +71,7 @@ export default function LoginPage() {
                 </button>
               </div>
               <div className="text-right mt-1.5">
-                <Link href="/forgot-password" className="text-xs text-orange-500 hover:underline">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-xs text-sky-500 hover:underline">Forgot password?</Link>
               </div>
             </div>
 
@@ -89,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+              className="w-full py-2.5 bg-sky-400 hover:bg-sky-500 text-[#0D1B2A] font-semibold rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -97,14 +92,13 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Don't have an account?{' '}
-            <Link href="/signup" className="text-orange-500 font-medium hover:underline">Sign up</Link>
+            <Link href="/signup" className="text-sky-500 font-medium hover:underline">Sign up</Link>
           </p>
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-4 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} DigiMenu. All rights reserved.
+        © {new Date().getFullYear()} Menuberg. All rights reserved.
       </footer>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -40,13 +41,11 @@ export default function SuperAdminLayout({
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-orange-500 rounded-md flex items-center justify-center text-white font-bold text-sm">
-              D
-            </div>
+          <div className="flex items-center gap-2.5">
+            <Image src="/logo.png" alt="Menuberg" width={40} height={40} style={{ objectFit: 'contain' }} />
             <div>
-              <p className="text-sm font-semibold text-white">DigiMenu</p>
-              <p className="text-xs text-orange-400 font-medium">Super Admin</p>
+              <p className="text-sm font-semibold text-white">Menuberg</p>
+              <p className="text-xs text-sky-400 font-medium">Super Admin</p>
             </div>
           </div>
           <button
@@ -71,7 +70,7 @@ export default function SuperAdminLayout({
                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                   ${
                     isActive
-                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                      ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
               >

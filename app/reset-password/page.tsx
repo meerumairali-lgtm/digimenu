@@ -1,117 +1,97 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Eye, EyeOff } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { ArrowLeft, MailCheck } from 'lucide-react'
+import Navbar from '@/app/components/Navbar'
 
-export default function ResetPasswordPage() {
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
   const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (password !== confirm) {
-      setError('Passwords do not match')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.updateUser({ password })
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      setSent(true)
     }
   }
 
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ colorScheme: 'light' }}>
-      {/* Header */}
-      <header className="border-b border-gray-100 px-6 py-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">D</div>
-          <span className="font-bold text-gray-900 text-lg">DigiMenu</span>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Set new password</h1>
-          <p className="text-gray-500 text-sm mb-8">Choose a strong password for your account.</p>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Min. 6 characters"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
+          {sent ? (
+            <div className="text-center">
+              <div className="w-14 h-14 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MailCheck size={26} className="text-sky-400" />
               </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h1>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                We sent a password reset link to <strong className="text-gray-700">{email}</strong>. Check your inbox and click the link.
+              </p>
+              <Link href="/login" className="inline-flex items-center gap-2 text-sm text-sky-500 hover:underline font-medium">
+                <ArrowLeft size={15} /> Back to login
+              </Link>
             </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">Forgot password?</h1>
+              <p className="text-gray-500 text-sm mb-8">Enter your email and we'll send you a reset link.</p>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm New Password</label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? 'text' : 'password'}
-                  placeholder="Repeat your password"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  required
-                  className="w-full px-4 py-2.5 pr-11 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                />
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
+                  />
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
                 <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 bg-sky-400 hover:bg-sky-500 text-[#0D1B2A] font-semibold rounded-lg transition-colors disabled:opacity-50 text-sm"
                 >
-                  {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
+                  {loading ? 'Sending...' : 'Send reset link'}
                 </button>
-              </div>
-            </div>
+              </form>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
-            >
-              {loading ? 'Updating...' : 'Update password'}
-            </button>
-          </form>
+              <p className="text-center mt-6">
+                <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
+                  <ArrowLeft size={14} /> Back to login
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </main>
 
       <footer className="border-t border-gray-100 px-6 py-4 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} DigiMenu. All rights reserved.
+        © {new Date().getFullYear()} Menuberg. All rights reserved.
       </footer>
     </div>
   )

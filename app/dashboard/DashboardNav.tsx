@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import LogoutButton from './LogoutButton'
 
@@ -24,19 +25,20 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
     const base = mobile
       ? 'block px-3 py-2.5 text-sm rounded-lg transition-colors'
       : 'px-3 py-1.5 text-sm rounded-lg transition-colors'
-    const active = 'bg-orange-50 text-orange-600 font-medium'
-    const inactive = 'text-slate-600 hover:bg-orange-50 hover:text-orange-600'
+    const active = 'bg-sky-500/10 text-sky-400 font-medium'
+    const inactive = 'text-sky-200 hover:bg-sky-500/10 hover:text-sky-300'
     return `${base} ${isActive(href) ? active : inactive}`
   }
 
   return (
-    <header className="bg-white border-b border-orange-100 sticky top-0 z-20">
+    <header className="sticky top-0 z-20" style={{ background: '#0D1B2A', borderBottom: '1px solid rgba(56,189,248,0.15)' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
 
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-bold text-orange-500 text-base tracking-tight">
-            DigiMenu
-          </Link>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="Menuberg" width={40} height={40} style={{ objectFit: 'contain' }} />
+            <span className="font-bold text-white text-base tracking-tight">Menuberg</span> 
+            </Link>
           <nav className="hidden sm:flex items-center gap-1">
             {links.map(link => (
               <Link key={link.href} href={link.href} className={navLinkClass(link.href)}>
@@ -50,7 +52,7 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
           <Link
             href={menuUrl}
             target="_blank"
-            className="hidden sm:flex items-center gap-1 text-xs text-slate-500 hover:text-orange-500 transition-colors px-3 py-1.5 rounded-lg hover:bg-orange-50"
+            className="hidden sm:flex items-center gap-1 text-xs text-sky-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-sky-500/10"
           >
             View menu ↗
           </Link>
@@ -70,24 +72,22 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
       </div>
 
       {open && (
-        <div className="sm:hidden border-t border-orange-100 bg-white px-4 py-3 flex flex-col gap-1">
-          {links.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className={navLinkClass(link.href, true)}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="border-t border-orange-100 mt-2 pt-2 flex items-center justify-between">
+        <div className="sm:hidden px-4 py-3 flex flex-col gap-1" style={{ background: '#0D1B2A', borderTop: '1px solid rgba(56,189,248,0.15)' }}>          {links.map(link => (
+          <Link
+            key={link.href}
+            href={link.href}
+            onClick={() => setOpen(false)}
+            className={navLinkClass(link.href, true)}
+          >
+            {link.label}
+          </Link>
+        ))}
+          <div className="border-t border-sky-100 mt-2 pt-2 flex items-center justify-between">
             <Link
               href={menuUrl}
               target="_blank"
               onClick={() => setOpen(false)}
-              className="text-sm text-slate-500 hover:text-orange-500"
-            >
+              className="text-sm text-sky-300 hover:text-white"            >
               View menu ↗
             </Link>
             <LogoutButton />
