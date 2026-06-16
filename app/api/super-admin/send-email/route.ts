@@ -3,8 +3,6 @@ import { logAuditAction } from '@/lib/audit'
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,6 +11,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const { subject, body, recipientType, restaurantId } = await req.json()
 
   if (!subject || !body || !recipientType) {
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
 
   try {
     if (recipientType === 'all') {
-      // Fetch all restaurant owner emails
       const { data: restaurants } = await supabase
         .from('restaurants')
         .select('id, name, email')
@@ -31,7 +29,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'No restaurants found' }, { status: 404 })
       }
 
-      // Send to each
       for (const restaurant of restaurants) {
         if (!restaurant.email) continue
 
@@ -69,7 +66,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, sent: restaurants.length })
 
     } else {
-      // Single restaurant
       const { data: restaurant } = await supabase
         .from('restaurants')
         .select('id, name, email')
