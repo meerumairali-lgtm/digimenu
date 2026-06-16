@@ -3,7 +3,6 @@ import { logAuditAction } from '@/lib/audit'
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function GET() {
   const supabase = await createClient()
@@ -29,6 +28,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const { title, message, sendEmail } = await req.json()
 
   if (!title || !message) {
