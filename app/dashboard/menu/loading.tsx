@@ -11,14 +11,14 @@ export default function MenuLoading() {
       </div>
 
       {/* Add category box skeleton */}
-      <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20, marginBottom: 24 }}>
+      <div style={{ background: '#f0f9ff', border: '1px solid #E0F2FE', borderRadius: 12, padding: 20, marginBottom: 24 }}>
         <div style={{ ...bar, width: 120, height: 16, marginBottom: 12 }} />
         <div style={{ ...bar, width: '100%', height: 36, borderRadius: 8 }} />
       </div>
 
       {/* Category card skeletons */}
       {[1, 2].map(i => (
-        <div key={i} style={{ border: '1px solid #eee', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+        <div key={i} style={{ border: '1px solid #E0F2FE', borderRadius: 12, padding: 20, marginBottom: 16, background: '#fff' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <div style={{ ...bar, width: 120, height: 20, marginBottom: 6 }} />
@@ -27,7 +27,7 @@ export default function MenuLoading() {
             <div style={{ ...bar, width: 64, height: 28, borderRadius: 6 }} />
           </div>
           {[1, 2, 3].map(j => (
-            <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f0f0f0' }}>
+            <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f0f9ff' }}>
               <div>
                 <div style={{ ...bar, width: 140, height: 14, marginBottom: 6 }} />
                 <div style={{ ...bar, width: 200, height: 12 }} />
@@ -42,7 +42,7 @@ export default function MenuLoading() {
 }
 
 const bar = {
-  background: '#e2e8f0',
+  background: '#E0F2FE',
   borderRadius: 6,
   animation: 'pulse 1.5s ease-in-out infinite',
 }

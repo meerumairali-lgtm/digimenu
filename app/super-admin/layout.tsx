@@ -5,15 +5,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard,
-  Store,
-  Settings,
-  FileText,
-  Menu,
-  X,
-  ChevronRight,
-  LogOut,
-  ScrollText,
+  LayoutDashboard, Store, Settings, FileText,
+  Menu, X, ChevronRight, LogOut, ScrollText, Mail, Megaphone,
+  LifeBuoy, // add this
 } from 'lucide-react'
 
 const navItems = [
@@ -21,6 +15,9 @@ const navItems = [
   { label: 'Restaurants', href: '/super-admin/restaurants', icon: Store },
   { label: 'Audit Logs', href: '/super-admin/audit', icon: ScrollText },
   { label: 'Content', href: '/super-admin/content', icon: FileText },
+  { label: 'Emails', href: '/super-admin/emails', icon: Mail },
+  { label: 'Announcements', href: '/super-admin/announcements', icon: Megaphone },
+  { label: 'Support', href: '/super-admin/support', icon: LifeBuoy }, // add this
   { label: 'Settings', href: '/super-admin/settings', icon: Settings },
 ]
 
@@ -41,10 +38,13 @@ export default function SuperAdminLayout({
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
-          <div className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Menuberg" width={40} height={40} style={{ objectFit: 'contain' }} />
+          <div className="flex items-center gap-2">
+            <Image src="/logo.png" alt="Menuberg" width={44} height={44} style={{ objectFit: 'contain' }} />
             <div>
-              <p className="text-sm font-semibold text-white">Menuberg</p>
+              <div className="flex items-baseline gap-0.5">
+                <span className="font-black text-white text-base tracking-tight">Menuberg</span>
+                <span className="text-sky-400 text-xs font-semibold">.com</span>
+              </div>
               <p className="text-xs text-sky-400 font-medium">Super Admin</p>
             </div>
           </div>
@@ -68,10 +68,9 @@ export default function SuperAdminLayout({
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  ${
-                    isActive
-                      ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  ${isActive
+                    ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
               >
                 <div className="flex items-center gap-3">

@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const THEMES = [
-  { id: 'light', label: 'Light', bg: '#ffffff', accent: '#f97316' },
-  { id: 'dark', label: 'Dark', bg: '#111111', accent: '#f97316' },
+  { id: 'light', label: 'Light', bg: '#ffffff', accent: '#38BDF8' },
+  { id: 'dark', label: 'Dark', bg: '#111111', accent: '#38BDF8' },
   { id: 'gold', label: 'Gold', bg: '#1a1200', accent: '#d4a017' },
-  { id: 'vibrant', label: 'Vibrant', bg: '#0f172a', accent: '#f97316' },
+  { id: 'vibrant', label: 'Vibrant', bg: '#0f172a', accent: '#38BDF8' },
 ]
 
 const CURRENCIES = [
@@ -80,7 +80,8 @@ export default function SettingsPage() {
   const inputStyle = {
     padding: '10px 14px', borderRadius: 8,
     border: '1px solid #ddd', fontSize: 14, width: '100%',
-    boxSizing: 'border-box' as const
+    boxSizing: 'border-box' as const,
+    outline: 'none',
   }
 
   const labelStyle = {
@@ -88,23 +89,28 @@ export default function SettingsPage() {
     display: 'block' as const, marginBottom: 6, color: '#444'
   }
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' as const }}>Loading...</div>
+  const sectionStyle = {
+    background: '#f0f9ff', borderRadius: 12, padding: 20,
+    border: '1px solid #e0f2fe'
+  }
+
+  if (loading) return (
+    <div style={{ padding: 40, textAlign: 'center' as const, color: '#0D1B2A' }}>
+      Loading...
+    </div>
+  )
 
   return (
     <div style={{ maxWidth: 560, margin: '40px auto', padding: '0 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <h1 style={{ margin: 0 }}>Restaurant Settings</h1>
-        <button onClick={() => router.push('/dashboard')}
-          style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontSize: 14 }}>
-          ← Back
-        </button>
+        <h1 style={{ margin: 0, color: '#0D1B2A' }}>Restaurant Settings</h1>
       </div>
 
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* Basic Info */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 15 }}>Basic Info</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Basic Info</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={labelStyle}>Restaurant Name</label>
@@ -117,7 +123,7 @@ export default function SettingsPage() {
             <div>
               <label style={labelStyle}>Menu URL slug</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>digimenu.app/menu/</span>
+                <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/menu/</span>
                 <input style={{ ...inputStyle, flex: 1 }} value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} required />
               </div>
             </div>
@@ -125,8 +131,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Contact */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 15 }}>Contact</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Contact</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={labelStyle}>Phone</label>
@@ -144,8 +150,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Social */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 15 }}>Social Media</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Social Media</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={labelStyle}>WhatsApp number</label>
@@ -169,8 +175,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Theme */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Menu Theme</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Menu Theme</h3>
           <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>How your public menu page looks to customers</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             {THEMES.map(t => (
@@ -179,15 +185,15 @@ export default function SettingsPage() {
                 onClick={() => setForm({ ...form, theme: t.id })}
                 style={{
                   cursor: 'pointer', borderRadius: 10, overflow: 'hidden',
-                  border: form.theme === t.id ? '2px solid #f97316' : '2px solid transparent',
-                  outline: form.theme === t.id ? '1px solid #f97316' : '1px solid #e5e5e5',
+                  border: form.theme === t.id ? '2px solid #38BDF8' : '2px solid transparent',
+                  outline: form.theme === t.id ? '1px solid #38BDF8' : '1px solid #e5e5e5',
                 }}
               >
                 <div style={{ background: t.bg, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: 24, height: 4, borderRadius: 2, background: t.accent, opacity: 0.8 }} />
                 </div>
                 <div style={{ padding: '6px 8px', background: '#fff', textAlign: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: form.theme === t.id ? 600 : 400, color: form.theme === t.id ? '#f97316' : '#555' }}>
+                  <span style={{ fontSize: 12, fontWeight: form.theme === t.id ? 600 : 400, color: form.theme === t.id ? '#38BDF8' : '#555' }}>
                     {t.label}
                   </span>
                 </div>
@@ -197,8 +203,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Layout */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Menu Layout</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Menu Layout</h3>
           <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>How items are displayed to customers</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             {LAYOUTS.map(l => (
@@ -207,13 +213,13 @@ export default function SettingsPage() {
                 onClick={() => setForm({ ...form, layout: l.id })}
                 style={{
                   cursor: 'pointer', borderRadius: 10, padding: '14px 16px',
-                  border: form.layout === l.id ? '2px solid #f97316' : '2px solid #e5e5e5',
-                  background: form.layout === l.id ? '#fff4ed' : '#fff',
+                  border: form.layout === l.id ? '2px solid #38BDF8' : '2px solid #e5e5e5',
+                  background: form.layout === l.id ? '#e0f2fe' : '#fff',
                   transition: 'all 0.15s',
                 }}
               >
                 <div style={{ fontSize: 22, marginBottom: 6 }}>{l.icon}</div>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: form.layout === l.id ? '#f97316' : '#333' }}>{l.label}</p>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: form.layout === l.id ? '#0D1B2A' : '#333' }}>{l.label}</p>
                 <p style={{ margin: '2px 0 0', fontSize: 12, color: '#888' }}>{l.desc}</p>
               </div>
             ))}
@@ -221,8 +227,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Currency */}
-        <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Currency</h3>
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Currency</h3>
           <p style={{ margin: '0 0 12px', fontSize: 13, color: '#888' }}>Shown next to prices on your menu</p>
           <select
             value={form.currency}
@@ -235,14 +241,14 @@ export default function SettingsPage() {
           </select>
         </div>
 
-        {error && <p style={{ color: 'red', fontSize: 14 }}>{error}</p>}
+        {error && <p style={{ color: '#ef4444', fontSize: 14 }}>{error}</p>}
         {success && <p style={{ color: '#16a34a', fontSize: 14 }}>{success}</p>}
 
-        <button type="submit" disabled={saving} style={{
-          padding: '12px', borderRadius: 8, background: '#f97316',
-          color: '#fff', border: 'none', fontSize: 15, cursor: 'pointer',
-          fontWeight: 600, marginBottom: 40
-        }}>
+        <button
+          type="submit"
+          disabled={saving}
+          style={{ padding: '12px', borderRadius: 8, background: '#38BDF8', color: '#0D1B2A', border: 'none', fontSize: 15, cursor: 'pointer', fontWeight: 700, marginBottom: 40 }}
+        >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </form>

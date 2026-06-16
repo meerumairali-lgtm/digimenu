@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import FeaturesCarousel from './FeaturesCarousel'
 import { createClient } from '@/lib/supabase/server'
+import LandingNav from './components/LandingNav'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,26 +11,26 @@ export default async function Home() {
   const { data: rows } = await supabase.from('landing_content').select('key, value')
 
   const cms: Record<string, string> = {}
-  ;(rows || []).forEach(r => { cms[r.key] = r.value || '' })
+    ; (rows || []).forEach(r => { cms[r.key] = r.value || '' })
 
   const c = {
-    heroBadge:    cms.hero_badge         || '✦ Now live in 12+ countries',
-    heroLine1:    cms.hero_title_line1   || 'Your restaurant,',
-    heroLine2:    cms.hero_title_line2   || 'online in minutes.',
-    heroLine3:    cms.hero_title_line3   || 'Not months.',
-    heroSubtitle: cms.hero_subtitle      || 'A beautiful digital menu for the price of a burger a month. No coding. No expensive web agency. Just scan & order.',
-    heroCta1:     cms.hero_cta_primary   || 'Create your menu free →',
-    heroCta2:     cms.hero_cta_secondary || 'See a live example',
-    stat1v:       cms.stat_1_value       || '2,400+',
-    stat1l:       cms.stat_1_label       || 'Restaurants live',
-    stat2v:       cms.stat_2_value       || '47',
-    stat2l:       cms.stat_2_label       || 'Countries',
-    stat3v:       cms.stat_3_value       || '$4.99',
-    stat3l:       cms.stat_3_label       || 'Per month',
-    stat4v:       cms.stat_4_value       || '5 min',
-    stat4l:       cms.stat_4_label       || 'To go live',
-    ctaTitle:     cms.cta_banner_title   || 'Ready to take your menu digital?',
-    ctaSubtitle:  cms.cta_banner_subtitle || 'Join thousands of restaurants already using Menuberg.',
+    heroBadge: cms.hero_badge || '✦ Now live in 12+ countries',
+    heroLine1: cms.hero_title_line1 || 'Your restaurant,',
+    heroLine2: cms.hero_title_line2 || 'online in minutes.',
+    heroLine3: cms.hero_title_line3 || 'Not months.',
+    heroSubtitle: cms.hero_subtitle || 'A beautiful digital menu for the price of a burger a month. No coding. No expensive web agency. Just scan & order.',
+    heroCta1: cms.hero_cta_primary || 'Create your menu free →',
+    heroCta2: cms.hero_cta_secondary || 'See a live example',
+    stat1v: cms.stat_1_value || '2,400+',
+    stat1l: cms.stat_1_label || 'Restaurants live',
+    stat2v: cms.stat_2_value || '47',
+    stat2l: cms.stat_2_label || 'Countries',
+    stat3v: cms.stat_3_value || '$4.99',
+    stat3l: cms.stat_3_label || 'Per month',
+    stat4v: cms.stat_4_value || '5 min',
+    stat4l: cms.stat_4_label || 'To go live',
+    ctaTitle: cms.cta_banner_title || 'Ready to take your menu digital?',
+    ctaSubtitle: cms.cta_banner_subtitle || 'Join thousands of restaurants already using Menuberg.',
   }
 
   let features: { icon: string; title: string; desc: string; image: string }[] = []
@@ -38,19 +39,7 @@ export default async function Home() {
   return (
     <main style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: "#ffffff", color: "#111111", minHeight: "100vh" }}>
 
-      {/* NAV */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 2rem", borderBottom: "1px solid rgba(255,255,255,0.08)", position: "sticky", top: 0, background: "rgba(13,27,42,0.97)", backdropFilter: "blur(10px)", zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Image src="/logo.png" alt="Menuberg" width={36} height={36} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: "20px", fontWeight: 700, color: "#ffffff", letterSpacing: "-0.5px" }}>Menuberg</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Link href="/login" style={{ fontSize: "14px", color: "#7DD3FC", textDecoration: "none" }}>Log in</Link>
-          <Link href="/signup" style={{ background: "#38BDF8", color: "#0D1B2A", padding: "8px 20px", borderRadius: "8px", fontSize: "14px", fontWeight: 700, textDecoration: "none" }}>
-            Get started free
-          </Link>
-        </div>
-      </nav>
+      <LandingNav />
 
       {/* HERO */}
       <section style={{ padding: "6rem 2rem 5rem", textAlign: "center", background: "#0D1B2A" }}>
@@ -94,10 +83,12 @@ export default async function Home() {
       </div>
 
       {/* FEATURES */}
-      <FeaturesCarousel features={features} />
+      <div id="features">
+        <FeaturesCarousel features={features} />
+      </div>
 
       {/* HOW IT WORKS */}
-      <section style={{ padding: "6rem 2rem", background: "#fafafa", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
+      <section id="how-it-works" style={{ padding: "6rem 2rem", background: "#fafafa", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
         <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 3.5rem" }}>
           <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>How it works</div>
           <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", letterSpacing: "-1px" }}>
@@ -122,7 +113,7 @@ export default async function Home() {
       </section>
 
       {/* PRICING */}
-      <section style={{ padding: "6rem 2rem", textAlign: "center", background: "#fff" }}>
+      <section id="pricing" style={{ padding: "6rem 2rem", textAlign: "center", background: "#fff" }}>
         <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>Pricing</div>
         <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", marginBottom: "0.5rem", letterSpacing: "-1px" }}>
           Less than a burger a month

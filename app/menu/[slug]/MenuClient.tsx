@@ -42,18 +42,18 @@ const themes: Record<string, {
 }> = {
   light: {
     bg: '#f5f5f5', surface: '#ffffff', text: '#111111', subtext: '#777777',
-    border: '#eeeeee', accent: '#f97316', accentText: '#ffffff',
-    tabBg: '#ffffff', tabActiveText: '#f97316', tabText: '#555555',
-    priceBg: '#fff4ed', priceText: '#f97316',
+    border: '#eeeeee', accent: '#38BDF8', accentText: '#ffffff',
+    tabBg: '#ffffff', tabActiveText: '#38BDF8', tabText: '#555555',
+    priceBg: '#E0F2FE', priceText: '#0D1B2A',
     headerBg: '#ffffff', headerText: '#111111', headerSub: '#777777',
     font: '"Inter", -apple-system, sans-serif',
     categoryFont: '"Inter", sans-serif',
   },
   dark: {
     bg: '#0a0a0a', surface: '#161616', text: '#f0f0f0', subtext: '#888888',
-    border: '#2a2a2a', accent: '#f97316', accentText: '#ffffff',
-    tabBg: '#161616', tabActiveText: '#f97316', tabText: '#888888',
-    priceBg: '#2a2a2a', priceText: '#f97316',
+    border: '#2a2a2a', accent: '#38BDF8', accentText: '#ffffff',
+    tabBg: '#161616', tabActiveText: '#38BDF8', tabText: '#888888',
+    priceBg: '#112240', priceText: '#38BDF8',
     headerBg: '#000000', headerText: '#ffffff', headerSub: '#888888',
     font: '"Inter", -apple-system, sans-serif',
     categoryFont: '"Inter", sans-serif',
@@ -69,9 +69,9 @@ const themes: Record<string, {
   },
   vibrant: {
     bg: '#0f172a', surface: '#1e293b', text: '#f1f5f9', subtext: '#94a3b8',
-    border: '#2d3f55', accent: '#f97316', accentText: '#ffffff',
-    tabBg: '#1e293b', tabActiveText: '#f97316', tabText: '#94a3b8',
-    priceBg: '#f97316', priceText: '#ffffff',
+    border: '#2d3f55', accent: '#38BDF8', accentText: '#ffffff',
+    tabBg: '#1e293b', tabActiveText: '#38BDF8', tabText: '#94a3b8',
+    priceBg: '#38BDF8', priceText: '#0D1B2A',
     headerBg: '#0f172a', headerText: '#ffffff', headerSub: '#94a3b8',
     font: '"Inter", sans-serif',
     categoryFont: '"Inter", sans-serif',
@@ -150,20 +150,16 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
       </div>
       <div style={{ height: 1, background: t.border, marginBottom: 12, marginLeft: 16, marginRight: 16 }} />
 
-      {/* Carousel wrapper */}
       <div
         style={{ position: 'relative', padding: '0 16px' }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Scroll container */}
         <div
           ref={scrollRef}
           onScroll={handleScroll}
           style={{
-            display: 'flex',
-            gap: 12,
-            overflowX: 'auto',
+            display: 'flex', gap: 12, overflowX: 'auto',
             scrollbarWidth: 'none' as any,
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch' as any,
@@ -173,34 +169,20 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
             <div
               key={item.id}
               style={{
-                width: 'calc(100% - 48px)',
-                minWidth: 'calc(100% - 48px)',
-                flexShrink: 0,
-                scrollSnapAlign: 'center',
-                background: t.surface,
-                borderRadius: 16,
-                overflow: 'hidden',
+                width: 'calc(100% - 48px)', minWidth: 'calc(100% - 48px)',
+                flexShrink: 0, scrollSnapAlign: 'center',
+                background: t.surface, borderRadius: 16, overflow: 'hidden',
               }}
             >
               {item.image_url ? (
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }}
-                />
+                <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
               ) : (
-                <div style={{ width: '100%', height: 200, background: t.border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>
-                  🍽️
-                </div>
+                <div style={{ width: '100%', height: 200, background: t.border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>🍽️</div>
               )}
               <div style={{ padding: '14px 16px 18px' }}>
-                <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 16, color: t.text, lineHeight: 1.3 }}>
-                  {item.name}
-                </p>
+                <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 16, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
                 {item.description && (
-                  <p style={{ margin: '0 0 12px', fontSize: 13, color: t.subtext, lineHeight: 1.5 }}>
-                    {item.description}
-                  </p>
+                  <p style={{ margin: '0 0 12px', fontSize: 13, color: t.subtext, lineHeight: 1.5 }}>{item.description}</p>
                 )}
                 <span style={{ fontWeight: 700, fontSize: 15, color: t.priceText, background: t.priceBg, padding: '6px 14px', borderRadius: 8 }}>
                   {currency} {item.price}
@@ -210,7 +192,6 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
           ))}
         </div>
 
-        {/* Left hover arrow */}
         {activeIndex > 0 && hovered && (
           <div
             onClick={() => scrollTo(activeIndex - 1)}
@@ -221,12 +202,9 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
               cursor: 'pointer', color: '#fff', fontSize: 28, fontWeight: 300,
               borderRadius: '16px 0 0 16px', zIndex: 2,
             }}
-          >
-            ‹
-          </div>
+          >‹</div>
         )}
 
-        {/* Right hover arrow */}
         {activeIndex < items.length - 1 && hovered && (
           <div
             onClick={() => scrollTo(activeIndex + 1)}
@@ -237,13 +215,10 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
               cursor: 'pointer', color: '#fff', fontSize: 28, fontWeight: 300,
               borderRadius: '0 16px 16px 0', zIndex: 2,
             }}
-          >
-            ›
-          </div>
+          >›</div>
         )}
       </div>
 
-      {/* Dots */}
       {items.length > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10, marginBottom: 8 }}>
           {items.map((_, i) => (
@@ -251,8 +226,7 @@ function SwipeCategory({ category, items, t, currency, sectionRefs }: {
               key={i}
               onClick={() => scrollTo(i)}
               style={{
-                width: activeIndex === i ? 20 : 6,
-                height: 6, borderRadius: 3,
+                width: activeIndex === i ? 20 : 6, height: 6, borderRadius: 3,
                 background: activeIndex === i ? t.accent : t.border,
                 cursor: 'pointer', transition: 'all 0.25s',
               }}
@@ -336,8 +310,7 @@ export default function MenuClient({ restaurant, categories }: {
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         background: t.tabBg, borderBottom: `1px solid ${t.border}`,
-        overflowX: 'auto', display: 'flex',
-        scrollbarWidth: 'none',
+        overflowX: 'auto', display: 'flex', scrollbarWidth: 'none',
       }} ref={tabsRef}>
         <div style={{ display: 'flex', padding: '0 16px', gap: 4, minWidth: 'max-content' }}>
           {availableCategories.map(cat => (
@@ -372,7 +345,7 @@ export default function MenuClient({ restaurant, categories }: {
         </div>
       )}
       <p style={{ textAlign: 'center', color: t.subtext, fontSize: 11, marginTop: 32, opacity: 0.5 }}>
-        Powered by <strong>DigiMenu</strong>
+        Powered by <strong>Menuberg</strong>
       </p>
     </>
   )
@@ -502,7 +475,6 @@ export default function MenuClient({ restaurant, categories }: {
     )
   }
 
-  // ── SWIPE LAYOUT ────────────────────────────────────────────
   // ── SWIPE LAYOUT ────────────────────────────────────────────
   if (layout === 'swipe') {
     return (
