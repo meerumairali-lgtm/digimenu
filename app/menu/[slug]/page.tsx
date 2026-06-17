@@ -20,6 +20,9 @@ export default async function MenuPage({ params }: { params: Promise<{ slug: str
     .eq('restaurant_id', restaurant.id)
     .order('sort_order')
 
+  // Log page view silently
+  await supabase.from('page_views').insert({ restaurant_id: restaurant.id })
+
   return (
     <MenuClient
       restaurant={restaurant}

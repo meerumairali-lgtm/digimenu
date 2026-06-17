@@ -7,10 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: restaurant } = await supabase
@@ -37,6 +34,15 @@ export default async function DashboardPage() {
     .eq("restaurant_id", restaurant.id)
     .eq("is_available", true);
 
+  // Today's page views preview
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const { count: todayViews } = await supabase
+    .from("page_views")
+    .select("*", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant.id)
+    .gte("visited_at", todayStart.toISOString())
+
   const menuUrl = `/menu/${restaurant.slug}`;
   const fullMenuUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${menuUrl}`;
 
@@ -46,15 +52,10 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold text-slate-900">
           {restaurant.name}
         </h1>
-
         <p className="text-slate-500 text-sm mt-1">
           Menu live at{" "}
-          <a
-            href={fullMenuUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
-          >
+          <a href={fullMenuUrl} target="_blank" rel="noreferrer"
+            className="text-sky-500 underline underline-offset-2 hover:text-sky-600">
             {fullMenuUrl}
           </a>
         </p>
@@ -62,36 +63,23 @@ export default async function DashboardPage() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-        <Link
-          href="/dashboard/menu"
-          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
-        >
+        <Link href="/dashboard/menu"
+          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors">
           <p className="text-xs text-sky-600 mb-1">Categories</p>
-          <p className="text-2xl font-semibold text-[#0D1B2A]">
-            {categoryCount ?? 0}
-          </p>
+          <p className="text-2xl font-semibold text-[#0D1B2A]">{categoryCount ?? 0}</p>
         </Link>
 
-        <Link
-          href="/dashboard/menu"
-          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
-        >
+        <Link href="/dashboard/menu"
+          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors">
           <p className="text-xs text-sky-600 mb-1">Menu items</p>
           <p className="text-2xl font-semibold text-[#0D1B2A]">
             {availableCount ?? 0}
-            <span className="text-sm font-normal text-slate-400">
-              {" "}
-              / {itemCount ?? 0}
-            </span>
+            <span className="text-sm font-normal text-slate-400"> / {itemCount ?? 0}</span>
           </p>
         </Link>
 
-        <a
-          href={fullMenuUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors"
-        >
+        <a href={fullMenuUrl} target="_blank" rel="noreferrer"
+          className="bg-sky-50 border border-sky-100 rounded-xl p-4 hover:border-sky-200 transition-colors">
           <p className="text-xs text-sky-600 mb-1">Status</p>
           <p className="text-lg font-semibold text-green-600 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
@@ -104,34 +92,30 @@ export default async function DashboardPage() {
         Quick actions
       </p>
 
-      <div className="grid sm:grid-cols-3 gap-3">
-        <Link
-          href="/dashboard/menu"
-          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-colors"
-        >
+      <div className="grid sm:grid-cols-4 gap-3">
+        <Link href="/dashboard/menu"
+          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-colors">
           <p className="text-xs text-slate-400 mb-1">Menu items</p>
-          <p className="text-2xl font-semibold text-[#0D1B2A]">
-            {itemCount ?? 0}
-          </p>
+          <p className="text-2xl font-semibold text-[#0D1B2A]">{itemCount ?? 0}</p>
         </Link>
 
-        <Link
-          href="/dashboard/qr"
-          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all"
-        >
+        <Link href="/dashboard/qr"
+          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all">
           <p className="font-medium text-[#0D1B2A] text-sm">Get QR code</p>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Download and print for your tables
-          </p>
+          <p className="text-xs text-slate-400 mt-0.5">Download and print for your tables</p>
         </Link>
 
-        <Link
-          href="/dashboard/settings"
-          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all"
-        >
+        <Link href="/dashboard/settings"
+          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all">
           <p className="font-medium text-[#0D1B2A] text-sm">Settings</p>
+          <p className="text-xs text-slate-400 mt-0.5">Profile, social links, contact info</p>
+        </Link>
+
+        <Link href="/dashboard/analytics"
+          className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all">
+          <p className="font-medium text-[#0D1B2A] text-sm">Analytics</p>
           <p className="text-xs text-slate-400 mt-0.5">
-            Profile, social links, contact info
+            {todayViews ?? 0} visitor{todayViews === 1 ? '' : 's'} today
           </p>
         </Link>
       </div>

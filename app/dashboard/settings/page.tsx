@@ -27,6 +27,14 @@ const LAYOUTS = [
   { id: 'swipe', label: 'Swipe', desc: 'Horizontal carousel', icon: '⟺' },
 ]
 
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+type DayHours = { open: string; close: string; closed: boolean }
+type OpeningHours = Record<string, DayHours>
+
+const defaultHours = (): OpeningHours =>
+  Object.fromEntries(DAYS.map(d => [d, { open: '09:00', close: '22:00', closed: false }]))
+
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -35,8 +43,11 @@ export default function SettingsPage() {
   const [form, setForm] = useState({
     name: '', slug: '', tagline: '', phone: '',
     address: '', email: '', whatsapp: '', instagram: '', facebook: '',
-    theme: 'light', currency: 'PKR', layout: 'classic'
+    theme: 'light', currency: 'PKR', layout: 'classic',
+    about: '', google_maps_url: '',
   })
+  const [openingHours, setOpeningHours] = useState<OpeningHours>(defaultHours())
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -45,24 +56,36 @@ export default function SettingsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('restaurants').select('*').eq('user_id', user.id).single()
-      if (data) setForm({
-        name: data.name || '',
-        slug: data.slug || '',
-        tagline: data.tagline || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        email: data.email || '',
-        whatsapp: data.whatsapp || '',
-        instagram: data.instagram || '',
-        facebook: data.facebook || '',
-        theme: data.theme || 'light',
-        currency: data.currency || 'PKR',
-        layout: data.layout || 'classic',
-      })
+      if (data) {
+        setForm({
+          name: data.name || '',
+          slug: data.slug || '',
+          tagline: data.tagline || '',
+          phone: data.phone || '',
+          address: data.address || '',
+          email: data.email || '',
+          whatsapp: data.whatsapp || '',
+          instagram: data.instagram || '',
+          facebook: data.facebook || '',
+          theme: data.theme || 'light',
+          currency: data.currency || 'PKR',
+          layout: data.layout || 'classic',
+          about: data.about || '',
+          google_maps_url: data.google_maps_url || '',
+        })
+        if (data.opening_hours) setOpeningHours(data.opening_hours)
+      }
       setLoading(false)
     }
     load()
   }, [])
+
+  function updateDay(day: string, field: keyof DayHours, value: string | boolean) {
+    setOpeningHours(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [field]: value }
+    }))
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -71,7 +94,10 @@ export default function SettingsPage() {
     setSuccess('')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { error } = await supabase.from('restaurants').update(form).eq('user_id', user.id)
+    const { error } = await supabase.from('restaurants').update({
+      ...form,
+      opening_hours: openingHours,
+    }).eq('user_id', user.id)
     if (error) setError(error.message)
     else setSuccess('Saved successfully!')
     setSaving(false)
@@ -80,8 +106,7 @@ export default function SettingsPage() {
   const inputStyle = {
     padding: '10px 14px', borderRadius: 8,
     border: '1px solid #ddd', fontSize: 14, width: '100%',
-    boxSizing: 'border-box' as const,
-    outline: 'none',
+    boxSizing: 'border-box' as const, outline: 'none',
   }
 
   const labelStyle = {
@@ -95,9 +120,7 @@ export default function SettingsPage() {
   }
 
   if (loading) return (
-    <div style={{ padding: 40, textAlign: 'center' as const, color: '#0D1B2A' }}>
-      Loading...
-    </div>
+    <div style={{ padding: 40, textAlign: 'center' as const, color: '#0D1B2A' }}>Loading...</div>
   )
 
   return (
@@ -130,6 +153,70 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* About */}
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>About Your Restaurant</h3>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown in the About section of your menu page</p>
+          <textarea
+            value={form.about}
+            onChange={e => setForm({ ...form, about: e.target.value })}
+            placeholder="Tell your customers about your restaurant, your story, what makes you special..."
+            rows={4}
+            style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+          />
+        </div>
+
+        {/* Opening Hours */}
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Opening Hours</h3>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>Set your hours for each day of the week</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {DAYS.map(day => {
+              const h = openingHours[day] || { open: '09:00', close: '22:00', closed: false }
+              return (
+                <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#fff', borderRadius: 8, border: '1px solid #e0f2fe' }}>
+                  {/* Day name */}
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#0D1B2A', width: 90, flexShrink: 0 }}>{day.slice(0, 3)}</span>
+
+                  {/* Closed toggle */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flexShrink: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={h.closed}
+                      onChange={e => updateDay(day, 'closed', e.target.checked)}
+                      style={{ accentColor: '#38BDF8', width: 14, height: 14 }}
+                    />
+                    <span style={{ fontSize: 12, color: h.closed ? '#ef4444' : '#888' }}>Closed</span>
+                  </label>
+
+                  {/* Time inputs */}
+                  {!h.closed && (
+                    <>
+                      <input
+                        type="time"
+                        value={h.open}
+                        onChange={e => updateDay(day, 'open', e.target.value)}
+                        style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #ddd', fontSize: 13, flex: 1 }}
+                      />
+                      <span style={{ fontSize: 12, color: '#888', flexShrink: 0 }}>to</span>
+                      <input
+                        type="time"
+                        value={h.close}
+                        onChange={e => updateDay(day, 'close', e.target.value)}
+                        style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #ddd', fontSize: 13, flex: 1 }}
+                      />
+                    </>
+                  )}
+
+                  {h.closed && (
+                    <span style={{ fontSize: 13, color: '#ccc', fontStyle: 'italic' }}>— Closed all day —</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
         {/* Contact */}
         <div style={sectionStyle}>
           <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Contact</h3>
@@ -145,6 +232,16 @@ export default function SettingsPage() {
             <div>
               <label style={labelStyle}>Address</label>
               <input style={inputStyle} value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Food Street, Karachi" />
+            </div>
+            <div>
+              <label style={labelStyle}>Google Maps URL</label>
+              <input
+                style={inputStyle}
+                value={form.google_maps_url}
+                onChange={e => setForm({ ...form, google_maps_url: e.target.value })}
+                placeholder="https://maps.google.com/..."
+              />
+              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#888' }}>Paste the link from Google Maps → Share → Copy link</p>
             </div>
           </div>
         </div>
