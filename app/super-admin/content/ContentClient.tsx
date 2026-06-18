@@ -7,7 +7,7 @@ interface Feature { icon: string; title: string; desc: string; image: string }
 function Field({ label, value, onChange, multiline = false }: {
   label: string; value: string; onChange: (v: string) => void; multiline?: boolean
 }) {
-  const base: React.CSSProperties = { width: '100%', background: '#111827', color: '#fff', border: '1px solid #374151', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }
+  const base: React.CSSProperties = { width: '100%', background: '#111827', color: '#fff', border: '1px solid #374151', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   return (
     <div>
       <label style={{ display: 'block', color: '#9ca3af', fontSize: '12px', marginBottom: '4px' }}>{label}</label>
@@ -69,7 +69,7 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
           <p style={{ color: '#6b7280', fontSize: '13px', margin: '4px 0 0' }}>Changes go live instantly — no deploy needed.</p>
         </div>
         <button onClick={save} disabled={saving}
-          style={{ background: saving ? '#9a3412' : saved ? '#15803d' : '#f97316', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+          style={{ background: saving ? '#1A3A5C' : saved ? '#15803d' : '#38BDF8', color: saving ? '#7DD3FC' : saved ? '#fff' : '#0D1B2A', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
           {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Changes'}
         </button>
       </div>
@@ -78,7 +78,7 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
       <Card title="Hero Section">
         <Field label="Badge text" value={c.hero_badge || ''} onChange={v => set('hero_badge', v)} />
         <Field label="Title line 1" value={c.hero_title_line1 || ''} onChange={v => set('hero_title_line1', v)} />
-        <Field label="Title line 2 (orange)" value={c.hero_title_line2 || ''} onChange={v => set('hero_title_line2', v)} />
+        <Field label="Title line 2 (blue)" value={c.hero_title_line2 || ''} onChange={v => set('hero_title_line2', v)} />
         <Field label="Title line 3" value={c.hero_title_line3 || ''} onChange={v => set('hero_title_line3', v)} />
         <Field label="Subtitle" value={c.hero_subtitle || ''} onChange={v => set('hero_subtitle', v)} multiline />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -106,6 +106,17 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
       <Card title="CTA Banner">
         <Field label="Title" value={c.cta_banner_title || ''} onChange={v => set('cta_banner_title', v)} />
         <Field label="Subtitle" value={c.cta_banner_subtitle || ''} onChange={v => set('cta_banner_subtitle', v)} />
+      </Card>
+
+      {/* Contact Section */}
+      <Card title="Contact Section">
+        <Field label="Heading" value={c.contact_heading || ''} onChange={v => set('contact_heading', v)} />
+        <Field label="Subheading" value={c.contact_subheading || ''} onChange={v => set('contact_subheading', v)} multiline />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <Field label="Email address" value={c.contact_email || ''} onChange={v => set('contact_email', v)} />
+          <Field label="Phone number" value={c.contact_phone || ''} onChange={v => set('contact_phone', v)} />
+        </div>
+        <Field label="Address (optional)" value={c.contact_address || ''} onChange={v => set('contact_address', v)} />
       </Card>
 
       {/* Features */}
@@ -139,7 +150,7 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
           ))}
           <button
             onClick={() => setFeatures(prev => [...prev, { icon: '⭐', title: 'New Feature', desc: 'Feature description', image: '' }])}
-            style={{ background: 'none', border: '1px dashed #374151', borderRadius: '8px', color: '#f97316', padding: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            style={{ background: 'none', border: '1px dashed #374151', borderRadius: '8px', color: '#38BDF8', padding: '10px', fontSize: '13px', cursor: 'pointer' }}>
             + Add Feature
           </button>
         </div>

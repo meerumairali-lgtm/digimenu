@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -8,32 +8,83 @@ import { createClient } from '@/lib/supabase/client'
 export default function LandingNav() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState<{ name: string } | null>(null)
+  const [activeSection, setActiveSection] = useState<string>('')
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, show: false })
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
+
+  const navLinks = [
+    { label: 'Features', id: 'features' },
+    { label: 'How it works', id: 'how-it-works' },
+    { label: 'Pricing', id: 'pricing' },
+    { label: 'Contact', id: 'contact' },
+  ]
 
   useEffect(() => {
     async function checkUser() {
       const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
+      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const name =
-          user.user_metadata?.full_name ||
-          user.email?.split('@')[0] ||
-          'there'
-
-        setUser({ name })
+        setUser({
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'there',
+        })
       }
     }
-
     checkUser()
   }, [])
 
-  const navLinks = [
-    { label: 'Features', href: '#features' },
-    { label: 'How it works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
-  ]
+  useEffect(() => {
+    const observers: IntersectionObserver[] = []
+
+    navLinks.forEach(link => {
+      const el = document.getElementById(link.id)
+      if (!el) return
+
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(link.id)
+        },
+        { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
+      )
+
+      obs.observe(el)
+      observers.push(obs)
+    })
+
+    return () => observers.forEach(o => o.disconnect())
+  }, [])
+
+  useEffect(() => {
+    const idx = navLinks.findIndex(l => l.id === activeSection)
+
+    if (idx < 0 || !linkRefs.current[idx] || !containerRef.current) {
+      setIndicator(p => ({ ...p, show: false }))
+      return
+    }
+
+    const linkEl = linkRefs.current[idx]!
+    const containerEl = containerRef.current
+
+    const linkRect = linkEl.getBoundingClientRect()
+    const containerRect = containerEl.getBoundingClientRect()
+
+    if (linkRect.width === 0) {
+      setIndicator(p => ({ ...p, show: false }))
+      return
+    }
+
+    setIndicator({
+      left: linkRect.left - containerRect.left,
+      width: linkRect.width,
+      show: true,
+    })
+  }, [activeSection])
+
+  function scrollToSection(id: string) {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
     <header
@@ -46,6 +97,7 @@ export default function LandingNav() {
       }}
     >
       <div
+        ref={containerRef}
         style={{
           maxWidth: 1100,
           margin: '0 auto',
@@ -54,6 +106,7 @@ export default function LandingNav() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          position: 'relative',
         }}
       >
         {/* Logo */}
@@ -72,18 +125,16 @@ export default function LandingNav() {
             alt="Menuberg"
             width={62}
             height={62}
-            style={{
-              objectFit: 'contain',
-              width: '44px',
-              height: '44px',
-            }}
+            style={{ objectFit: 'contain', width: '44px', height: '44px' }}
           />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-            <span style={{ fontSize: '20px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>Menuberg</span>
+            <span style={{ fontSize: '20px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>
+              Menuberg
+            </span>
             <span style={{ fontSize: '12px', fontWeight: 600, color: '#38BDF8' }}>.com</span>
           </div>
         </Link>
-        
+
         {/* Desktop nav links */}
         <nav
           className="desktop-nav"
@@ -96,53 +147,70 @@ export default function LandingNav() {
             transform: 'translateX(-50%)',
           }}
         >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                fontSize: 14,
-                color: '#7DD3FC',
-                textDecoration: 'none',
-                padding: '6px 14px',
-                borderRadius: 8,
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fff'
-                e.currentTarget.style.background =
-                  'rgba(56,189,248,0.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#7DD3FC'
-                e.currentTarget.style.background = 'transparent'
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+          {navLinks.map((link, i) => {
+            const isActive = activeSection === link.id
 
-        {/* Desktop right side */}
-        <div
-          className="desktop-nav"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          {user ? (
-            <>
-              <span
+            return (
+              <a
+                key={link.id}
+                ref={el => {
+                  linkRefs.current[i] = el
+                }}
+                href={`#${link.id}`}
+                onClick={e => {
+                  e.preventDefault()
+                  scrollToSection(link.id)
+                }}
                 style={{
                   fontSize: 14,
-                  color: '#7DD3FC',
+                  color: isActive ? '#ffffff' : '#7DD3FC',
+                  textDecoration: 'none',
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  fontWeight: isActive ? 600 : 400,
+                  transition: 'color 0.2s, background 0.2s',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  border: 'none',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = '#fff'
+                  e.currentTarget.style.background = 'rgba(56,189,248,0.08)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = isActive ? '#fff' : '#7DD3FC'
+                  e.currentTarget.style.background = 'transparent'
                 }}
               >
-                Hi, {user.name}
-              </span>
+                {link.label}
+              </a>
+            )
+          })}
+        </nav>
 
+        {/* Sliding indicator */}
+        <span
+          className="desktop-nav"
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: indicator.left,
+            width: indicator.width,
+            height: 2,
+            background: 'linear-gradient(90deg, #38BDF8, #7DD3FC)',
+            borderRadius: '2px 2px 0 0',
+            transition:
+              'left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.2s',
+            opacity: indicator.show ? 1 : 0,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Right side */}
+        <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {user ? (
+            <>
+              <span style={{ fontSize: 14, color: '#7DD3FC' }}>Hi, {user.name}</span>
               <Link
                 href="/dashboard"
                 style={{
@@ -172,7 +240,6 @@ export default function LandingNav() {
               >
                 Log in
               </Link>
-
               <Link
                 href="/signup"
                 style={{
@@ -215,13 +282,9 @@ export default function LandingNav() {
               height: 2,
               background: '#7DD3FC',
               borderRadius: 2,
-              transition: 'all 0.2s',
-              transform: menuOpen
-                ? 'rotate(45deg) translate(5px, 5px)'
-                : 'none',
+              transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none',
             }}
           />
-
           <span
             style={{
               display: 'block',
@@ -229,11 +292,9 @@ export default function LandingNav() {
               height: 2,
               background: '#7DD3FC',
               borderRadius: 2,
-              transition: 'all 0.2s',
               opacity: menuOpen ? 0 : 1,
             }}
           />
-
           <span
             style={{
               display: 'block',
@@ -241,10 +302,7 @@ export default function LandingNav() {
               height: 2,
               background: '#7DD3FC',
               borderRadius: 2,
-              transition: 'all 0.2s',
-              transform: menuOpen
-                ? 'rotate(-45deg) translate(5px, -5px)'
-                : 'none',
+              transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none',
             }}
           />
         </button>
@@ -263,23 +321,35 @@ export default function LandingNav() {
             gap: 4,
           }}
         >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                fontSize: 15,
-                color: '#7DD3FC',
-                textDecoration: 'none',
-                padding: '10px 12px',
-                borderRadius: 8,
-                display: 'block',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map(link => {
+            const isActive = activeSection === link.id
+
+            return (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                onClick={e => {
+                  e.preventDefault()
+                  scrollToSection(link.id)
+                  setMenuOpen(false)
+                }}
+                style={{
+                  fontSize: 15,
+                  color: isActive ? '#38BDF8' : '#7DD3FC',
+                  textDecoration: 'none',
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  display: 'block',
+                  fontWeight: isActive ? 600 : 400,
+                  borderLeft: isActive ? '2px solid #38BDF8' : '2px solid transparent',
+                  background: isActive ? 'rgba(56,189,248,0.06)' : 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                {link.label}
+              </a>
+            )
+          })}
 
           <div
             style={{
@@ -293,16 +363,9 @@ export default function LandingNav() {
           >
             {user ? (
               <>
-                <span
-                  style={{
-                    fontSize: 14,
-                    color: '#7DD3FC',
-                    padding: '0 12px',
-                  }}
-                >
+                <span style={{ fontSize: 14, color: '#7DD3FC', padding: '0 12px' }}>
                   Hi, {user.name} 👋
                 </span>
-
                 <Link
                   href="/dashboard"
                   onClick={() => setMenuOpen(false)}
@@ -336,7 +399,6 @@ export default function LandingNav() {
                 >
                   Log in
                 </Link>
-
                 <Link
                   href="/signup"
                   onClick={() => setMenuOpen(false)}
@@ -361,22 +423,11 @@ export default function LandingNav() {
       )}
 
       <style>{`
-        .desktop-nav {
-          display: flex !important;
-        }
-
-        .mobile-nav {
-          display: none !important;
-        }
-
+        .desktop-nav { display: flex !important; }
+        .mobile-nav { display: none !important; }
         @media (max-width: 640px) {
-          .desktop-nav {
-            display: none !important;
-          }
-
-          .mobile-nav {
-            display: flex !important;
-          }
+          .desktop-nav { display: none !important; }
+          .mobile-nav { display: flex !important; }
         }
       `}</style>
     </header>
