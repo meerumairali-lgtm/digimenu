@@ -14,7 +14,7 @@ export default function QRPage({ restaurantSlug, restaurantName }: Props) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const url = `${window.location.origin}/menu/${restaurantSlug}`
+    const url = `${window.location.origin}/${restaurantSlug}`
     setMenuUrl(url)
 
     if (canvasRef.current) {

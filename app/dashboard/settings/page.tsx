@@ -1,7 +1,16 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Country, State, City } from 'country-state-city'
+import SearchableSelect from '../SearchableSelect'
+import { isReservedSlug } from '@/lib/reservedSlugs'
+
+const ALL_COUNTRIES = Country.getAllCountries()
+
+function getDialCode(country: { phonecode: string }) {
+  return `+${country.phonecode.replace(/^\+/, '')}`
+}
 
 const THEMES = [
   { id: 'light', label: 'Light', bg: '#ffffff', accent: '#38BDF8' },
@@ -40,12 +49,26 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
   const [form, setForm] = useState({
-    name: '', slug: '', tagline: '', phone: '',
-    address: '', email: '', whatsapp: '', instagram: '', facebook: '',
+    name: '', slug: '', tagline: '',
+    address: '', whatsapp: '', instagram: '', facebook: '',
     theme: 'light', currency: 'PKR', layout: 'classic',
     about: '', google_maps_url: '',
   })
+
+  const [email, setEmail] = useState('') // read-only, from auth user — never editable here
+
+  const [phoneCountryIso, setPhoneCountryIso] = useState('')
+  const [phone, setPhone] = useState('')
+
+  const [countryCode, setCountryCode] = useState('')
+  const [countryName, setCountryName] = useState('')
+  const [stateCode, setStateCode] = useState('')
+  const [stateName, setStateName] = useState('')
+  const [cityName, setCityName] = useState('')
+  const [detectingLocation, setDetectingLocation] = useState(false)
+
   const [openingHours, setOpeningHours] = useState<OpeningHours>(defaultHours())
 
   const supabase = createClient()
@@ -53,17 +76,28 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data } = await supabase.from('restaurants').select('*').eq('user_id', user.id).single()
-      if (data) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push('/login'); return }
+        setEmail(user.email || '')
+
+        const { data, error: fetchError } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        if (fetchError) {
+          console.error('Failed to load restaurant:', fetchError)
+          return
+        }
+        if (!data) return
+
         setForm({
           name: data.name || '',
           slug: data.slug || '',
           tagline: data.tagline || '',
-          phone: data.phone || '',
           address: data.address || '',
-          email: data.email || '',
           whatsapp: data.whatsapp || '',
           instagram: data.instagram || '',
           facebook: data.facebook || '',
@@ -73,12 +107,87 @@ export default function SettingsPage() {
           about: data.about || '',
           google_maps_url: data.google_maps_url || '',
         })
+        setPhone(data.phone || '')
         if (data.opening_hours) setOpeningHours(data.opening_hours)
+
+        // Location — load existing if present, otherwise auto-detect
+        // (covers restaurants created before this feature existed)
+        if (data.country_code) {
+          try {
+            setCountryCode(data.country_code)
+            setCountryName(data.country || '')
+            const statesForCountry = State.getStatesOfCountry(data.country_code)
+            const matchedState = statesForCountry.find(s => s.name === data.state)
+            setStateCode(matchedState?.isoCode || '')
+            setStateName(data.state || '')
+            setCityName(data.city || '')
+          } catch (e) {
+            console.error('Error reading saved location, falling back to detection:', e)
+            setCountryCode('')
+            setCountryName('')
+          }
+        } else {
+          setDetectingLocation(true)
+          try {
+            const res = await fetch('/api/dashboard/detect-country')
+            const geo = await res.json()
+            console.log('detect-country response:', geo)
+            if (geo.country_code) {
+              const match = ALL_COUNTRIES.find(c => c.isoCode === geo.country_code)
+              if (match) {
+                setCountryCode(match.isoCode)
+                setCountryName(match.name)
+              } else {
+                console.error('detect-country returned an unrecognized code:', geo.country_code)
+              }
+            } else {
+              console.error('detect-country returned no country_code:', geo)
+            }
+          } catch (e) {
+            console.error('detect-country fetch failed:', e)
+          } finally {
+            setDetectingLocation(false)
+          }
+        }
+
+        if (data.phone_country_code) {
+          const matchedPhoneCountry = ALL_COUNTRIES.find(c => getDialCode(c) === data.phone_country_code)
+          setPhoneCountryIso(matchedPhoneCountry?.isoCode || '')
+        }
+      } catch (e) {
+        console.error('Settings load error:', e)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     load()
   }, [])
+
+  const states = useMemo(
+    () => (countryCode ? State.getStatesOfCountry(countryCode) : []),
+    [countryCode]
+  )
+
+  const cities = useMemo(
+    () => (countryCode && stateCode ? City.getCitiesOfState(countryCode, stateCode) : []),
+    [countryCode, stateCode]
+  )
+
+  function handleCountryChange(isoCode: string) {
+    const match = ALL_COUNTRIES.find(c => c.isoCode === isoCode)
+    setCountryCode(isoCode)
+    setCountryName(match?.name || '')
+    setStateCode('')
+    setStateName('')
+    setCityName('')
+  }
+
+  function handleStateChange(isoCode: string) {
+    const match = states.find(s => s.isoCode === isoCode)
+    setStateCode(isoCode)
+    setStateName(match?.name || '')
+    setCityName('')
+  }
 
   function updateDay(day: string, field: keyof DayHours, value: string | boolean) {
     setOpeningHours(prev => ({
@@ -89,13 +198,29 @@ export default function SettingsPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
     setError('')
     setSuccess('')
+
+    if (isReservedSlug(form.slug)) { setError(`"${form.slug}" is a reserved word and can't be used as your menu URL. Please choose another.`); return }
+    if (!countryCode) { setError('Please select your country'); return }
+    if (!phoneCountryIso) { setError('Please select your phone country code'); return }
+
+    setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+
+    const phoneCountry = ALL_COUNTRIES.find(c => c.isoCode === phoneCountryIso)
+    const phoneDialCode = phoneCountry ? getDialCode(phoneCountry) : ''
+
     const { error } = await supabase.from('restaurants').update({
       ...form,
+      email,
+      phone,
+      phone_country_code: phoneDialCode,
+      country: countryName,
+      country_code: countryCode,
+      state: stateName,
+      city: cityName,
       opening_hours: openingHours,
     }).eq('user_id', user.id)
     if (error) setError(error.message)
@@ -109,6 +234,13 @@ export default function SettingsPage() {
     boxSizing: 'border-box' as const, outline: 'none',
   }
 
+  const disabledInputStyle = {
+    ...inputStyle,
+    background: '#f3f4f6',
+    color: '#888',
+    cursor: 'not-allowed' as const,
+  }
+
   const labelStyle = {
     fontSize: 13, fontWeight: 600 as const,
     display: 'block' as const, marginBottom: 6, color: '#444'
@@ -118,6 +250,8 @@ export default function SettingsPage() {
     background: '#f0f9ff', borderRadius: 12, padding: 20,
     border: '1px solid #e0f2fe'
   }
+
+  const required = <span style={{ color: '#ef4444' }}> *</span>
 
   if (loading) return (
     <div style={{ padding: 40, textAlign: 'center' as const, color: '#0D1B2A' }}>Loading...</div>
@@ -136,7 +270,7 @@ export default function SettingsPage() {
           <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Basic Info</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={labelStyle}>Restaurant Name</label>
+              <label style={labelStyle}>Restaurant Name{required}</label>
               <input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div>
@@ -146,7 +280,7 @@ export default function SettingsPage() {
             <div>
               <label style={labelStyle}>Menu URL slug</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/menu/</span>
+                <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
                 <input style={{ ...inputStyle, flex: 1 }} value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} required />
               </div>
             </div>
@@ -155,15 +289,64 @@ export default function SettingsPage() {
 
         {/* About */}
         <div style={sectionStyle}>
-          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>About Your Restaurant</h3>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>About Your Restaurant{required}</h3>
           <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown in the About section of your menu page</p>
           <textarea
+            required
             value={form.about}
             onChange={e => setForm({ ...form, about: e.target.value })}
             placeholder="Tell your customers about your restaurant, your story, what makes you special..."
             rows={4}
             style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
           />
+        </div>
+
+        {/* Location */}
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Location</h3>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Where your restaurant is based</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={labelStyle}>
+                Country{required}
+                {detectingLocation && <span style={{ color: '#38BDF8', fontWeight: 400, marginLeft: 6 }}>(detecting...)</span>}
+              </label>
+              <SearchableSelect
+                variant="light"
+                value={countryCode}
+                onChange={handleCountryChange}
+                options={ALL_COUNTRIES.map(c => ({ value: c.isoCode, label: `${c.flag} ${c.name}` }))}
+                placeholder="Select country"
+                searchPlaceholder="Search countries..."
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>State / Province</label>
+                <SearchableSelect
+                  variant="light"
+                  value={stateCode}
+                  onChange={handleStateChange}
+                  options={states.map(s => ({ value: s.isoCode, label: s.name }))}
+                  placeholder={states.length === 0 ? 'N/A' : 'Select state'}
+                  searchPlaceholder="Search states..."
+                  disabled={!countryCode || states.length === 0}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>City</label>
+                <SearchableSelect
+                  variant="light"
+                  value={cityName}
+                  onChange={setCityName}
+                  options={cities.map(c => ({ value: c.name, label: c.name }))}
+                  placeholder={cities.length === 0 ? 'N/A' : 'Select city'}
+                  searchPlaceholder="Search cities..."
+                  disabled={!stateCode || cities.length === 0}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Opening Hours */}
@@ -175,10 +358,8 @@ export default function SettingsPage() {
               const h = openingHours[day] || { open: '09:00', close: '22:00', closed: false }
               return (
                 <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#fff', borderRadius: 8, border: '1px solid #e0f2fe' }}>
-                  {/* Day name */}
                   <span style={{ fontSize: 13, fontWeight: 600, color: '#0D1B2A', width: 90, flexShrink: 0 }}>{day.slice(0, 3)}</span>
 
-                  {/* Closed toggle */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flexShrink: 0 }}>
                     <input
                       type="checkbox"
@@ -189,7 +370,6 @@ export default function SettingsPage() {
                     <span style={{ fontSize: 12, color: h.closed ? '#ef4444' : '#888' }}>Closed</span>
                   </label>
 
-                  {/* Time inputs */}
                   {!h.closed && (
                     <>
                       <input
@@ -222,16 +402,28 @@ export default function SettingsPage() {
           <h3 style={{ margin: '0 0 16px', fontSize: 15, color: '#0D1B2A' }}>Contact</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={labelStyle}>Phone</label>
-              <input style={inputStyle} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+92-300-1234567" />
+              <label style={labelStyle}>Phone{required}</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <SearchableSelect
+                  variant="light"
+                  width={140}
+                  value={phoneCountryIso}
+                  onChange={setPhoneCountryIso}
+                  options={ALL_COUNTRIES.map(c => ({ value: c.isoCode, label: `${c.flag} ${getDialCode(c)} ${c.name}` }))}
+                  placeholder="Code"
+                  searchPlaceholder="Search..."
+                />
+                <input required style={{ ...inputStyle, flex: 1 }} value={phone} onChange={e => setPhone(e.target.value)} placeholder="3001234567" />
+              </div>
             </div>
             <div>
               <label style={labelStyle}>Email</label>
-              <input style={inputStyle} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="hello@restaurant.com" />
+              <input style={disabledInputStyle} type="email" value={email} disabled readOnly />
+              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#888' }}>This is your account login email and can't be changed here.</p>
             </div>
             <div>
               <label style={labelStyle}>Address</label>
-              <input style={inputStyle} value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Food Street, Karachi" />
+              <input style={inputStyle} value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Food Street" />
             </div>
             <div>
               <label style={labelStyle}>Google Maps URL</label>

@@ -45,7 +45,7 @@ export default async function DashboardLayout({
       .select('slug')
       .eq('user_id', user.id)
       .single()
-    if (restaurant?.slug) menuUrl = `/menu/${restaurant.slug}`
+    if (restaurant?.slug) menuUrl = `/${restaurant.slug}`
   }
 
   const visible = user ? await getVisibleAnnouncements(user.id) : []

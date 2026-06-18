@@ -4,6 +4,32 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+// Counts how many of the "profile" fields on a restaurant row are filled in.
+// Used to drive the "% profile complete" indicator on the Settings card.
+function calculateProfileCompletion(restaurant: Record<string, any>): number {
+  const simpleFields = [
+    "name", "slug", "tagline", "phone", "phone_country_code", "address",
+    "email", "whatsapp", "instagram", "facebook", "theme", "currency",
+    "layout", "about", "google_maps_url", "country", "country_code",
+    "state", "city",
+  ];
+
+  const filledSimple = simpleFields.filter(key => {
+    const value = restaurant[key];
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  }).length;
+
+  // opening_hours is an object, not a string — treat it as filled if it
+  // exists and has at least one day set (it's null until Settings is saved once)
+  const hoursFilled =
+    restaurant.opening_hours && Object.keys(restaurant.opening_hours).length > 0 ? 1 : 0;
+
+  const totalFields = simpleFields.length + 1;
+  const filledFields = filledSimple + hoursFilled;
+
+  return Math.round((filledFields / totalFields) * 100);
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -43,7 +69,9 @@ export default async function DashboardPage() {
     .eq("restaurant_id", restaurant.id)
     .gte("visited_at", todayStart.toISOString())
 
-  const menuUrl = `/menu/${restaurant.slug}`;
+  const profileCompletion = calculateProfileCompletion(restaurant);
+
+  const menuUrl = `/${restaurant.slug}`;
   const fullMenuUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${menuUrl}`;
 
   return (
@@ -108,7 +136,13 @@ export default async function DashboardPage() {
         <Link href="/dashboard/settings"
           className="bg-white border border-slate-200 rounded-xl p-4 hover:border-sky-200 hover:bg-sky-50 transition-all">
           <p className="font-medium text-[#0D1B2A] text-sm">Settings</p>
-          <p className="text-xs text-slate-400 mt-0.5">Profile, social links, contact info</p>
+          <p
+            className={`text-xs mt-0.5 font-semibold ${
+              profileCompletion >= 100 ? "text-green-600" : "text-red-500"
+            }`}
+          >
+            {profileCompletion >= 100 ? "Profile complete ✓" : `${profileCompletion}% profile complete`}
+          </p>
         </Link>
 
         <Link href="/dashboard/analytics"
