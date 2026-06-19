@@ -18,7 +18,7 @@ export default async function RestaurantsPage() {
 
   const { data: restaurants, error } = await supabase
     .from('restaurants')
-    .select('id, name, slug, email, created_at, is_suspended, theme, currency, layout')
+    .select('id, name, slug, email, created_at, is_suspended, theme, currency, layout, pricing_tier, subscription_status, bypass_payment')
     .order('created_at', { ascending: false })
 
   if (error) {

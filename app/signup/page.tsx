@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Eye, EyeOff } from 'lucide-react'
 import Navbar from '@/app/components/Navbar'
 
@@ -30,13 +29,38 @@ export default function SignupPage() {
       return
     }
     setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
+
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error || !data.user) {
+      setError(error?.message || 'Something went wrong. Please try again.')
       setLoading(false)
-    } else {
-      router.push('/dashboard')
+      return
     }
+
+    // Detect country -> assign pricing tier
+    let tier = 'tier_a'
+    try {
+      const [geoRes, tiersRes] = await Promise.all([
+        fetch('/api/dashboard/detect-country').then(r => r.json()),
+        supabase.from('pricing_tiers').select('id, countries'),
+      ])
+      const tierB = tiersRes.data?.find((t: any) => t.id === 'tier_b')
+      if (geoRes.country_code && tierB?.countries?.includes(geoRes.country_code)) {
+        tier = 'tier_b'
+      }
+    } catch (e) {
+      console.error('Tier detection failed, defaulting to tier_a:', e)
+    }
+
+    const { error: pendingError } = await supabase
+      .from('pending_signups')
+      .insert({ user_id: data.user.id, pricing_tier: tier })
+
+    if (pendingError) {
+      console.error('Failed to create pending signup:', pendingError)
+    }
+
+    router.push('/checkout')
   }
 
   return (
@@ -46,7 +70,7 @@ export default function SignupPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h1>
-          <p className="text-gray-500 text-sm mb-8">Start your free Menuberg account today</p>
+          <p className="text-gray-500 text-sm mb-8">Start your Menuberg account today</p>
 
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
             <div>

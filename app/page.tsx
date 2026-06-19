@@ -4,6 +4,7 @@ import FeaturesCarousel from './FeaturesCarousel'
 import { createClient } from '@/lib/supabase/server'
 import LandingNav from './components/LandingNav'
 import ContactSection from './components/ContactSection'
+import PricingBanner from './components/PricingBanner'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,94 +121,9 @@ export default async function Home() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" style={{ padding: "6rem 2rem", textAlign: "center", background: "#fff" }}>
-        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>Pricing</div>
-        <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", marginBottom: "0.5rem", letterSpacing: "-1px" }}>
-          Less than a burger a month
-        </h2>
-        <p style={{ fontSize: "16px", color: "#888", marginBottom: "3rem" }}>
-          Honest, simple pricing. Cancel anytime.
-        </p>
+      <PricingBanner />
 
-        <div style={{ maxWidth: "440px", margin: "0 auto", background: "#fff", border: "2px solid #38BDF8", borderRadius: "20px", padding: "2.5rem 2rem", textAlign: "left", position: "relative", boxShadow: "0 20px 60px rgba(56,189,248,0.1)" }}>
-          <div style={{ position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", background: "#38BDF8", color: "#0D1B2A", fontSize: "11px", fontWeight: 700, padding: "5px 20px", borderRadius: "20px", whiteSpace: "nowrap" as const, letterSpacing: "0.5px" }}>
-            Your professional digital storefront
-          </div>
-
-          {/* Subscription Section with Premium Limited Offer Badge */}
-          <div style={{ marginBottom: "1.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid #f0f0f0" }}>
-            <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.8rem" }}>Subscription</div>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-              <div>
-                {/* Crossed out old price */}
-                <div style={{ fontSize: "16px", color: "#aaa", textDecoration: "line-through", fontWeight: 500, marginBottom: "2px", marginLeft: "2px" }}>
-                  $12.50
-                </div>
-                {/* New price */}
-                <div style={{ display: "flex", alignItems: "flex-start", color: "#111", fontWeight: 800, letterSpacing: "-2px", lineHeight: 1 }}>
-                  <span style={{ fontSize: "22px", color: "#38BDF8", fontWeight: 700, marginTop: "4px", marginRight: "2px" }}>$</span>
-                  <span style={{ fontSize: "48px" }}>4.99</span>
-                  <span style={{ fontSize: "15px", color: "#aaa", fontWeight: 400, letterSpacing: 0, alignSelf: "flex-end", marginBottom: "6px", marginLeft: "4px" }}>/month</span>
-                </div>
-              </div>
-
-              {/* Premium Badge */}
-              <div style={{ background: "#0D1B2A", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "8px", padding: "6px 12px", textAlign: "center", boxShadow: "0 4px 12px rgba(13,27,42,0.15)" }}>
-                <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.7)", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" as const, marginBottom: "1px" }}>
-                  Limited Time Offer
-                </div>
-                <div style={{ fontSize: "14px", color: "#F59E0B", fontWeight: 800, letterSpacing: "0.5px" }}>
-                  60% OFF
-                </div>
-              </div>
-            </div>
-
-            <p style={{ fontSize: "13px", color: "#888", margin: "12px 0 0" }}>Less than the price of a burger. Keep your menu live, modern, and always online.</p>
-          </div>
-
-          {/* One-Time Setup */}
-          <div style={{ marginBottom: "2rem" }}>
-            <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase" as const, letterSpacing: "1px", marginBottom: "0.5rem" }}>One-Time Setup Fee</div>
-
-            <div style={{ display: "flex", alignItems: "flex-start", color: "#444", fontWeight: 800, letterSpacing: "-1px", lineHeight: 1 }}>
-              <span style={{ fontSize: "18px", color: "#38BDF8", fontWeight: 700, marginTop: "2px", marginRight: "2px" }}>$</span>
-              <span style={{ fontSize: "36px" }}>17.90</span>
-            </div>
-
-            <p style={{ fontSize: "13px", color: "#888", margin: "10px 0 0" }}>
-              <strong>We set it up for you.</strong> Send us your menu and we’ll configure your page so it's ready to launch flawlessly.
-            </p>
-          </div>
-
-          {/* Value Props */}
-          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", display: "flex", flexDirection: "column" as const, gap: "12px" }}>
-            {[
-              "Your storefront live at — menuberg.com/yourname",
-              "High-quality QR codes to print on tables and packaging",
-              "Unlimited categories, items, and photos",
-              "An affordable digital presence that works just like a website",
-              "Complete pages featuring your Menu, About section, and Contact info",
-              "Instant updates to change prices or hide sold-out items",
-              "Fully mobile-responsive for all screen sizes"
-            ].map(f => (
-              <li key={f} style={{ fontSize: "14px", color: "#333", display: "flex", alignItems: "flex-start", gap: "10px", lineHeight: "1.4" }}>
-                <span style={{ color: "#38BDF8", fontWeight: 700, flexShrink: 0, fontSize: "16px" }}>✓</span>
-                <span>{f}</span>
-              </li>
-            ))}
-          </ul>
-
-          {/* Action CTA */}
-          <Link href="/signup" style={{ display: "block", padding: "15px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, background: "#38BDF8", color: "#0D1B2A", textDecoration: "none", textAlign: "center" as const }}>
-            Launch your storefront
-          </Link>
-        </div>
-
-        <p style={{ marginTop: "1.5rem", fontSize: "13px", color: "#bbb" }}>7-day free trial · Cancel anytime · No contract or setup hassle</p>
-      </section>
-
-            {/* CONTACT */}
+      {/* CONTACT */}
       <ContactSection
         heading={c.contactHeading}
         subheading={c.contactSubheading}
@@ -217,7 +133,7 @@ export default async function Home() {
       />
 
       {/* CTA BANNER */}
-      <section style={{ margin: "0 2rem 5rem", background: "#0D1B2A", borderRadius: "20px", padding: "4rem 2rem", textAlign: "center" }}>
+      <section style={{ margin: "5rem 2rem 5rem", background: "#0D1B2A", borderRadius: "20px", padding: "4rem 2rem", textAlign: "center" }}>
         <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 800, color: "#fff", marginBottom: "1rem", letterSpacing: "-1px" }}>
           {c.ctaTitle}
         </h2>
@@ -235,10 +151,12 @@ export default async function Home() {
           <Image src="/logo.png" alt="Menuberg" width={28} height={28} style={{ objectFit: "contain" }} />
           <span style={{ fontSize: "18px", fontWeight: 700, color: "#0D1B2A" }}>Menuberg <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Digital menus for everyone</span></span>
         </div>
-        <div style={{ display: "flex", gap: "1.5rem" }}>
-          <a href="#" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>About</a>
+        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
+          <Link href="/pricing" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Pricing</Link>
           <a href="#contact" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Contact</a>
-          <a href="#" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Privacy</a>
+          <Link href="/terms" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Terms</Link>
+          <Link href="/privacy" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Privacy</Link>
+          <Link href="/refund" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Refund Policy</Link>
         </div>
         <p style={{ fontSize: "12px", color: "#ccc", width: "100%", margin: 0 }}>© 2025 Menuberg. Built for small restaurants worldwide.</p>
       </footer>

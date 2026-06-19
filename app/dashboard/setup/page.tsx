@@ -35,6 +35,13 @@ export default function SetupPage() {
   const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
+  const [billing, setBilling] = useState({
+    pricing_tier: 'tier_a',
+    subscription_status: 'pending',
+    paddle_customer_id: null as string | null,
+    paddle_subscription_id: null as string | null,
+    coupon_code_used: null as string | null,
+  })
 
   useEffect(() => {
     async function init() {
@@ -56,6 +63,14 @@ export default function SetupPage() {
       }
 
       setCheckingExisting(false)
+
+      const { data: pending } = await supabase
+        .from('pending_signups')
+        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (pending) setBilling(pending)
 
       try {
         const res = await fetch('/api/dashboard/detect-country')
@@ -145,6 +160,7 @@ export default function SetupPage() {
       country_code: countryCode,
       state: stateName,
       city: cityName,
+      ...billing, // pricing_tier, subscription_status, paddle ids, coupon used
     })
 
     if (error) {

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Trash2,
   Filter,
+  Crown,
 } from 'lucide-react'
 
 type Restaurant = {
@@ -22,6 +23,16 @@ type Restaurant = {
   theme: string | null
   currency: string | null
   layout: string | null
+  pricing_tier: string
+  subscription_status: string
+  bypass_payment: boolean
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  active: 'bg-green-500/10 text-green-400 border-green-500/20',
+  pending: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+  past_due: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
 }
 
 export default function RestaurantList({
@@ -67,6 +78,30 @@ export default function RestaurantList({
       setRestaurants((prev) =>
         prev.map((r) =>
           r.id === id ? { ...r, is_suspended: !currentlySuspended } : r
+        )
+      )
+    }
+
+    setLoadingId(null)
+  }
+
+  async function toggleBypass(id: string, currentlyBypassed: boolean, name: string) {
+    setLoadingId(id)
+
+    const res = await fetch('/api/super-admin/toggle-bypass', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        bypass: !currentlyBypassed,
+        name,
+      }),
+    })
+
+    if (res.ok) {
+      setRestaurants((prev) =>
+        prev.map((r) =>
+          r.id === id ? { ...r, bypass_payment: !currentlyBypassed } : r
         )
       )
     }
@@ -164,6 +199,9 @@ export default function RestaurantList({
                   Created
                 </th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                  Billing
+                </th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">
                   Status
                 </th>
                 <th className="text-right px-4 py-3 text-gray-400 font-medium">
@@ -175,7 +213,7 @@ export default function RestaurantList({
             <tbody className="divide-y divide-gray-800">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-500">
+                  <td colSpan={6} className="text-center py-12 text-gray-500">
                     No restaurants found
                   </td>
                 </tr>
@@ -205,6 +243,23 @@ export default function RestaurantList({
                   </td>
 
                   <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs text-gray-500 uppercase">
+                        {r.pricing_tier === 'tier_b' ? 'Tier B' : 'Tier A'}
+                      </span>
+                      {r.bypass_payment ? (
+                        <span className="inline-flex items-center gap-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-full">
+                          <Crown size={11} /> VIP
+                        </span>
+                      ) : (
+                        <span className={`inline-flex items-center text-xs border px-2 py-1 rounded-full capitalize ${STATUS_STYLES[r.subscription_status] ?? STATUS_STYLES.pending}`}>
+                          {r.subscription_status.replace('_', ' ')}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-3">
                     {r.is_suspended ? (
                       <span className="inline-flex items-center gap-1 text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1 rounded-full">
                         Suspended
@@ -229,7 +284,7 @@ export default function RestaurantList({
 
                       {/* Public menu */}
                       <Link
-                        href={`/menu/${r.slug}`}
+                        href={`/${r.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
@@ -237,6 +292,21 @@ export default function RestaurantList({
                       >
                         <ExternalLink size={15} />
                       </Link>
+
+                      {/* VIP bypass toggle */}
+                      <button
+                        onClick={() => toggleBypass(r.id, r.bypass_payment, r.name)}
+                        disabled={loadingId === r.id}
+                        className={`p-1.5 rounded-lg transition-colors disabled:opacity-50
+                          ${
+                            r.bypass_payment
+                              ? 'text-amber-400 hover:bg-amber-500/10'
+                              : 'text-gray-500 hover:bg-gray-700 hover:text-amber-400'
+                          }`}
+                        title={r.bypass_payment ? 'Remove VIP bypass (require payment)' : 'Grant VIP bypass (skip payment)'}
+                      >
+                        <Crown size={15} />
+                      </button>
 
                       {/* Suspend / Reactivate */}
                       <button
