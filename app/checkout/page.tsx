@@ -63,6 +63,7 @@ export default function CheckoutPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
+      // Already have a paid/bypassed restaurant -> nothing to do here
       const { data: restaurant } = await supabase
         .from('restaurants')
         .select('subscription_status, bypass_payment')
@@ -85,7 +86,39 @@ export default function CheckoutPage() {
         return
       }
 
-      const tierId = pending?.pricing_tier || 'tier_a'
+      let resolvedTierId = pending?.pricing_tier
+
+      // Self-heal: if this user has no pending_signups row at all, it
+      // likely means signup's insert ran before email confirmation
+      // (no session yet -> RLS silently blocked it). Create it now
+      // that we have a real authenticated session.
+      if (!pending) {
+        let detectedTier = 'tier_a'
+        try {
+          const [geoRes, tiersRes] = await Promise.all([
+            fetch('/api/dashboard/detect-country').then(r => r.json()),
+            supabase.from('pricing_tiers').select('id, countries'),
+          ])
+          const tierB = tiersRes.data?.find((t: any) => t.id === 'tier_b')
+          if (geoRes.country_code && tierB?.countries?.includes(geoRes.country_code)) {
+            detectedTier = 'tier_b'
+          }
+        } catch (e) {
+          console.error('Tier detection failed during self-heal, defaulting to tier_a:', e)
+        }
+
+        const { error: insertError } = await supabase
+          .from('pending_signups')
+          .insert({ user_id: user.id, pricing_tier: detectedTier })
+
+        if (insertError) {
+          console.error('Self-heal pending_signups insert failed:', insertError)
+        } else {
+          resolvedTierId = detectedTier
+        }
+      }
+
+      const tierId = resolvedTierId || 'tier_a'
       const { data: tierRow } = await supabase
         .from('pricing_tiers')
         .select('id, label, setup_fee, monthly_price')
@@ -94,6 +127,8 @@ export default function CheckoutPage() {
 
       if (tierRow) setTier(tierRow)
 
+      // Currency estimate (display only — real local-currency billing
+      // happens inside Paddle's own checkout once that's wired up)
       try {
         const geo = await fetch('/api/dashboard/detect-country').then(r => r.json())
         if (geo.country_code) {
