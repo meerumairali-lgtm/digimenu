@@ -4,14 +4,25 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 // Maps each pricing tier to its two Paddle Price IDs (setup fee + monthly).
+// const PADDLE_PRICE_IDS: Record<string, { setup: string; monthly: string }> = {
+//   tier_a: {
+//     setup: 'pri_01kvhcswa3a0wf6me8v7tvj882',
+//     monthly: 'pri_01kvhcz3hja1r3dem1kbeg4pbd',
+//   },
+//   tier_b: {
+//     setup: 'pri_01kvhd3q571p0k8cabxt4r9vxz',
+//     monthly: 'pri_01kvhd59hydcrc7z94awczcsge',
+//   },
+// }
+
 const PADDLE_PRICE_IDS: Record<string, { setup: string; monthly: string }> = {
   tier_a: {
-    setup: 'pri_01kvhcswa3a0wf6me8v7tvj882',
-    monthly: 'pri_01kvhcz3hja1r3dem1kbeg4pbd',
+    setup: 'pri_01kvkakwytrpft23tq4vs7sast',
+    monthly: 'pri_01kvkar865vqnsabs6frwfatkg',
   },
   tier_b: {
-    setup: 'pri_01kvhd3q571p0k8cabxt4r9vxz',
-    monthly: 'pri_01kvhd59hydcrc7z94awczcsge',
+    setup: 'pri_01kvka7a5mtbnzmeh3mxdjyk85',
+    monthly: 'pri_01kvka88sbchnykgxpba8f5r6w',
   },
 }
 
