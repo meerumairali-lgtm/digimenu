@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
+
+
 
 function verifySignature(rawBody: string, paddleSignature: string, secretKey: string): boolean {
   const parts = paddleSignature.split(';')
