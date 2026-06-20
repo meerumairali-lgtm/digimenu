@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import LandingNav from "@/app/components/LandingNav";
 import { Check } from "lucide-react";
+import { getUsdExchangeRates } from "@/lib/currency";
+import { getCurrencyForCountry, convertUsd, formatCurrency } from "@/lib/currencyDisplay";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +80,8 @@ export default async function PricingPage() {
     countryCode && tierB?.countries?.includes(countryCode) ? true : false;
 
   const tier = isTierB ? tierB : tierA;
+  const currency = getCurrencyForCountry(countryCode);
+  const rates = await getUsdExchangeRates();
 
   const features = [
     "Custom QR code menu",
@@ -89,12 +93,20 @@ export default async function PricingPage() {
   ];
 
   const showIntro = tier?.intro_discount_active && tier?.intro_monthly_price != null;
-  const displayPrice = showIntro ? tier!.intro_monthly_price! : tier?.monthly_price;
-  const crossedPrice = showIntro ? tier?.monthly_price : null;
+  const displayPriceUsd = showIntro ? tier!.intro_monthly_price! : tier?.monthly_price;
+  const crossedPriceUsd = showIntro ? tier?.monthly_price : null;
   const introMonths = tier?.intro_duration_months ?? 3;
+
+  const displayPrice =
+    displayPriceUsd != null ? convertUsd(displayPriceUsd, currency, rates) : null;
+  const crossedPrice =
+    crossedPriceUsd != null ? convertUsd(crossedPriceUsd, currency, rates) : null;
+  const setupFee =
+    tier?.setup_fee != null ? convertUsd(tier.setup_fee, currency, rates) : null;
+
   const discountPercent =
-    showIntro && tier && crossedPrice
-      ? Math.round((1 - tier.intro_monthly_price! / crossedPrice) * 100)
+    showIntro && tier && tier.monthly_price
+      ? Math.round((1 - tier.intro_monthly_price! / tier.monthly_price) * 100)
       : null;
 
   return (
@@ -122,7 +134,7 @@ export default async function PricingPage() {
           <div className="mb-2 flex items-baseline gap-3">
             {crossedPrice != null && (
               <span className="text-lg text-gray-500 line-through">
-                ${crossedPrice.toFixed(2)}
+                {formatCurrency(crossedPrice, currency)}
               </span>
             )}
           </div>
@@ -130,17 +142,17 @@ export default async function PricingPage() {
           <div className="mb-2">
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-bold">
-                ${displayPrice?.toFixed(2) ?? "—"}
+                {displayPrice != null ? formatCurrency(displayPrice, currency) : "—"}
               </span>
               <span className="text-[#7DD3FC]">/month</span>
             </div>
             <p className="text-sm text-gray-400 mt-1">
-              + ${tier?.setup_fee.toFixed(2) ?? "—"} one-time setup fee
+              + {setupFee != null ? formatCurrency(setupFee, currency) : "—"} one-time setup fee
             </p>
             {showIntro && (
               <p className="text-sm text-[#7DD3FC] mt-2">
-                For your first <strong>{introMonths} months</strong>, then $
-                {crossedPrice?.toFixed(2)}/month after.
+                For your first <strong>{introMonths} months</strong>, then{" "}
+                {crossedPrice != null ? formatCurrency(crossedPrice, currency) : "—"}/month after.
               </p>
             )}
           </div>
@@ -163,7 +175,7 @@ export default async function PricingPage() {
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-8">
-          Prices shown in USD. Cancel anytime, no contract.
+          Cancel anytime, no contract.
         </p>
 
         <div className="text-center mt-16 text-sm text-gray-500">

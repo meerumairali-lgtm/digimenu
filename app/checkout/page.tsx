@@ -4,6 +4,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Country } from 'country-state-city'
 
+declare global {
+  interface Window {
+    Paddle: any
+  }
+}
+
 interface Tier { id: string; label: string; setup_fee: number; monthly_price: number }
 interface Coupon {
   code: string
@@ -23,15 +29,40 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('')
   const [couponChecking, setCouponChecking] = useState(false)
 
+  const [paddleReady, setPaddleReady] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
+
   const router = useRouter()
   const supabase = createClient()
+
+  // Load Paddle.js once, on mount
+  useEffect(() => {
+    if (window.Paddle) {
+      setPaddleReady(true)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
+    script.onload = () => {
+      if (window.Paddle) {
+        window.Paddle.Environment.set(
+          process.env.NEXT_PUBLIC_PADDLE_ENV === 'production' ? 'production' : 'sandbox'
+        )
+        window.Paddle.Setup({
+          token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+        })
+        setPaddleReady(true)
+      }
+    }
+    document.body.appendChild(script)
+  }, [])
 
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      // Already have a paid/bypassed restaurant -> nothing to do here
       const { data: restaurant } = await supabase
         .from('restaurants')
         .select('subscription_status, bypass_payment')
@@ -63,8 +94,6 @@ export default function CheckoutPage() {
 
       if (tierRow) setTier(tierRow)
 
-      // Currency estimate (display only — real local-currency billing
-      // happens inside Paddle's own checkout once that's wired up)
       try {
         const geo = await fetch('/api/dashboard/detect-country').then(r => r.json())
         if (geo.country_code) {
@@ -123,11 +152,40 @@ export default function CheckoutPage() {
     return Math.max(0, amount - coupon.discount_value)
   }
 
-  function handleContinueToPayment() {
-    // TODO: once Paddle products/prices are created, this calls a server
-    // route that creates a Paddle transaction (re-validating the coupon
-    // server-side) and opens Paddle.js checkout.
-    alert('Payment isn\'t wired up yet — Paddle products need to be created first. This button will open the real checkout once that\'s done.')
+  async function handleContinueToPayment() {
+    if (!paddleReady || submitting) return
+    setSubmitting(true)
+    setPaymentError('')
+
+    try {
+      const res = await fetch('/api/checkout/create-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: coupon?.code || null }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.transactionId) {
+        setPaymentError(data.error || 'Could not start checkout. Please try again.')
+        setSubmitting(false)
+        return
+      }
+
+      window.Paddle.Checkout.open({
+        transactionId: data.transactionId,
+        settings: {
+          displayMode: 'overlay',
+          theme: 'dark',
+        },
+      })
+
+      setSubmitting(false)
+    } catch (err) {
+      console.error('Checkout error:', err)
+      setPaymentError('Something went wrong starting checkout. Please try again.')
+      setSubmitting(false)
+    }
   }
 
   if (loading || !tier) {
@@ -150,7 +208,6 @@ export default function CheckoutPage() {
           <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>One step left before your menu goes live.</p>
         </div>
 
-        {/* Setup fee */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
           <span style={{ color: '#7DD3FC', fontSize: 14 }}>One-time setup</span>
           <div style={{ textAlign: 'right' }}>
@@ -164,7 +221,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Monthly */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
           <span style={{ color: '#7DD3FC', fontSize: 14 }}>Then monthly</span>
           <div style={{ textAlign: 'right' }}>
@@ -178,7 +234,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Coupon */}
         <div style={{ marginTop: 20 }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: '#1A3A5C', display: 'block', marginBottom: 6 }}>Coupon code</label>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -206,11 +261,27 @@ export default function CheckoutPage() {
           {coupon && <p style={{ color: '#38BDF8', fontSize: 13, marginTop: 6 }}>✓ "{coupon.code}" applied</p>}
         </div>
 
+        {paymentError && (
+          <p style={{ color: '#f87171', fontSize: 13, marginTop: 12, textAlign: 'center' }}>{paymentError}</p>
+        )}
+
         <button
           onClick={handleContinueToPayment}
-          style={{ width: '100%', padding: '14px', borderRadius: 8, background: '#38BDF8', color: '#0D1B2A', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginTop: 24 }}
+          disabled={!paddleReady || submitting}
+          style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: 8,
+            background: !paddleReady || submitting ? '#1A3A5C' : '#38BDF8',
+            color: !paddleReady || submitting ? '#7DD3FC' : '#0D1B2A',
+            border: 'none',
+            fontSize: 15,
+            fontWeight: 700,
+            cursor: !paddleReady || submitting ? 'default' : 'pointer',
+            marginTop: 24,
+          }}
         >
-          Continue to payment →
+          {submitting ? 'Starting checkout...' : !paddleReady ? 'Loading...' : 'Continue to payment →'}
         </button>
 
         <p style={{ textAlign: 'center', color: '#64748b', fontSize: 12, marginTop: 16 }}>
