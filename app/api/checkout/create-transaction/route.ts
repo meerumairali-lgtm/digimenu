@@ -3,28 +3,25 @@ import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-// Maps each pricing tier to its two Paddle Price IDs (setup fee + monthly).
-// const PADDLE_PRICE_IDS: Record<string, { setup: string; monthly: string }> = {
-//   tier_a: {
-//     setup: 'pri_01kvhcswa3a0wf6me8v7tvj882',
-//     monthly: 'pri_01kvhcz3hja1r3dem1kbeg4pbd',
-//   },
-//   tier_b: {
-//     setup: 'pri_01kvhd3q571p0k8cabxt4r9vxz',
-//     monthly: 'pri_01kvhd59hydcrc7z94awczcsge',
-//   },
-// }
-
-const PADDLE_PRICE_IDS: Record<string, { setup: string; monthly: string }> = {
+const PADDLE_IDS: Record<
+  string,
+  {
+    productId: string;
+    setupPriceId: string;
+    monthlyPriceId: string;
+  }
+> = {
   tier_a: {
-    setup: 'pri_01kvkakwytrpft23tq4vs7sast',
-    monthly: 'pri_01kvkar865vqnsabs6frwfatkg',
+    productId: 'pro_01kvkagr8dqm37w0kq3p6qeakj',
+    setupPriceId: 'pri_01kvkakwytrpft23tq4vs7sast',
+    monthlyPriceId: 'pri_01kvkar865vqnsabs6frwfatkg',
   },
   tier_b: {
-    setup: 'pri_01kvka7a5mtbnzmeh3mxdjyk85',
-    monthly: 'pri_01kvka88sbchnykgxpba8f5r6w',
+    productId: 'pro_01kvka26fbqnm56sf0bdc02hps',
+    setupPriceId: 'pri_01kvka7a5mtbnzmeh3mxdjyk85',
+    monthlyPriceId: 'pri_01kvka88sbchnykgxpba8f5r6w',
   },
-}
+};
 
 const PADDLE_API_BASE =
   process.env.PADDLE_ENV === 'production'
@@ -74,8 +71,8 @@ export async function POST(request: NextRequest) {
     }
 
     const tierId = pending?.pricing_tier || 'tier_a'
-    const priceIds = PADDLE_PRICE_IDS[tierId]
-    if (!priceIds) {
+    const paddleIds = PADDLE_IDS[tierId]
+    if (!paddleIds) {
       return NextResponse.json({ error: 'Invalid pricing tier' }, { status: 400 })
     }
 
@@ -117,8 +114,34 @@ export async function POST(request: NextRequest) {
     const setupPrice = applyDiscount(tier.setup_fee, coupon, 'setup')
     const monthlyPrice = applyDiscount(baseMonthly, coupon, 'monthly')
 
-    const setupCents = Math.round(setupPrice * 100).toString()
-    const monthlyCents = Math.round(monthlyPrice * 100).toString()
+    function buildItem(
+      catalogAmount: number,
+      finalAmount: number,
+      priceId: string,
+      productId: string,
+      label: string
+    ) {
+      if (Math.round(catalogAmount * 100) === Math.round(finalAmount * 100)) {
+        return { price_id: priceId, quantity: 1 }
+      }
+      return {
+        quantity: 1,
+        price: {
+          product_id: productId,
+          description: label,
+          name: label,
+          unit_price: {
+            amount: Math.round(finalAmount * 100).toString(),
+            currency_code: 'USD',
+          },
+        },
+      }
+    }
+
+    const items = [
+      buildItem(tier.setup_fee, setupPrice, paddleIds.setupPriceId, paddleIds.productId, 'Setup fee'),
+      buildItem(baseMonthly, monthlyPrice, paddleIds.monthlyPriceId, paddleIds.productId, 'Monthly subscription'),
+    ]
 
     const paddleRes = await fetch(`${PADDLE_API_BASE}/transactions`, {
       method: 'POST',
@@ -127,18 +150,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${process.env.PADDLE_API_KEY}`,
       },
       body: JSON.stringify({
-        items: [
-          {
-            price_id: priceIds.setup,
-            quantity: 1,
-            price: { unit_price: { amount: setupCents, currency_code: 'USD' } },
-          },
-          {
-            price_id: priceIds.monthly,
-            quantity: 1,
-            price: { unit_price: { amount: monthlyCents, currency_code: 'USD' } },
-          },
-        ],
+        items,
         custom_data: {
           user_id: user.id,
           pricing_tier: tierId,
