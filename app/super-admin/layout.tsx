@@ -18,6 +18,7 @@ import {
   Megaphone,
   LifeBuoy,
   Contact,
+  DollarSign,
 } from 'lucide-react'
 
 const navItems = [
@@ -30,6 +31,7 @@ const navItems = [
   { label: 'Support', href: '/super-admin/support', icon: LifeBuoy },
   { label: 'Settings', href: '/super-admin/settings', icon: Settings },
   { label: 'Contact', href: '/super-admin/contact-submissions', icon: Contact },
+  { label: 'Pricing', href: '/super-admin/pricing', icon: DollarSign },
 ]
 
 export default function SuperAdminLayout({
