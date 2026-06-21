@@ -41,6 +41,10 @@ export default function SetupPage() {
     paddle_customer_id: null as string | null,
     paddle_subscription_id: null as string | null,
     coupon_code_used: null as string | null,
+    // Defaults to "right now" in case pending_signups doesn't have a row
+    // for this user. If it does have a row, this gets overwritten below
+    // with the REAL trial start time from signup.
+    trial_started_at: new Date().toISOString() as string | null,
   })
 
   useEffect(() => {
@@ -49,8 +53,6 @@ export default function SetupPage() {
       if (!user) { router.push('/login'); return }
       setEmail(user.email || '')
 
-      // If setup was already completed, this page has nothing left to do —
-      // Settings covers everything Setup does and more.
       const { data: existing } = await supabase
         .from('restaurants')
         .select('id')
@@ -59,14 +61,14 @@ export default function SetupPage() {
 
       if (existing) {
         router.push('/dashboard/settings')
-        return // stays in checking state — page never renders the form, just redirects
+        return
       }
 
       setCheckingExisting(false)
 
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used')
+        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -160,17 +162,13 @@ export default function SetupPage() {
       country_code: countryCode,
       state: stateName,
       city: cityName,
-      ...billing, // pricing_tier, subscription_status, paddle ids, coupon used
+      ...billing, // pricing_tier, subscription_status, paddle ids, coupon used, trial_started_at
     })
 
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
-      // Setup is done — pending_signups has done its job and would
-      // otherwise sit as a permanent stale row. Clean it up. Not
-      // critical if this fails (it's just leftover data), so don't
-      // block the redirect on it.
       await supabase.from('pending_signups').delete().eq('user_id', user.id)
 
       router.refresh()
