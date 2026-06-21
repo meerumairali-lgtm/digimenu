@@ -167,6 +167,12 @@ export default function SetupPage() {
       setError(error.message)
       setLoading(false)
     } else {
+      // Setup is done — pending_signups has done its job and would
+      // otherwise sit as a permanent stale row. Clean it up. Not
+      // critical if this fails (it's just leftover data), so don't
+      // block the redirect on it.
+      await supabase.from('pending_signups').delete().eq('user_id', user.id)
+
       router.refresh()
       router.push('/dashboard')
     }

@@ -5,6 +5,8 @@ import DashboardNav from './DashboardNav'
 
 export const dynamic = 'force-dynamic'
 
+const TRIAL_DAYS = 7
+
 type Announcement = {
   id: string
   title: string
@@ -30,6 +32,14 @@ async function getVisibleAnnouncements(userId: string): Promise<Announcement[]> 
   return (announcements || []).filter((a) => !dismissedIds.has(a.id))
 }
 
+function daysRemaining(trialStartedAt: string | null): number {
+  if (!trialStartedAt) return 0
+  const startedMs = new Date(trialStartedAt).getTime()
+  const elapsedMs = Date.now() - startedMs
+  const elapsedDays = elapsedMs / (1000 * 60 * 60 * 24)
+  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsedDays))
+}
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -39,29 +49,42 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser()
 
   let menuUrl = '/dashboard'
+  let trialDaysLeft: number | null = null
 
   if (user) {
     const { data: restaurant } = await supabase
       .from('restaurants')
-      .select('slug, subscription_status, bypass_payment')
+      .select('slug, subscription_status, bypass_payment, trial_started_at')
       .eq('user_id', user.id)
       .maybeSingle()
 
     if (restaurant) {
       const unlocked = restaurant.subscription_status === 'active' || restaurant.bypass_payment === true
-      if (!unlocked) redirect('/checkout')
+
+      if (!unlocked) {
+        const remaining = daysRemaining(restaurant.trial_started_at)
+        if (remaining <= 0) {
+          redirect('/checkout')
+        }
+        trialDaysLeft = remaining
+      }
+
       if (restaurant.slug) menuUrl = `/${restaurant.slug}`
     } else {
-      // No restaurant yet — must have an active (or paid) pending signup
-      // to even reach Setup.
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('subscription_status')
+        .select('subscription_status, bypass_payment, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 
-      if (!pending || pending.subscription_status !== 'active') {
-        redirect('/checkout')
+      const unlocked = pending?.subscription_status === 'active' || pending?.bypass_payment === true
+
+      if (!unlocked) {
+        const remaining = daysRemaining(pending?.trial_started_at || null)
+        if (remaining <= 0) {
+          redirect('/checkout')
+        }
+        trialDaysLeft = remaining
       }
     }
   }
@@ -70,7 +93,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DashboardNav menuUrl={menuUrl} />
+      <DashboardNav menuUrl={menuUrl} trialDaysLeft={trialDaysLeft} />
       {visible.length > 0 && <AnnouncementBanner announcements={visible} />}
       {children}
     </div>

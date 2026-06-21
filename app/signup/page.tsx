@@ -54,13 +54,17 @@ export default function SignupPage() {
 
     const { error: pendingError } = await supabase
       .from('pending_signups')
-      .insert({ user_id: data.user.id, pricing_tier: tier })
+      .insert({
+        user_id: data.user.id,
+        pricing_tier: tier,
+        trial_started_at: new Date().toISOString(),
+      })
 
     if (pendingError) {
       console.error('Failed to create pending signup:', pendingError)
     }
 
-    router.push('/checkout')
+    router.push('/dashboard/setup')
   }
 
   return (

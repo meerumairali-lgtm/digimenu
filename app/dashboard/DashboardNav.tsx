@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { User, CreditCard, Shield, LogOut, ChevronDown } from 'lucide-react'
 import LogoutButton from './LogoutButton'
 
 const links = [
@@ -11,12 +12,30 @@ const links = [
   { href: '/dashboard/menu', label: 'Menu' },
   { href: '/dashboard/qr', label: 'QR Code' },
   { href: '/dashboard/settings', label: 'Settings' },
-  { href: '/dashboard/support', label: 'Support' }, // add this
+  { href: '/dashboard/support', label: 'Support' },
 ]
 
-export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
+export default function DashboardNav({
+  menuUrl,
+  trialDaysLeft,
+}: {
+  menuUrl: string
+  trialDaysLeft: number | null
+}) {
   const [open, setOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   function isActive(href: string) {
     if (href === '/dashboard') return pathname === '/dashboard'
@@ -63,8 +82,24 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
           </nav>
         </div>
 
-        {/* Right — view menu + logout + hamburger */}
+        {/* Right — trial badge + view menu + profile dropdown + hamburger */}
         <div className="flex items-center gap-2">
+          {trialDaysLeft != null && (
+            <Link
+              href="/checkout"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+              style={{
+                background: 'rgba(245, 158, 11, 0.12)',
+                color: '#F59E0B',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+              }}
+            >
+              {trialDaysLeft === 0
+                ? 'Trial ending — upgrade now'
+                : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left in trial`}
+            </Link>
+          )}
+
           <Link
             href={menuUrl}
             target="_blank"
@@ -72,8 +107,58 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
           >
             View menu ↗
           </Link>
-          <div className="hidden sm:block">
-            <LogoutButton />
+
+          {/* Profile avatar dropdown — desktop */}
+          <div className="hidden sm:block relative" ref={profileRef}>
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-sky-500/10 transition-colors"
+            >
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: '#38BDF8', color: '#0D1B2A' }}
+              >
+                <User size={15} />
+              </div>
+              <ChevronDown size={14} className="text-sky-300" />
+            </button>
+
+            {profileOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 w-56 rounded-xl overflow-hidden shadow-xl"
+                style={{ background: '#112240', border: '1px solid rgba(56,189,248,0.15)' }}
+              >
+                <Link
+                  href="/dashboard/account"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 text-sm text-sky-100 hover:bg-sky-500/10 transition-colors"
+                >
+                  <User size={16} className="text-sky-400" />
+                  My Profile
+                </Link>
+                <Link
+                  href="/dashboard/billing"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 text-sm text-sky-100 hover:bg-sky-500/10 transition-colors"
+                >
+                  <CreditCard size={16} className="text-sky-400" />
+                  Billing &amp; Subscription
+                </Link>
+                <Link
+                  href="/dashboard/account/security"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 text-sm text-sky-100 hover:bg-sky-500/10 transition-colors"
+                >
+                  <Shield size={16} className="text-sky-400" />
+                  Security
+                </Link>
+                <div style={{ borderTop: '1px solid rgba(56,189,248,0.1)' }}>
+                  <div className="px-4 py-3">
+                    <LogoutButton />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Hamburger — mobile only */}
@@ -95,6 +180,19 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
           className="sm:hidden px-4 py-3 flex flex-col gap-1"
           style={{ background: '#0D1B2A', borderTop: '1px solid rgba(56,189,248,0.15)' }}
         >
+          {trialDaysLeft != null && (
+            <Link
+              href="/checkout"
+              onClick={() => setOpen(false)}
+              className="block px-3 py-2.5 text-sm font-semibold rounded-lg mb-1"
+              style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B' }}
+            >
+              {trialDaysLeft === 0
+                ? 'Trial ending — upgrade now'
+                : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left in trial`}
+            </Link>
+          )}
+
           {links.map(link => (
             <Link
               key={link.href}
@@ -105,16 +203,40 @@ export default function DashboardNav({ menuUrl }: { menuUrl: string }) {
               {link.label}
             </Link>
           ))}
-          <div className="border-t border-sky-900 mt-2 pt-2 flex items-center justify-between">
+
+          <div className="border-t border-sky-900 mt-2 pt-2 flex flex-col gap-1">
             <Link
               href={menuUrl}
               target="_blank"
               onClick={() => setOpen(false)}
-              className="text-sm text-sky-300 hover:text-white"
+              className="text-sm text-sky-300 hover:text-white px-3 py-2"
             >
               View menu ↗
             </Link>
-            <LogoutButton />
+            <Link
+              href="/dashboard/account"
+              onClick={() => setOpen(false)}
+              className="text-sm text-sky-200 px-3 py-2"
+            >
+              My Profile
+            </Link>
+            <Link
+              href="/dashboard/billing"
+              onClick={() => setOpen(false)}
+              className="text-sm text-sky-200 px-3 py-2"
+            >
+              Billing &amp; Subscription
+            </Link>
+            <Link
+              href="/dashboard/account/security"
+              onClick={() => setOpen(false)}
+              className="text-sm text-sky-200 px-3 py-2"
+            >
+              Security
+            </Link>
+            <div className="px-3 py-2">
+              <LogoutButton />
+            </div>
           </div>
         </div>
       )}
