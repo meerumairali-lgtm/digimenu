@@ -5,11 +5,7 @@ export const dynamic = 'force-dynamic'
 
 const PADDLE_IDS: Record<
   string,
-  {
-    productId: string;
-    setupPriceId: string;
-    monthlyPriceId: string;
-  }
+  { productId: string; setupPriceId: string; monthlyPriceId: string }
 > = {
   tier_a: {
     productId: 'pro_01kvkagr8dqm37w0kq3p6qeakj',
@@ -21,7 +17,7 @@ const PADDLE_IDS: Record<
     setupPriceId: 'pri_01kvka7a5mtbnzmeh3mxdjyk85',
     monthlyPriceId: 'pri_01kvka88sbchnykgxpba8f5r6w',
   },
-};
+}
 
 const PADDLE_API_BASE =
   process.env.PADDLE_ENV === 'production'
@@ -37,6 +33,16 @@ interface Coupon {
   expires_at: string | null
   max_redemptions: number | null
   times_redeemed: number
+}
+
+async function getPaddlePriceAmount(priceId: string): Promise<number | null> {
+  const res = await fetch(`${PADDLE_API_BASE}/prices/${priceId}`, {
+    headers: { Authorization: `Bearer ${process.env.PADDLE_API_KEY}` },
+  })
+  if (!res.ok) return null
+  const json = await res.json()
+  const cents = json?.data?.unit_price?.amount
+  return cents != null ? Number(cents) / 100 : null
 }
 
 function applyDiscount(amount: number, coupon: Coupon | null, type: 'setup' | 'monthly'): number {
@@ -76,16 +82,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid pricing tier' }, { status: 400 })
     }
 
-    const { data: tier } = await supabase
-      .from('pricing_tiers')
-      .select('setup_fee, monthly_price, intro_discount_active, intro_monthly_price')
-      .eq('id', tierId)
-      .single()
-
-    if (!tier) {
-      return NextResponse.json({ error: 'Pricing tier not found' }, { status: 400 })
-    }
-
     let coupon: Coupon | null = null
     if (couponCode) {
       const { data: couponRow } = await supabase
@@ -106,42 +102,47 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const baseMonthly =
-      tier.intro_discount_active && tier.intro_monthly_price != null
-        ? tier.intro_monthly_price
-        : tier.monthly_price
+    let items: any[]
 
-    const setupPrice = applyDiscount(tier.setup_fee, coupon, 'setup')
-    const monthlyPrice = applyDiscount(baseMonthly, coupon, 'monthly')
+    if (!coupon) {
+      items = [
+        { price_id: paddleIds.setupPriceId, quantity: 1 },
+        { price_id: paddleIds.monthlyPriceId, quantity: 1 },
+      ]
+    } else {
+      const [setupCatalogPrice, monthlyCatalogPrice] = await Promise.all([
+        getPaddlePriceAmount(paddleIds.setupPriceId),
+        getPaddlePriceAmount(paddleIds.monthlyPriceId),
+      ])
 
-    function buildItem(
-      catalogAmount: number,
-      finalAmount: number,
-      priceId: string,
-      productId: string,
-      label: string
-    ) {
-      if (Math.round(catalogAmount * 100) === Math.round(finalAmount * 100)) {
-        return { price_id: priceId, quantity: 1 }
+      if (setupCatalogPrice == null || monthlyCatalogPrice == null) {
+        console.error('Could not fetch live Paddle prices for coupon calculation')
+        return NextResponse.json({ error: 'Failed to create transaction' }, { status: 502 })
       }
-      return {
-        quantity: 1,
-        price: {
-          product_id: productId,
-          description: label,
-          name: label,
-          unit_price: {
-            amount: Math.round(finalAmount * 100).toString(),
-            currency_code: 'USD',
+
+      const setupPrice = applyDiscount(setupCatalogPrice, coupon, 'setup')
+      const monthlyPrice = applyDiscount(monthlyCatalogPrice, coupon, 'monthly')
+
+      function buildDiscountedItem(amount: number, label: string) {
+        return {
+          quantity: 1,
+          price: {
+            product_id: paddleIds.productId,
+            description: label,
+            name: label,
+            unit_price: {
+              amount: Math.round(amount * 100).toString(),
+              currency_code: 'USD',
+            },
           },
-        },
+        }
       }
-    }
 
-    const items = [
-      buildItem(tier.setup_fee, setupPrice, paddleIds.setupPriceId, paddleIds.productId, 'Setup fee'),
-      buildItem(baseMonthly, monthlyPrice, paddleIds.monthlyPriceId, paddleIds.productId, 'Monthly subscription'),
-    ]
+      items = [
+        buildDiscountedItem(setupPrice, 'Setup fee'),
+        buildDiscountedItem(monthlyPrice, 'Monthly subscription'),
+      ]
+    }
 
     const paddleRes = await fetch(`${PADDLE_API_BASE}/transactions`, {
       method: 'POST',
