@@ -115,12 +115,14 @@ export async function POST(request: Request) {
             const priceId = item?.price_id
             const classification = priceId ? PRICE_ID_LOOKUP[priceId] : null
 
+            const dbType = classification?.kind === 'monthly' ? 'subscription' : classification?.kind || 'setup'
+
             const { error: paymentInsertError } = await admin.from('payments').insert({
               restaurant_id: restaurantId,
               paddle_transaction_id: data?.id,
               amount: item?.totals?.total ? Number(item.totals.total) / 100 : null,
               currency: data?.currency_code || 'USD',
-              type: classification?.kind || 'unknown',
+              type: dbType,
               status: 'completed',
             })
 
