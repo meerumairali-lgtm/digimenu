@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+
 // Reverse lookup: price_id -> { tier, kind }. Used to classify each
 // line item as a setup fee or monthly subscription for a given tier,
 // since transaction.completed line items don't carry billing_cycle
@@ -80,14 +81,33 @@ export async function POST(request: Request) {
           break
         }
 
-        await admin
-          .from('pending_signups')
-          .update({
-            subscription_status: 'active',
-            paddle_customer_id: data?.customer_id || null,
-            paddle_subscription_id: data?.subscription_id || null,
-          })
+        const { data: restaurant } = await admin
+          .from('restaurants')
+          .select('id')
           .eq('user_id', userId)
+          .maybeSingle()
+
+        let restaurantId: string | null = restaurant?.id || null
+
+        if (restaurant) {
+          await admin
+            .from('restaurants')
+            .update({
+              subscription_status: 'active',
+              paddle_customer_id: data?.customer_id || null,
+              paddle_subscription_id: data?.subscription_id || null,
+            })
+            .eq('id', restaurant.id)
+        } else {
+          await admin
+            .from('pending_signups')
+            .update({
+              subscription_status: 'active',
+              paddle_customer_id: data?.customer_id || null,
+              paddle_subscription_id: data?.subscription_id || null,
+            })
+            .eq('user_id', userId)
+        }
 
         const lineItems = data?.details?.line_items || []
         for (const item of lineItems) {
@@ -95,7 +115,7 @@ export async function POST(request: Request) {
           const classification = priceId ? PRICE_ID_LOOKUP[priceId] : null
 
           await admin.from('payments').insert({
-            restaurant_id: null,
+            restaurant_id: restaurantId,
             paddle_transaction_id: data?.id,
             amount: item?.totals?.total ? Number(item.totals.total) / 100 : null,
             currency: data?.currency_code || 'USD',
