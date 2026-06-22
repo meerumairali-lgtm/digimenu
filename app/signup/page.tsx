@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -37,34 +38,34 @@ export default function SignupPage() {
       return
     }
 
-    // Detect country -> assign pricing tier
-    let tier = 'tier_a'
-    try {
-      const [geoRes, tiersRes] = await Promise.all([
-        fetch('/api/dashboard/detect-country').then(r => r.json()),
-        supabase.from('pricing_tiers').select('id, countries'),
-      ])
-      const tierB = tiersRes.data?.find((t: any) => t.id === 'tier_b')
-      if (geoRes.country_code && tierB?.countries?.includes(geoRes.country_code)) {
-        tier = 'tier_b'
-      }
-    } catch (e) {
-      console.error('Tier detection failed, defaulting to tier_a:', e)
+    if (data.session) {
+      router.push('/dashboard/setup')
+    } else {
+      setConfirmationSent(true)
+      setLoading(false)
     }
+  }
 
-    const { error: pendingError } = await supabase
-      .from('pending_signups')
-      .insert({
-        user_id: data.user.id,
-        pricing_tier: tier,
-        trial_started_at: new Date().toISOString(),
-      })
-
-    if (pendingError) {
-      console.error('Failed to create pending signup:', pendingError)
-    }
-
-    router.push('/dashboard/setup')
+  if (confirmationSent) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col" style={{ colorScheme: 'light' }}>
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-sm text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Check your email</h1>
+            <p className="text-gray-500 text-sm">
+              We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click it to activate your account, then log in to get started.
+            </p>
+            <Link href="/login" className="inline-block mt-6 text-sky-500 font-medium hover:underline text-sm">
+              Go to login
+            </Link>
+          </div>
+        </main>
+        <footer className="border-t border-gray-100 px-6 py-4 text-center text-xs text-gray-400">
+          © {new Date().getFullYear()} Menuberg. All rights reserved.
+        </footer>
+      </div>
+    )
   }
 
   return (
