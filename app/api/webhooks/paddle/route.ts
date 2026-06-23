@@ -169,12 +169,26 @@ export async function POST(request: Request) {
       case 'subscription.updated': {
         const subscriptionId = data?.id
         const status = data?.status
-        if (subscriptionId && status) {
+        const scheduledChange = data?.scheduled_change
+
+        // Paddle's raw `status` stays 'active' right up until a scheduled
+        // cancellation actually takes effect — it does NOT flip to
+        // 'canceled' the moment someone cancels, only on the effective
+        // date. Without this check, every subscription.updated event
+        // sent right after a cancel request silently overwrites our
+        // correct 'cancelled' value back to 'active' within milliseconds.
+        const hasScheduledCancellation = scheduledChange?.action === 'cancel'
+
+        const resolvedStatus = hasScheduledCancellation ? 'cancelled' : status
+
+        if (subscriptionId && resolvedStatus) {
           await admin
             .from('restaurants')
             .update({
-              subscription_status: status,
-              next_billed_at: data?.next_billed_at || null,
+              subscription_status: resolvedStatus,
+              next_billed_at: hasScheduledCancellation
+                ? (scheduledChange?.effective_at || data?.next_billed_at || null)
+                : (data?.next_billed_at || null),
             })
             .eq('paddle_subscription_id', subscriptionId)
         }
