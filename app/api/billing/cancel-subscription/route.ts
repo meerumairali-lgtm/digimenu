@@ -58,10 +58,15 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to cancel subscription with Paddle' }, { status: 502 })
   }
 
-  const { error: updateError } = await admin
+  console.log('CANCEL DEBUG: about to update restaurant', restaurant.id, 'to cancelled')
+
+  const { data: updateData, error: updateError } = await admin
     .from('restaurants')
     .update({ subscription_status: 'cancelled' })
     .eq('id', restaurant.id)
+    .select()
+
+  console.log('CANCEL DEBUG: update result', JSON.stringify({ updateData, updateError }))
 
   if (updateError) {
     console.error('Failed to locally mark subscription canceled after Paddle success', updateError)
