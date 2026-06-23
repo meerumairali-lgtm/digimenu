@@ -21,6 +21,7 @@ interface BillingInfo {
   bypass_payment: boolean
   trial_started_at: string | null
   pricing_tier: string
+  next_billed_at: string | null
 }
 
 export default function BillingPage() {
@@ -28,45 +29,51 @@ export default function BillingPage() {
   const [billing, setBilling] = useState<BillingInfo | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
   const [restaurantId, setRestaurantId] = useState<string | null>(null)
+
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [canceling, setCanceling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
+
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+  async function load() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
 
-      const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('id, subscription_status, bypass_payment, trial_started_at, pricing_tier')
+    const { data: restaurant } = await supabase
+      .from('restaurants')
+      .select('id, subscription_status, bypass_payment, trial_started_at, pricing_tier, next_billed_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (restaurant) {
+      setBilling(restaurant)
+      setRestaurantId(restaurant.id)
+
+      const { data: paymentRows } = await supabase
+        .from('payments')
+        .select('id, paddle_transaction_id, amount, currency, type, status, created_at')
+        .eq('restaurant_id', restaurant.id)
+        .order('created_at', { ascending: false })
+
+      if (paymentRows) setPayments(paymentRows)
+    } else {
+      const { data: pending } = await supabase
+        .from('pending_signups')
+        .select('subscription_status, trial_started_at, pricing_tier')
         .eq('user_id', user.id)
         .maybeSingle()
 
-      if (restaurant) {
-        setBilling(restaurant)
-        setRestaurantId(restaurant.id)
-
-        const { data: paymentRows } = await supabase
-          .from('payments')
-          .select('id, paddle_transaction_id, amount, currency, type, status, created_at')
-          .eq('restaurant_id', restaurant.id)
-          .order('created_at', { ascending: false })
-
-        if (paymentRows) setPayments(paymentRows)
-      } else {
-        const { data: pending } = await supabase
-          .from('pending_signups')
-          .select('subscription_status, trial_started_at, pricing_tier')
-          .eq('user_id', user.id)
-          .maybeSingle()
-
-        if (pending) {
-          setBilling({ ...pending, bypass_payment: false })
-        }
+      if (pending) {
+        setBilling({ ...pending, bypass_payment: false, next_billed_at: null })
       }
-
-      setLoading(false)
     }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
     load()
   }, [])
 
@@ -75,6 +82,34 @@ export default function BillingPage() {
     const startedMs = new Date(trialStartedAt).getTime()
     const elapsedDays = (Date.now() - startedMs) / (1000 * 60 * 60 * 24)
     return Math.max(0, Math.ceil(TRIAL_DAYS - elapsedDays))
+  }
+
+  function formatDate(iso: string | null): string {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+  }
+
+  async function handleCancel() {
+    setCanceling(true)
+    setCancelError('')
+
+    try {
+      const res = await fetch('/api/billing/cancel-subscription', { method: 'POST' })
+      const result = await res.json()
+
+      if (!res.ok) {
+        setCancelError(result.error || 'Something went wrong. Please try again.')
+        setCanceling(false)
+        return
+      }
+
+      setConfirmingCancel(false)
+      setCanceling(false)
+      await load()
+    } catch (e) {
+      setCancelError('Network error. Please try again.')
+      setCanceling(false)
+    }
   }
 
   const sectionStyle = {
@@ -87,6 +122,7 @@ export default function BillingPage() {
   }
 
   const isActive = billing?.subscription_status === 'active'
+  const isCanceled = billing?.subscription_status === 'canceled'
   const isBypassed = billing?.bypass_payment === true
   const isUnlocked = isActive || isBypassed
   const remaining = !isUnlocked ? daysRemaining(billing?.trial_started_at || null) : 0
@@ -110,11 +146,87 @@ export default function BillingPage() {
               <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Your account has complimentary access — no billing applies.</p>
             </div>
           ) : isActive ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ background: '#dcfce7', color: '#166534', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999 }}>
-                Active
-              </span>
-              <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Your subscription is active.</p>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ background: '#dcfce7', color: '#166534', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999 }}>
+                  Active
+                </span>
+              </div>
+
+              <p style={{ margin: '0 0 4px', fontSize: 13, color: '#888' }}>
+                Your subscription is active.
+              </p>
+              {billing?.next_billed_at && (
+                <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>
+                  Next billing date: <strong style={{ color: '#0D1B2A' }}>{formatDate(billing.next_billed_at)}</strong>
+                </p>
+              )}
+
+              {!confirmingCancel ? (
+                <button
+                  onClick={() => setConfirmingCancel(true)}
+                  style={{
+                    marginTop: 8, padding: '9px 16px', borderRadius: 8,
+                    background: 'transparent', color: '#dc2626',
+                    border: '1px solid #fecaca', fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel subscription
+                </button>
+              ) : (
+                <div style={{ background: '#fff', border: '1px solid #fecaca', borderRadius: 8, padding: 14, marginTop: 8 }}>
+                  <p style={{ margin: '0 0 12px', fontSize: 13, color: '#0D1B2A' }}>
+                    Your menu will stay live until {billing?.next_billed_at ? formatDate(billing.next_billed_at) : 'the end of your current billing period'}, then your subscription will end. You won&apos;t be charged again. Are you sure?
+                  </p>
+                  {cancelError && (
+                    <p style={{ margin: '0 0 12px', fontSize: 13, color: '#dc2626' }}>{cancelError}</p>
+                  )}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={handleCancel}
+                      disabled={canceling}
+                      style={{
+                        padding: '8px 14px', borderRadius: 8, background: '#dc2626',
+                        color: '#fff', border: 'none', fontSize: 13, fontWeight: 700,
+                        cursor: 'pointer', opacity: canceling ? 0.7 : 1,
+                      }}
+                    >
+                      {canceling ? 'Canceling...' : 'Yes, cancel'}
+                    </button>
+                    <button
+                      onClick={() => { setConfirmingCancel(false); setCancelError('') }}
+                      disabled={canceling}
+                      style={{
+                        padding: '8px 14px', borderRadius: 8, background: '#f1f5f9',
+                        color: '#0D1B2A', border: 'none', fontSize: 13, fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Never mind
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : isCanceled ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ background: '#f1f5f9', color: '#475569', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999 }}>
+                  Canceled
+                </span>
+              </div>
+              <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>
+                {billing?.next_billed_at
+                  ? `Your menu will remain live until ${formatDate(billing.next_billed_at)}.`
+                  : 'Your subscription has ended.'}
+              </p>
+              <Link
+                href="/checkout"
+                style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 8, background: '#38BDF8', color: '#0D1B2A', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}
+              >
+                Resubscribe
+              </Link>
             </div>
           ) : (
             <div>
@@ -154,7 +266,7 @@ export default function BillingPage() {
                 <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#fff', borderRadius: 8, border: '1px solid #e0f2fe' }}>
                   <div>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#0D1B2A', textTransform: 'capitalize' as const }}>
-                      {p.type === 'setup' ? 'Setup fee' : p.type === 'monthly' ? 'Monthly subscription' : p.type}
+                      {p.type === 'setup' ? 'Setup fee' : p.type === 'subscription' ? 'Monthly subscription' : p.type}
                     </p>
                     <p style={{ margin: '2px 0 0', fontSize: 12, color: '#888' }}>
                       {new Date(p.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
