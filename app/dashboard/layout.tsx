@@ -55,12 +55,20 @@ export default async function DashboardLayout({
   if (user) {
     const { data: restaurant } = await supabase
       .from('restaurants')
-      .select('slug, subscription_status, bypass_payment, trial_started_at')
+      .select('slug, subscription_status, bypass_payment, trial_started_at, next_billed_at')
       .eq('user_id', user.id)
       .maybeSingle()
 
     if (restaurant) {
-      const unlocked = restaurant.subscription_status === 'active' || restaurant.bypass_payment === true
+      const stillPaidThroughPeriod =
+        restaurant.subscription_status === 'cancelled' &&
+        restaurant.next_billed_at &&
+        new Date(restaurant.next_billed_at).getTime() > Date.now()
+
+      const unlocked =
+        restaurant.subscription_status === 'active' ||
+        restaurant.bypass_payment === true ||
+        stillPaidThroughPeriod
 
       if (!unlocked) {
         const remaining = daysRemaining(restaurant.trial_started_at)
@@ -93,6 +101,8 @@ export default async function DashboardLayout({
             .from('pricing_tiers')
             .select('id, countries')
 
+          // Best-effort country detection server-side via header (Vercel sets this).
+          // Falls back to tier_a if anything is missing — never blocks the user.
           const { headers } = await import('next/headers')
           const h = await headers()
           const countryCode = h.get('x-vercel-ip-country') || ''

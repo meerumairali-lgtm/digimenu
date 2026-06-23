@@ -28,7 +28,7 @@ export async function POST() {
     return NextResponse.json({ error: 'No active subscription to cancel' }, { status: 400 })
   }
 
-  if (restaurant.subscription_status === 'canceled') {
+  if (restaurant.subscription_status === 'cancelled') {
     return NextResponse.json({ error: 'Subscription is already canceled' }, { status: 400 })
   }
 
@@ -60,7 +60,7 @@ export async function POST() {
 
   const { error: updateError } = await admin
     .from('restaurants')
-    .update({ subscription_status: 'canceled' })
+    .update({ subscription_status: 'cancelled' })
     .eq('id', restaurant.id)
 
   if (updateError) {

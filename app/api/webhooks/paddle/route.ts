@@ -88,6 +88,7 @@ export async function POST(request: Request) {
               subscription_status: 'active',
               paddle_customer_id: data?.customer_id || null,
               paddle_subscription_id: data?.subscription_id || null,
+              next_billed_at: data?.billing_period?.ends_at || null,
             })
             .eq('id', restaurant.id)
 
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
         if (subscriptionId) {
           await admin
             .from('restaurants')
-            .update({ subscription_status: 'canceled' })
+            .update({ subscription_status: 'cancelled' })
             .eq('paddle_subscription_id', subscriptionId)
         }
         break
@@ -171,7 +172,10 @@ export async function POST(request: Request) {
         if (subscriptionId && status) {
           await admin
             .from('restaurants')
-            .update({ subscription_status: status })
+            .update({
+              subscription_status: status,
+              next_billed_at: data?.next_billed_at || null,
+            })
             .eq('paddle_subscription_id', subscriptionId)
         }
         break

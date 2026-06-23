@@ -26,9 +26,15 @@ export default async function MenuPage({ params }: { params: Promise<{ slug: str
 
   if (!restaurant) notFound()
 
+  const stillPaidThroughPeriod =
+    restaurant.subscription_status === 'cancelled' &&
+    restaurant.next_billed_at &&
+    new Date(restaurant.next_billed_at).getTime() > Date.now()
+
   const unlocked =
     restaurant.subscription_status === 'active' ||
     restaurant.bypass_payment === true ||
+    stillPaidThroughPeriod ||
     daysRemaining(restaurant.trial_started_at) > 0
 
   if (!unlocked) {
