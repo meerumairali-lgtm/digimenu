@@ -122,7 +122,7 @@ export default function BillingPage() {
   }
 
   const isActive = billing?.subscription_status === 'active'
-  const isCanceled = billing?.subscription_status === 'canceled'
+  const isCanceled = billing?.subscription_status === 'cancelled'
   const isBypassed = billing?.bypass_payment === true
   const isUnlocked = isActive || isBypassed
   const remaining = !isUnlocked ? daysRemaining(billing?.trial_started_at || null) : 0
