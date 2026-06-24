@@ -18,11 +18,16 @@ interface Coupon {
   applies_to: 'setup' | 'monthly' | 'both'
 }
 
+const TRIAL_LENGTH_DAYS = 7
+
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [tier, setTier] = useState<Tier | null>(null)
   const [localCurrency, setLocalCurrency] = useState<string | null>(null)
   const [rates, setRates] = useState<Record<string, number> | null>(null)
+
+  // null while we don't know yet, true = trial still running, false = trial expired/never started
+  const [trialActive, setTrialActive] = useState<boolean | null>(null)
 
   const [couponInput, setCouponInput] = useState('')
   const [coupon, setCoupon] = useState<Coupon | null>(null)
@@ -66,7 +71,7 @@ export default function CheckoutPage() {
       // Already have a paid/bypassed restaurant -> nothing to do here
       const { data: restaurant } = await supabase
         .from('restaurants')
-        .select('subscription_status, bypass_payment')
+        .select('subscription_status, bypass_payment, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -77,13 +82,27 @@ export default function CheckoutPage() {
 
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status')
+        .select('pricing_tier, subscription_status, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 
       if (pending?.subscription_status === 'active') {
         router.push('/dashboard/setup')
         return
+      }
+
+      // Work out whether the 7-day trial is still running, using
+      // whichever row actually has a trial_started_at value.
+      const trialStartedAt = restaurant?.trial_started_at || pending?.trial_started_at || null
+      if (trialStartedAt) {
+        const startedMs = new Date(trialStartedAt).getTime()
+        const elapsedMs = Date.now() - startedMs
+        const trialLengthMs = TRIAL_LENGTH_DAYS * 24 * 60 * 60 * 1000
+        setTrialActive(elapsedMs < trialLengthMs)
+      } else {
+        // No trial_started_at on either row yet -> treat as not active
+        // (covers brand-new self-heal case below, before insert happens)
+        setTrialActive(false)
       }
 
       let resolvedTierId = pending?.pricing_tier
@@ -213,6 +232,16 @@ export default function CheckoutPage() {
           displayMode: 'overlay',
           theme: 'dark',
         },
+        eventCallback: (event: { name: string }) => {
+          // Fires when the user finishes paying inside Paddle's overlay.
+          // Give them a few seconds to see Paddle's own success screen,
+          // then move them into the dashboard automatically.
+          if (event.name === 'checkout.completed') {
+            setTimeout(() => {
+              router.push('/dashboard')
+            }, 4000)
+          }
+        },
       })
 
       setSubmitting(false)
@@ -239,8 +268,17 @@ export default function CheckoutPage() {
       <div style={{ width: '100%', maxWidth: 440, background: '#112240', borderRadius: 16, padding: '40px 32px', border: '1px solid rgba(56,189,248,0.15)' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Complete your setup</h1>
-          <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>One step left before your menu goes live.</p>
+          {trialActive ? (
+            <>
+              <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Your menu is already live</h1>
+              <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>Subscribe now to keep it that way after your trial ends.</p>
+            </>
+          ) : (
+            <>
+              <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Your trial has ended</h1>
+              <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>Subscribe to reactivate your menu.</p>
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
