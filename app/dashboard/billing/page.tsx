@@ -122,9 +122,10 @@ export default function BillingPage() {
   }
 
   const isActive = billing?.subscription_status === 'active'
+  const isPastDue = billing?.subscription_status === 'past_due'
   const isCanceled = billing?.subscription_status === 'cancelled'
   const isBypassed = billing?.bypass_payment === true
-  const isUnlocked = isActive || isBypassed
+  const isUnlocked = isActive || isPastDue || isBypassed
   const remaining = !isUnlocked ? daysRemaining(billing?.trial_started_at || null) : 0
 
   return (
@@ -144,6 +145,23 @@ export default function BillingPage() {
                 ⭐ VIP Access
               </span>
               <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Your account has complimentary access — no billing applies.</p>
+            </div>
+          ) : isPastDue ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ background: '#fee2e2', color: '#991b1b', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999 }}>
+                  ⚠ Payment failed
+                </span>
+              </div>
+              <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>
+                We couldn&apos;t process your last payment. Your menu is still live while we retry — please update your payment method to avoid losing access.
+              </p>
+              <Link
+                href="/checkout"
+                style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 8, background: '#dc2626', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}
+              >
+                Update payment method
+              </Link>
             </div>
           ) : isActive ? (
             <div>

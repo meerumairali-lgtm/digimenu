@@ -67,6 +67,7 @@ export default async function DashboardLayout({
 
       const unlocked =
         restaurant.subscription_status === 'active' ||
+        restaurant.subscription_status === 'past_due' ||
         restaurant.bypass_payment === true ||
         stillPaidThroughPeriod
 
@@ -101,8 +102,6 @@ export default async function DashboardLayout({
             .from('pricing_tiers')
             .select('id, countries')
 
-          // Best-effort country detection server-side via header (Vercel sets this).
-          // Falls back to tier_a if anything is missing — never blocks the user.
           const { headers } = await import('next/headers')
           const h = await headers()
           const countryCode = h.get('x-vercel-ip-country') || ''
