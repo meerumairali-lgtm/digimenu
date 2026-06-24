@@ -33,6 +33,29 @@ function verifySignature(rawBody: string, paddleSignature: string, secretKey: st
   return timingSafeEqual(a, b)
 }
 
+// Paddle doesn't guarantee webhook delivery order. If an older event
+// arrives after a newer one (network retry, delivery delay), it could
+// overwrite a more current status with stale data. Before writing any
+// subscription-status change, check that this event is newer than the
+// last one we actually applied for this subscription — if not, skip it.
+async function isStaleEvent(
+  admin: ReturnType<typeof createAdminClient>,
+  subscriptionId: string,
+  occurredAt: string | null
+): Promise<boolean> {
+  if (!occurredAt) return false
+
+  const { data: existing } = await admin
+    .from('restaurants')
+    .select('last_webhook_event_at')
+    .eq('paddle_subscription_id', subscriptionId)
+    .maybeSingle()
+
+  if (!existing?.last_webhook_event_at) return false
+
+  return new Date(occurredAt).getTime() < new Date(existing.last_webhook_event_at).getTime()
+}
+
 export async function POST(request: Request) {
   const paddleSignature = request.headers.get('paddle-signature')
   const secretKey = process.env.PADDLE_WEBHOOK_SECRET_KEY
@@ -155,12 +178,41 @@ export async function POST(request: Request) {
         break
       }
 
-      case 'subscription.canceled': {
+      case 'subscription.past_due': {
+        // Paddle fires this when an automatic renewal charge fails. Paddle
+        // itself retries the payment up to 7 times over 30 days, then
+        // auto-cancels if all retries fail — we don't need to replicate
+        // that logic, just reflect whatever status Paddle tells us.
         const subscriptionId = data?.id
+        const occurredAt = event?.occurred_at || null
+
         if (subscriptionId) {
+          if (await isStaleEvent(admin, subscriptionId, occurredAt)) {
+            console.log('subscription.past_due: skipping stale event for', subscriptionId)
+            break
+          }
+
           await admin
             .from('restaurants')
-            .update({ subscription_status: 'cancelled' })
+            .update({ subscription_status: 'past_due', last_webhook_event_at: occurredAt })
+            .eq('paddle_subscription_id', subscriptionId)
+        }
+        break
+      }
+
+      case 'subscription.canceled': {
+        const subscriptionId = data?.id
+        const occurredAt = event?.occurred_at || null
+
+        if (subscriptionId) {
+          if (await isStaleEvent(admin, subscriptionId, occurredAt)) {
+            console.log('subscription.canceled: skipping stale event for', subscriptionId)
+            break
+          }
+
+          await admin
+            .from('restaurants')
+            .update({ subscription_status: 'cancelled', last_webhook_event_at: occurredAt })
             .eq('paddle_subscription_id', subscriptionId)
         }
         break
@@ -170,18 +222,18 @@ export async function POST(request: Request) {
         const subscriptionId = data?.id
         const status = data?.status
         const scheduledChange = data?.scheduled_change
+        const occurredAt = event?.occurred_at || null
 
-        // Paddle's raw `status` stays 'active' right up until a scheduled
-        // cancellation actually takes effect — it does NOT flip to
-        // 'canceled' the moment someone cancels, only on the effective
-        // date. Without this check, every subscription.updated event
-        // sent right after a cancel request silently overwrites our
-        // correct 'cancelled' value back to 'active' within milliseconds.
         const hasScheduledCancellation = scheduledChange?.action === 'cancel'
 
         const resolvedStatus = hasScheduledCancellation ? 'cancelled' : status
 
         if (subscriptionId && resolvedStatus) {
+          if (await isStaleEvent(admin, subscriptionId, occurredAt)) {
+            console.log('subscription.updated: skipping stale event for', subscriptionId)
+            break
+          }
+
           await admin
             .from('restaurants')
             .update({
@@ -189,6 +241,7 @@ export async function POST(request: Request) {
               next_billed_at: hasScheduledCancellation
                 ? (scheduledChange?.effective_at || data?.next_billed_at || null)
                 : (data?.next_billed_at || null),
+              last_webhook_event_at: occurredAt,
             })
             .eq('paddle_subscription_id', subscriptionId)
         }
