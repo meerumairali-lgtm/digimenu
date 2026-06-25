@@ -6,6 +6,12 @@ import Link from 'next/link'
 
 const TRIAL_DAYS = 7
 
+declare global {
+  interface Window {
+    Paddle: any
+  }
+}
+
 interface Payment {
   id: string
   paddle_transaction_id: string
@@ -34,8 +40,36 @@ export default function BillingPage() {
   const [canceling, setCanceling] = useState(false)
   const [cancelError, setCancelError] = useState('')
 
+  const [paddleReady, setPaddleReady] = useState(false)
+  const [updatingPayment, setUpdatingPayment] = useState(false)
+  const [updatePaymentError, setUpdatePaymentError] = useState('')
+
   const router = useRouter()
   const supabase = createClient()
+
+  // Load Paddle.js once, on mount — same pattern as the checkout page.
+  // Needed here because the "Update payment method" button below opens
+  // a real Paddle Checkout overlay, same as the main checkout flow does.
+  useEffect(() => {
+    if (window.Paddle) {
+      setPaddleReady(true)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
+    script.onload = () => {
+      if (window.Paddle) {
+        window.Paddle.Environment.set(
+          process.env.NEXT_PUBLIC_PADDLE_ENV === 'production' ? 'production' : 'sandbox'
+        )
+        window.Paddle.Setup({
+          token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+        })
+        setPaddleReady(true)
+      }
+    }
+    document.body.appendChild(script)
+  }, [])
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -112,6 +146,45 @@ export default function BillingPage() {
     }
   }
 
+  async function handleUpdatePaymentMethod() {
+    if (!paddleReady || updatingPayment) return
+    setUpdatingPayment(true)
+    setUpdatePaymentError('')
+
+    try {
+      const res = await fetch('/api/billing/update-payment-method', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok || !data.transactionId) {
+        setUpdatePaymentError(data.error || 'Could not start payment method update. Please try again.')
+        setUpdatingPayment(false)
+        return
+      }
+
+      window.Paddle.Checkout.open({
+        transactionId: data.transactionId,
+        settings: {
+          displayMode: 'overlay',
+          theme: 'dark',
+        },
+        eventCallback: (event: { name: string }) => {
+          // Fires once the new card is saved. Refresh billing info —
+          // the webhook should flip status back to active shortly after,
+          // but re-loading now at least confirms the update went through.
+          if (event.name === 'checkout.completed') {
+            load()
+          }
+        },
+      })
+
+      setUpdatingPayment(false)
+    } catch (e) {
+      console.error('Update payment method error:', e)
+      setUpdatePaymentError('Something went wrong. Please try again.')
+      setUpdatingPayment(false)
+    }
+  }
+
   const sectionStyle = {
     background: '#f0f9ff', borderRadius: 12, padding: 20,
     border: '1px solid #e0f2fe'
@@ -156,12 +229,21 @@ export default function BillingPage() {
               <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>
                 We couldn&apos;t process your last payment. Your menu is still live while we retry — please update your payment method to avoid losing access.
               </p>
-              <Link
-                href="/checkout"
-                style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 8, background: '#dc2626', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}
+              {updatePaymentError && (
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: '#dc2626' }}>{updatePaymentError}</p>
+              )}
+              <button
+                onClick={handleUpdatePaymentMethod}
+                disabled={!paddleReady || updatingPayment}
+                style={{
+                  display: 'inline-block', padding: '10px 20px', borderRadius: 8,
+                  background: !paddleReady || updatingPayment ? '#fca5a5' : '#dc2626',
+                  color: '#fff', fontSize: 14, fontWeight: 700, border: 'none',
+                  cursor: !paddleReady || updatingPayment ? 'default' : 'pointer',
+                }}
               >
-                Update payment method
-              </Link>
+                {updatingPayment ? 'Opening secure checkout...' : !paddleReady ? 'Loading...' : 'Update payment method'}
+              </button>
             </div>
           ) : isActive ? (
             <div>

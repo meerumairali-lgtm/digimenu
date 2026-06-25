@@ -56,6 +56,13 @@ export default function CheckoutPage() {
         )
         window.Paddle.Setup({
           token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+          eventCallback: (event: { name: string }) => {
+            if (event.name === 'checkout.completed') {
+              setTimeout(() => {
+                router.push('/dashboard')
+              }, 4000)
+            }
+          },
         })
         setPaddleReady(true)
       }
@@ -232,16 +239,7 @@ export default function CheckoutPage() {
           displayMode: 'overlay',
           theme: 'dark',
         },
-        eventCallback: (event: { name: string }) => {
-          // Fires when the user finishes paying inside Paddle's overlay.
-          // Give them a few seconds to see Paddle's own success screen,
-          // then move them into the dashboard automatically.
-          if (event.name === 'checkout.completed') {
-            setTimeout(() => {
-              router.push('/dashboard')
-            }, 4000)
-          }
-        },
+
       })
 
       setSubmitting(false)
