@@ -16,6 +16,8 @@ type Category = {
   menu_items: MenuItem[]
 }
 
+type HeroSlide = { image_url: string; caption: string }
+
 type Restaurant = {
   id: string
   name: string
@@ -33,17 +35,12 @@ type Restaurant = {
   about?: string
   opening_hours?: Record<string, { open: string; close: string; closed: boolean }>
   google_maps_url?: string
-  // Not in the database yet — included so the UI is ready the day
-  // these columns and an upload flow exist. Safe to leave undefined.
   logo_url?: string
-  cover_image_urls?: string[]
+  hero_slides?: HeroSlide[]
 }
 
 // ─────────────────────────────────────────────────────────────
-// THEME TOKENS — same 4 theme keys as before (light/dark/gold/
-// vibrant), restyled with a warmer, more contemporary palette.
-// Every component below reads exclusively from this object, so
-// changing a value here updates the whole page consistently.
+// THEME TOKENS
 // ─────────────────────────────────────────────────────────────
 const themes: Record<string, {
   bg: string; surface: string; surfaceRaised: string; text: string; subtext: string
@@ -57,36 +54,36 @@ const themes: Record<string, {
   light: {
     bg: '#FAF8F5', surface: '#FFFFFF', surfaceRaised: '#FFFFFF', text: '#1C1917', subtext: '#78716C',
     border: 'rgba(28,25,23,0.07)', accent: '#D97757', accentSoft: 'rgba(217,119,87,0.12)', accentText: '#FFFFFF',
-    navBg: 'rgba(255,255,255,0.82)', navText: '#1C1917', navMuted: '#9C9893',
+    navBg: 'rgba(255,255,255,0.92)', navText: '#1C1917', navMuted: '#9C9893',
     priceBg: 'rgba(217,119,87,0.10)', priceText: '#B25B3F',
-    heroOverlayFrom: 'rgba(20,16,14,0.15)', heroOverlayTo: 'rgba(20,16,14,0.78)',
+    heroOverlayFrom: 'rgba(20,16,14,0.1)', heroOverlayTo: 'rgba(20,16,14,0.75)',
     shadow: '0 8px 30px -8px rgba(28,25,23,0.12)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
   dark: {
     bg: '#16151A', surface: '#1F1E24', surfaceRaised: '#26252C', text: '#F2EFEA', subtext: '#9A968F',
     border: 'rgba(255,255,255,0.07)', accent: '#E8A33D', accentSoft: 'rgba(232,163,61,0.14)', accentText: '#16151A',
-    navBg: 'rgba(22,21,26,0.78)', navText: '#F2EFEA', navMuted: '#75726C',
+    navBg: 'rgba(22,21,26,0.9)', navText: '#F2EFEA', navMuted: '#75726C',
     priceBg: 'rgba(232,163,61,0.14)', priceText: '#E8A33D',
-    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(10,9,7,0.88)',
+    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(10,9,7,0.85)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
   gold: {
     bg: '#0E0B05', surface: '#181206', surfaceRaised: '#201805', text: '#F5E6C8', subtext: '#A6936B',
     border: 'rgba(212,160,23,0.14)', accent: '#D4A017', accentSoft: 'rgba(212,160,23,0.14)', accentText: '#15110A',
-    navBg: 'rgba(14,11,5,0.82)', navText: '#F5E6C8', navMuted: '#8A7A54',
+    navBg: 'rgba(14,11,5,0.92)', navText: '#F5E6C8', navMuted: '#8A7A54',
     priceBg: 'rgba(212,160,23,0.14)', priceText: '#D4A017',
-    heroOverlayFrom: 'rgba(0,0,0,0.25)', heroOverlayTo: 'rgba(8,6,2,0.9)',
+    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(8,6,2,0.88)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.6)',
     font: '"Georgia", "Iowan Old Style", serif',
   },
   vibrant: {
     bg: '#0F172A', surface: '#1A2436', surfaceRaised: '#202B40', text: '#F1F5F9', subtext: '#8B98AC',
     border: 'rgba(255,255,255,0.08)', accent: '#38BDF8', accentSoft: 'rgba(56,189,248,0.14)', accentText: '#0D1B2A',
-    navBg: 'rgba(15,23,42,0.78)', navText: '#F1F5F9', navMuted: '#5B6B82',
+    navBg: 'rgba(15,23,42,0.9)', navText: '#F1F5F9', navMuted: '#5B6B82',
     priceBg: 'rgba(255,107,91,0.14)', priceText: '#FF8A77',
-    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(6,10,20,0.9)',
+    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(6,10,20,0.85)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
@@ -94,13 +91,13 @@ const themes: Record<string, {
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
+const TOPBAR_HEIGHT = 60
 
 function socialBtn(bg: string): React.CSSProperties {
   return {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: 46, height: 46, borderRadius: '50%',
     background: bg, color: '#fff', textDecoration: 'none', flexShrink: 0,
-    transition: `transform 0.2s ${EASE}`,
   }
 }
 
@@ -132,83 +129,134 @@ function BackIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
 }
 function PlateIcon() {
-  return <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /></svg>
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /></svg>
 }
 
 // ─────────────────────────────────────────────────────────────
-// AUTO-ROTATING HERO CAROUSEL
-// Falls back to a single gradient panel if no cover images are
-// set yet — designed so it looks complete either way.
+// TOP BAR — always sticky at the very top. Logo + name on the
+// left, view switcher on the right. This is separate from the
+// hero now, per spec: it never scrolls away.
+// ─────────────────────────────────────────────────────────────
+function TopBar({
+  restaurant, view, onChange, hasAbout, hasContact, t,
+}: {
+  restaurant: Restaurant
+  view: 'menu' | 'about' | 'contact'
+  onChange: (v: 'menu' | 'about' | 'contact') => void
+  hasAbout: boolean; hasContact: boolean
+  t: typeof themes.light
+}) {
+  const items: { key: 'menu' | 'about' | 'contact'; label: string }[] = [
+    { key: 'menu', label: 'Menu' },
+    ...(hasAbout ? [{ key: 'about' as const, label: 'About' }] : []),
+    ...(hasContact ? [{ key: 'contact' as const, label: 'Contact' }] : []),
+  ]
+
+  return (
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 200, height: TOPBAR_HEIGHT,
+      background: t.navBg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: `1px solid ${t.border}`,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '0 18px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        {restaurant.logo_url ? (
+          <img src={restaurant.logo_url} alt="" style={{ width: 32, height: 32, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
+        ) : (
+          <div style={{
+            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+            background: t.accentSoft, color: t.accent,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /></svg>
+          </div>
+        )}
+        <span style={{
+          fontWeight: 600, fontSize: 15, color: t.navText, letterSpacing: '-0.2px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>{restaurant.name}</span>
+      </div>
+
+      {items.length > 1 && (
+        <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+          {items.map(item => (
+            <button
+              key={item.key}
+              onClick={() => onChange(item.key)}
+              style={{
+                padding: '7px 14px', border: 'none', borderRadius: 999,
+                background: view === item.key ? t.accent : 'transparent',
+                color: view === item.key ? t.accentText : t.navMuted,
+                fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                fontFamily: t.font, transition: `all 0.2s ${EASE}`,
+              }}
+            >{item.label}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// HERO CAROUSEL — reads real hero_slides data, each with its own
+// caption. Scrolls away normally; it is not sticky.
 // ─────────────────────────────────────────────────────────────
 function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof themes.light }) {
-  const images = restaurant.cover_image_urls?.filter(Boolean) || []
+  const slides = (restaurant.hero_slides || []).filter(s => s.image_url)
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    if (images.length < 2) return
-    const id = setInterval(() => setIndex(i => (i + 1) % images.length), 4500)
+    if (slides.length < 2) return
+    const id = setInterval(() => setIndex(i => (i + 1) % slides.length), 4500)
     return () => clearInterval(id)
-  }, [images.length])
+  }, [slides.length])
+
+  if (slides.length === 0) {
+    // Graceful fallback while a restaurant hasn't set up slides yet.
+    return (
+      <div style={{
+        height: 220, background: `radial-gradient(circle at 30% 20%, ${t.accentSoft}, transparent 60%), linear-gradient(160deg, ${t.surfaceRaised}, ${t.bg})`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.accent,
+      }}><PlateIcon /></div>
+    )
+  }
 
   return (
-    <div style={{ position: 'relative', height: 280, overflow: 'hidden', background: t.surface }}>
-      {images.length > 0 ? (
-        images.map((src, i) => (
-          <div
-            key={src + i}
-            style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center',
-              opacity: i === index ? 1 : 0,
-              transition: `opacity 1s ${EASE}`,
-            }}
-          />
-        ))
-      ) : (
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `radial-gradient(circle at 30% 20%, ${t.accentSoft}, transparent 60%), linear-gradient(160deg, ${t.surfaceRaised}, ${t.bg})`,
-        }} />
-      )}
+    <div style={{ position: 'relative', height: 260, overflow: 'hidden', background: t.surface }}>
+      {slides.map((slide, i) => (
+        <div
+          key={slide.image_url + i}
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${slide.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center',
+            opacity: i === index ? 1 : 0,
+            transition: `opacity 1s ${EASE}`,
+          }}
+        />
+      ))}
 
       <div style={{
         position: 'absolute', inset: 0,
         background: `linear-gradient(180deg, ${t.heroOverlayFrom} 0%, ${t.heroOverlayTo} 100%)`,
       }} />
 
-      <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0,
-        padding: '0 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-      }}>
-        {restaurant.logo_url ? (
-          <img
-            src={restaurant.logo_url}
-            alt=""
-            style={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover', marginBottom: 14, boxShadow: '0 4px 16px rgba(0,0,0,0.35)' }}
-          />
-        ) : (
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, marginBottom: 14,
-            background: t.accentSoft, color: t.accent,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: `1px solid ${t.border}`,
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 24px 26px', textAlign: 'center' }}>
+        {slides[index]?.caption && (
+          <p style={{
+            margin: 0, color: '#FFFFFF', fontSize: 17, fontWeight: 600, lineHeight: 1.4,
+            maxWidth: 380, marginLeft: 'auto', marginRight: 'auto',
+            textShadow: '0 2px 12px rgba(0,0,0,0.35)',
           }}>
-            <PlateIcon />
-          </div>
-        )}
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.4px', lineHeight: 1.25 }}>
-          {restaurant.name}
-        </h1>
-        {restaurant.tagline && (
-          <p style={{ margin: '8px 0 0', color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.5, maxWidth: 360 }}>
-            {restaurant.tagline}
+            {slides[index].caption}
           </p>
         )}
       </div>
 
-      {images.length > 1 && (
-        <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
-          {images.map((_, i) => (
+      {slides.length > 1 && (
+        <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {slides.map((_, i) => (
             <div key={i} style={{
               width: i === index ? 16 : 5, height: 5, borderRadius: 3,
               background: i === index ? '#fff' : 'rgba(255,255,255,0.4)',
@@ -222,53 +270,9 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
 }
 
 // ─────────────────────────────────────────────────────────────
-// FLOATING PILL NAV — replaces the old edge-to-edge sticky bar.
-// Sits inset from the viewport edges with a blurred glass look.
-// ─────────────────────────────────────────────────────────────
-function FloatingNav({
-  view, onChange, hasAbout, hasContact, t,
-}: {
-  view: 'menu' | 'about' | 'contact'
-  onChange: (v: 'menu' | 'about' | 'contact') => void
-  hasAbout: boolean; hasContact: boolean
-  t: typeof themes.light
-}) {
-  const items: { key: 'menu' | 'about' | 'contact'; label: string }[] = [
-    { key: 'menu', label: 'Menu' },
-    ...(hasAbout ? [{ key: 'about' as const, label: 'About' }] : []),
-    ...(hasContact ? [{ key: 'contact' as const, label: 'Contact' }] : []),
-  ]
-
-  if (items.length < 2) return null
-
-  return (
-    <div style={{ position: 'sticky', top: 14, zIndex: 100, display: 'flex', justifyContent: 'center', padding: '0 16px' }}>
-      <div style={{
-        display: 'inline-flex', gap: 2, padding: 4,
-        background: t.navBg, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: 999, border: `1px solid ${t.border}`,
-        boxShadow: t.shadow,
-      }}>
-        {items.map(item => (
-          <button
-            key={item.key}
-            onClick={() => onChange(item.key)}
-            style={{
-              padding: '9px 20px', border: 'none', borderRadius: 999,
-              background: view === item.key ? t.accent : 'transparent',
-              color: view === item.key ? t.accentText : t.navMuted,
-              fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
-              fontFamily: t.font, transition: `all 0.25s ${EASE}`,
-            }}
-          >{item.label}</button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────
-// CATEGORY PILLS — horizontal scroll filter row
+// CATEGORY PILLS — sticky immediately under the top bar once
+// scrolled into that position. top is set to TOPBAR_HEIGHT so
+// the two sticky elements stack cleanly with no gap or overlap.
 // ─────────────────────────────────────────────────────────────
 function CategoryPills({
   categories, active, onSelect, t,
@@ -278,36 +282,39 @@ function CategoryPills({
   if (categories.length < 2) return null
   return (
     <div style={{
-      display: 'flex', gap: 8, overflowX: 'auto', padding: '4px 20px 4px',
-      scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+      position: 'sticky', top: TOPBAR_HEIGHT, zIndex: 100,
+      background: t.bg, borderBottom: `1px solid ${t.border}`,
+      paddingTop: 10, paddingBottom: 10,
     }}>
-      {categories.map(cat => {
-        const isActive = active === cat.id
-        return (
-          <button
-            key={cat.id}
-            onClick={() => onSelect(cat.id)}
-            style={{
-              flexShrink: 0, padding: '8px 16px', borderRadius: 999,
-              border: `1px solid ${isActive ? 'transparent' : t.border}`,
-              background: isActive ? t.accent : t.surface,
-              color: isActive ? t.accentText : t.subtext,
-              fontSize: 13, fontWeight: 500, fontFamily: t.font,
-              cursor: 'pointer', whiteSpace: 'nowrap',
-              transition: `all 0.2s ${EASE}`,
-            }}
-          >{cat.name}</button>
-        )
-      })}
+      <div style={{
+        display: 'flex', gap: 8, overflowX: 'auto', padding: '0 20px',
+        scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+      }}>
+        {categories.map(cat => {
+          const isActive = active === cat.id
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onSelect(cat.id)}
+              style={{
+                flexShrink: 0, padding: '8px 16px', borderRadius: 999,
+                border: `1px solid ${isActive ? 'transparent' : t.border}`,
+                background: isActive ? t.accent : t.surface,
+                color: isActive ? t.accentText : t.subtext,
+                fontSize: 13, fontWeight: 500, fontFamily: t.font,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+                transition: `all 0.2s ${EASE}`,
+              }}
+            >{cat.name}</button>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────
-// ITEM DETAIL POPUP — bottom sheet on mobile, centered card on
-// wider viewports (handled with a max-width + auto margins, no
-// separate breakpoint logic needed since the sheet just centers
-// itself once there's room).
+// ITEM DETAIL POPUP
 // ─────────────────────────────────────────────────────────────
 function ItemPopup({ item, t, currency, onClose }: {
   item: MenuItem; t: typeof themes.light; currency: string; onClose: () => void
@@ -338,7 +345,6 @@ function ItemPopup({ item, t, currency, onClose }: {
           background: t.surfaceRaised, borderRadius: '28px 28px 0 0',
           overflow: 'hidden', animation: 'menubergSlideUp 0.35s cubic-bezier(0.32,0.72,0,1)',
           maxHeight: '88vh', display: 'flex', flexDirection: 'column',
-          marginBottom: 0,
         }}
       >
         <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -379,7 +385,7 @@ function ItemPopup({ item, t, currency, onClose }: {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SWIPE LAYOUT — horizontal snapping carousel per category
+// SWIPE LAYOUT
 // ─────────────────────────────────────────────────────────────
 function SwipeCategory({ category, items, t, currency, onItemClick }: {
   category: Category; items: MenuItem[]; t: typeof themes.light; currency: string
@@ -420,7 +426,6 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
                 width: 'calc(100% - 32px)', minWidth: 'calc(100% - 32px)', flexShrink: 0, scrollSnapAlign: 'center',
                 background: t.surface, borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
                 border: `1px solid ${t.border}`, boxShadow: t.shadow,
-                transition: `transform 0.25s ${EASE}`,
               }}
             >
               {item.image_url ? (
@@ -456,9 +461,6 @@ export default function MenuClient({ restaurant, categories }: {
   const currency = restaurant.currency || 'PKR'
   const layout = restaurant.layout || 'classic'
 
-  // Replaces the old scroll-spy across one long page: the whole
-  // app is one of three discrete views, switched with local state.
-  // No route change, no scroll position to track between sections.
   const [view, setView] = useState<'menu' | 'about' | 'contact'>('menu')
   const [activeCategory, setActiveCategory] = useState(categories[0]?.id || '')
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -472,20 +474,65 @@ export default function MenuClient({ restaurant, categories }: {
     if (!activeCategory && availableCategories[0]) setActiveCategory(availableCategories[0].id)
   }, [availableCategories])
 
+  // Active-category highlight on scroll — same IntersectionObserver
+  // technique as before, watching each category's section element.
+  useEffect(() => {
+    if (view !== 'menu') return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveCategory(entry.target.id)
+        })
+      },
+      { rootMargin: `-${TOPBAR_HEIGHT + 60}px 0px -60% 0px`, threshold: 0 }
+    )
+    availableCategories.forEach(c => {
+      const el = sectionRefs.current[c.id]
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [availableCategories, view])
+
   function scrollToCategory(id: string) {
     setActiveCategory(id)
-    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const el = sectionRefs.current[id]
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - TOPBAR_HEIGHT - 56
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }
   }
 
   function changeView(next: 'menu' | 'about' | 'contact') {
     setView(next)
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    window.scrollTo({ top: 0 })
   }
 
-  // ── ABOUT PANEL ────────────────────────────────────────────
+  function PanelHeader({ title, onBack }: { title: string; onBack: () => void }) {
+    return (
+      <button
+        onClick={onBack}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22,
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          color: t.subtext, fontFamily: t.font,
+        }}
+      >
+        <span style={{ display: 'flex', color: t.text }}><BackIcon /></span>
+        <span style={{ fontSize: 19, fontWeight: 600, color: t.text }}>{title}</span>
+      </button>
+    )
+  }
+
+  // ── ABOUT PANEL — now also carries the restaurant's name as a
+  // heading, since the hero no longer shows it.
   const AboutPanel = () => (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
-      <PanelHeader title="About us" onBack={() => changeView('menu')} t={t} />
+      <PanelHeader title="About us" onBack={() => changeView('menu')} />
+
+      <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: '-0.3px' }}>{restaurant.name}</h1>
+      {restaurant.tagline && (
+        <p style={{ margin: '0 0 20px', fontSize: 14, color: t.subtext, lineHeight: 1.5 }}>{restaurant.tagline}</p>
+      )}
 
       {restaurant.about && (
         <div style={{ background: t.surface, borderRadius: 20, padding: 22, marginBottom: 18, border: `1px solid ${t.border}` }}>
@@ -522,7 +569,7 @@ export default function MenuClient({ restaurant, categories }: {
   // ── CONTACT PANEL ──────────────────────────────────────────
   const ContactPanel = () => (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
-      <PanelHeader title="Contact and find us" onBack={() => changeView('menu')} t={t} />
+      <PanelHeader title="Contact and find us" onBack={() => changeView('menu')} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {restaurant.address && (
@@ -581,25 +628,10 @@ export default function MenuClient({ restaurant, categories }: {
     </div>
   )
 
-  function PanelHeader({ title, onBack, t }: { title: string; onBack: () => void; t: typeof themes.light }) {
-    return (
-      <button
-        onClick={onBack}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22,
-          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-          color: t.subtext, fontFamily: t.font,
-        }}
-      >
-        <span style={{ display: 'flex', color: t.text }}><BackIcon /></span>
-        <span style={{ fontSize: 19, fontWeight: 600, color: t.text }}>{title}</span>
-      </button>
-    )
-  }
-
   // ── MENU VIEW ──────────────────────────────────────────────
   const MenuView = () => (
     <div>
+      <HeroCarousel restaurant={restaurant} t={t} />
       <CategoryPills categories={availableCategories} active={activeCategory} onSelect={scrollToCategory} t={t} />
 
       <div style={{ maxWidth: layout === 'cards' ? 640 : 600, margin: '0 auto', padding: layout === 'swipe' ? '0 0 48px' : '8px 20px 48px' }}>
@@ -613,11 +645,7 @@ export default function MenuClient({ restaurant, categories }: {
                 {items.map(item => (
                   <div
                     key={item.id} onClick={() => setSelectedItem(item)}
-                    style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '16px 4px', cursor: 'pointer',
-                      transition: `background 0.2s ${EASE}`, borderRadius: 14,
-                    }}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 4px', cursor: 'pointer', borderRadius: 14 }}
                   >
                     <div style={{ flex: 1, paddingRight: 16 }}>
                       <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: t.text }}>{item.name}</p>
@@ -643,11 +671,7 @@ export default function MenuClient({ restaurant, categories }: {
                 {items.map(item => (
                   <div
                     key={item.id} onClick={() => setSelectedItem(item)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 14,
-                      background: t.surface, borderRadius: 18, padding: '12px 14px', cursor: 'pointer',
-                      border: `1px solid ${t.border}`, transition: `transform 0.2s ${EASE}, box-shadow 0.2s ${EASE}`,
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, background: t.surface, borderRadius: 18, padding: '12px 14px', cursor: 'pointer', border: `1px solid ${t.border}` }}
                   >
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.name} style={{ width: 68, height: 68, borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} />
@@ -675,19 +699,13 @@ export default function MenuClient({ restaurant, categories }: {
                 {items.map(item => (
                   <div
                     key={item.id} onClick={() => setSelectedItem(item)}
-                    style={{
-                      background: t.surface, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer',
-                      border: `1px solid ${t.border}`, boxShadow: t.shadow,
-                      transition: `transform 0.25s ${EASE}`,
-                    }}
+                    style={{ background: t.surface, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer', border: `1px solid ${t.border}`, boxShadow: t.shadow }}
                   >
-                    <div style={{ overflow: 'hidden' }}>
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 128, objectFit: 'cover', display: 'block', transition: `transform 0.4s ${EASE}` }} />
-                      ) : (
-                        <div style={{ width: '100%', height: 128, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
-                      )}
-                    </div>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 128, objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: 128, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
+                    )}
                     <div style={{ padding: '12px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
                       {item.description && <p style={{ margin: 0, fontSize: 12, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{item.description}</p>}
@@ -715,8 +733,7 @@ export default function MenuClient({ restaurant, categories }: {
     <div style={{ minHeight: '100vh', background: t.bg, fontFamily: t.font }}>
       {selectedItem && <ItemPopup item={selectedItem} t={t} currency={currency} onClose={() => setSelectedItem(null)} />}
 
-      <HeroCarousel restaurant={restaurant} t={t} />
-      <FloatingNav view={view} onChange={changeView} hasAbout={hasAbout} hasContact={hasContact} t={t} />
+      <TopBar restaurant={restaurant} view={view} onChange={changeView} hasAbout={hasAbout} hasContact={hasContact} t={t} />
 
       {view === 'menu' && <MenuView />}
       {view === 'about' && <AboutPanel />}
