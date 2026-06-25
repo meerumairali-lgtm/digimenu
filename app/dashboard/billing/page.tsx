@@ -64,6 +64,14 @@ export default function BillingPage() {
         )
         window.Paddle.Setup({
           token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+          eventCallback: (event: { name: string }) => {
+            // Fires once the new card is saved. Refresh billing info —
+            // the webhook should flip status back to active shortly after,
+            // but re-loading now at least confirms the update went through.
+            if (event.name === 'checkout.completed') {
+              load()
+            }
+          },
         })
         setPaddleReady(true)
       }
@@ -166,14 +174,6 @@ export default function BillingPage() {
         settings: {
           displayMode: 'overlay',
           theme: 'dark',
-        },
-        eventCallback: (event: { name: string }) => {
-          // Fires once the new card is saved. Refresh billing info —
-          // the webhook should flip status back to active shortly after,
-          // but re-loading now at least confirms the update went through.
-          if (event.name === 'checkout.completed') {
-            load()
-          }
         },
       })
 
