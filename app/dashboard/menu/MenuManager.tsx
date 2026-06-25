@@ -498,3 +498,4 @@ export default function MenuManager({ restaurant, initialCategories }: {
     </div>
   )
 }
+

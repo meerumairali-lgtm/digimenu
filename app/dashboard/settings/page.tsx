@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Country, State, City } from 'country-state-city'
@@ -41,6 +41,11 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 type DayHours = { open: string; close: string; closed: boolean }
 type OpeningHours = Record<string, DayHours>
 
+type HeroSlide = { image_url: string; caption: string }
+
+const MIN_HERO_SLIDES = 2
+const MAX_HERO_SLIDES = 5
+
 const defaultHours = (): OpeningHours =>
   Object.fromEntries(DAYS.map(d => [d, { open: '09:00', close: '22:00', closed: false }]))
 
@@ -71,6 +76,19 @@ export default function SettingsPage() {
 
   const [openingHours, setOpeningHours] = useState<OpeningHours>(defaultHours())
 
+  // Restaurant id is needed for uploads (logo + hero images are stored
+  // under a path that starts with this id). This page didn't track it
+  // before since none of the previous fields needed it directly.
+  const [restaurantId, setRestaurantId] = useState('')
+
+  const [logoUrl, setLogoUrl] = useState('')
+  const [logoUploading, setLogoUploading] = useState(false)
+  const logoFileRef = useRef<HTMLInputElement>(null)
+
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([])
+  const [heroUploadingIndex, setHeroUploadingIndex] = useState<number | null>(null)
+  const heroFileRefs = useRef<Record<number, HTMLInputElement | null>>({})
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -93,6 +111,8 @@ export default function SettingsPage() {
         }
         if (!data) return
 
+        setRestaurantId(data.id)
+
         setForm({
           name: data.name || '',
           slug: data.slug || '',
@@ -109,6 +129,15 @@ export default function SettingsPage() {
         })
         setPhone(data.phone || '')
         if (data.opening_hours) setOpeningHours(data.opening_hours)
+
+        if (data.logo_url) setLogoUrl(data.logo_url)
+        if (Array.isArray(data.hero_slides) && data.hero_slides.length > 0) {
+          setHeroSlides(data.hero_slides)
+        } else {
+          // Start new restaurants with two empty slots so the minimum
+          // of 2 is visually obvious the first time Settings loads.
+          setHeroSlides([{ image_url: '', caption: '' }, { image_url: '', caption: '' }])
+        }
 
         // Location — load existing if present, otherwise auto-detect
         // (covers restaurants created before this feature existed)
@@ -196,6 +225,46 @@ export default function SettingsPage() {
     }))
   }
 
+  async function handleLogoUpload(file: File) {
+    if (!restaurantId) return
+    setLogoUploading(true)
+    const ext = file.name.split('.').pop()
+    const fileName = `${restaurantId}/logo-${Date.now()}.${ext}`
+    const { data, error } = await supabase.storage.from('restaurant-branding').upload(fileName, file, { upsert: true })
+    if (!error && data) {
+      const { data: urlData } = supabase.storage.from('restaurant-branding').getPublicUrl(fileName)
+      setLogoUrl(urlData.publicUrl)
+    }
+    setLogoUploading(false)
+  }
+
+  async function handleHeroImageUpload(index: number, file: File) {
+    if (!restaurantId) return
+    setHeroUploadingIndex(index)
+    const ext = file.name.split('.').pop()
+    const fileName = `${restaurantId}/hero-${Date.now()}-${index}.${ext}`
+    const { data, error } = await supabase.storage.from('restaurant-branding').upload(fileName, file, { upsert: true })
+    if (!error && data) {
+      const { data: urlData } = supabase.storage.from('restaurant-branding').getPublicUrl(fileName)
+      setHeroSlides(slides => slides.map((s, i) => i === index ? { ...s, image_url: urlData.publicUrl } : s))
+    }
+    setHeroUploadingIndex(null)
+  }
+
+  function updateHeroCaption(index: number, caption: string) {
+    setHeroSlides(slides => slides.map((s, i) => i === index ? { ...s, caption } : s))
+  }
+
+  function addHeroSlide() {
+    if (heroSlides.length >= MAX_HERO_SLIDES) return
+    setHeroSlides(slides => [...slides, { image_url: '', caption: '' }])
+  }
+
+  function removeHeroSlide(index: number) {
+    if (heroSlides.length <= MIN_HERO_SLIDES) return
+    setHeroSlides(slides => slides.filter((_, i) => i !== index))
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -204,6 +273,12 @@ export default function SettingsPage() {
     if (isReservedSlug(form.slug)) { setError(`"${form.slug}" is a reserved word and can't be used as your menu URL. Please choose another.`); return }
     if (!countryCode) { setError('Please select your country'); return }
     if (!phoneCountryIso) { setError('Please select your phone country code'); return }
+
+    const completeSlides = heroSlides.filter(s => s.image_url)
+    if (completeSlides.length < MIN_HERO_SLIDES) {
+      setError(`Please add at least ${MIN_HERO_SLIDES} hero images before saving.`)
+      return
+    }
 
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -222,6 +297,8 @@ export default function SettingsPage() {
       state: stateName,
       city: cityName,
       opening_hours: openingHours,
+      logo_url: logoUrl || null,
+      hero_slides: completeSlides,
     }).eq('user_id', user.id)
     if (error) setError(error.message)
     else setSuccess('Saved successfully!')
@@ -285,6 +362,94 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Branding — Logo */}
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Logo</h3>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown next to your restaurant name on the menu page</p>
+          <div
+            onClick={() => logoFileRef.current?.click()}
+            style={{ border: '1px dashed #bae6fd', borderRadius: 8, padding: 14, textAlign: 'center', cursor: 'pointer', background: '#f0f9ff' }}
+          >
+            {logoUploading ? (
+              <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Uploading...</p>
+            ) : logoUrl ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                <img src={logoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover' }} />
+                <p style={{ margin: 0, fontSize: 13, color: '#38BDF8' }}>Tap to change logo</p>
+              </div>
+            ) : (
+              <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Tap to upload a logo <span style={{ color: '#aaa' }}>(optional)</span></p>
+            )}
+            <input ref={logoFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f) }} />
+          </div>
+        </div>
+
+        {/* Branding — Hero carousel */}
+        <div style={sectionStyle}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Hero carousel{required}</h3>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>
+            The rotating images customers see first. Add {MIN_HERO_SLIDES}–{MAX_HERO_SLIDES} images, each with a short line of text — a deal, a dish, or whatever you want to highlight.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {heroSlides.map((slide, index) => (
+              <div key={index} style={{ background: '#fff', borderRadius: 10, border: '1px solid #e0f2fe', padding: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#888' }}>Slide {index + 1}</span>
+                  {heroSlides.length > MIN_HERO_SLIDES && (
+                    <button
+                      type="button"
+                      onClick={() => removeHeroSlide(index)}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                <div
+                  onClick={() => heroFileRefs.current[index]?.click()}
+                  style={{ border: '1px dashed #bae6fd', borderRadius: 8, padding: 12, textAlign: 'center', cursor: 'pointer', background: '#f0f9ff', marginBottom: 10 }}
+                >
+                  {heroUploadingIndex === index ? (
+                    <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Uploading...</p>
+                  ) : slide.image_url ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <img src={slide.image_url} alt="" style={{ width: 48, height: 48, borderRadius: 6, objectFit: 'cover' }} />
+                      <p style={{ margin: 0, fontSize: 13, color: '#38BDF8' }}>Tap to change image</p>
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Tap to upload image</p>
+                  )}
+                  <input
+                    ref={el => { heroFileRefs.current[index] = el }}
+                    type="file" accept="image/*" style={{ display: 'none' }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleHeroImageUpload(index, f) }}
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  value={slide.caption}
+                  onChange={e => updateHeroCaption(index, e.target.value)}
+                  placeholder="e.g. 20% off all pizzas this week"
+                  style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 13, width: '100%', boxSizing: 'border-box' as const }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {heroSlides.length < MAX_HERO_SLIDES && (
+            <button
+              type="button"
+              onClick={addHeroSlide}
+              style={{ marginTop: 12, padding: '9px 16px', borderRadius: 8, border: '1px dashed #bae6fd', background: '#f0f9ff', cursor: 'pointer', fontSize: 13, color: '#38BDF8', fontWeight: 600 }}
+            >
+              + Add another slide
+            </button>
+          )}
         </div>
 
         {/* About */}
