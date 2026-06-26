@@ -16,7 +16,7 @@ type Category = {
   menu_items: MenuItem[]
 }
 
-type HeroSlide = { image_url: string; caption: string }
+type HeroSlide = { image_url: string; title?: string; caption?: string }
 
 type Restaurant = {
   id: string
@@ -39,9 +39,6 @@ type Restaurant = {
   hero_slides?: HeroSlide[]
 }
 
-// ─────────────────────────────────────────────────────────────
-// THEME TOKENS
-// ─────────────────────────────────────────────────────────────
 const themes: Record<string, {
   bg: string; surface: string; surfaceRaised: string; text: string; subtext: string
   border: string; accent: string; accentSoft: string; accentText: string
@@ -56,7 +53,7 @@ const themes: Record<string, {
     border: 'rgba(28,25,23,0.07)', accent: '#D97757', accentSoft: 'rgba(217,119,87,0.12)', accentText: '#FFFFFF',
     navBg: 'rgba(255,255,255,0.92)', navText: '#1C1917', navMuted: '#9C9893',
     priceBg: 'rgba(217,119,87,0.10)', priceText: '#B25B3F',
-    heroOverlayFrom: 'rgba(20,16,14,0.1)', heroOverlayTo: 'rgba(20,16,14,0.75)',
+    heroOverlayFrom: 'rgba(20,16,14,0.05)', heroOverlayTo: 'rgba(20,16,14,0.7)',
     shadow: '0 8px 30px -8px rgba(28,25,23,0.12)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
@@ -65,7 +62,7 @@ const themes: Record<string, {
     border: 'rgba(255,255,255,0.07)', accent: '#E8A33D', accentSoft: 'rgba(232,163,61,0.14)', accentText: '#16151A',
     navBg: 'rgba(22,21,26,0.9)', navText: '#F2EFEA', navMuted: '#75726C',
     priceBg: 'rgba(232,163,61,0.14)', priceText: '#E8A33D',
-    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(10,9,7,0.85)',
+    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(10,9,7,0.82)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
@@ -74,7 +71,7 @@ const themes: Record<string, {
     border: 'rgba(212,160,23,0.14)', accent: '#D4A017', accentSoft: 'rgba(212,160,23,0.14)', accentText: '#15110A',
     navBg: 'rgba(14,11,5,0.92)', navText: '#F5E6C8', navMuted: '#8A7A54',
     priceBg: 'rgba(212,160,23,0.14)', priceText: '#D4A017',
-    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(8,6,2,0.88)',
+    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(8,6,2,0.85)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.6)',
     font: '"Georgia", "Iowan Old Style", serif',
   },
@@ -83,7 +80,7 @@ const themes: Record<string, {
     border: 'rgba(255,255,255,0.08)', accent: '#38BDF8', accentSoft: 'rgba(56,189,248,0.14)', accentText: '#0D1B2A',
     navBg: 'rgba(15,23,42,0.9)', navText: '#F1F5F9', navMuted: '#5B6B82',
     priceBg: 'rgba(255,107,91,0.14)', priceText: '#FF8A77',
-    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(6,10,20,0.85)',
+    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(6,10,20,0.82)',
     shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
     font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
@@ -91,7 +88,18 @@ const themes: Record<string, {
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
-const TOPBAR_HEIGHT = 60
+const TOPBAR_HEIGHT = 58
+
+// Restaurant name shrinks in steps as it gets longer, so long names
+// stay fully visible (no ellipsis) instead of crowding the nav.
+// Ellipsis remains as a final safety net only for extreme lengths.
+function nameFontSize(name: string): number {
+  const len = name.length
+  if (len <= 16) return 15
+  if (len <= 24) return 13
+  if (len <= 32) return 12
+  return 10.5
+}
 
 function socialBtn(bg: string): React.CSSProperties {
   return {
@@ -131,11 +139,20 @@ function BackIcon() {
 function PlateIcon() {
   return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /></svg>
 }
+function MenuIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+}
+function InfoIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+}
+function ContactIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l9 6 9-6M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
+}
 
 // ─────────────────────────────────────────────────────────────
-// TOP BAR — always sticky at the very top. Logo + name on the
-// left, view switcher on the right. This is separate from the
-// hero now, per spec: it never scrolls away.
+// TOP BAR — sticky at top: 0, always visible. Logo + name act as
+// a "home" button (returns to menu view). Name font scales down
+// for long names instead of truncating.
 // ─────────────────────────────────────────────────────────────
 function TopBar({
   restaurant, view, onChange, hasAbout, hasContact, t,
@@ -146,10 +163,10 @@ function TopBar({
   hasAbout: boolean; hasContact: boolean
   t: typeof themes.light
 }) {
-  const items: { key: 'menu' | 'about' | 'contact'; label: string }[] = [
-    { key: 'menu', label: 'Menu' },
-    ...(hasAbout ? [{ key: 'about' as const, label: 'About' }] : []),
-    ...(hasContact ? [{ key: 'contact' as const, label: 'Contact' }] : []),
+  const items: { key: 'menu' | 'about' | 'contact'; label: string; icon: React.ReactNode }[] = [
+    { key: 'menu', label: 'Menu', icon: <MenuIconSvg /> },
+    ...(hasAbout ? [{ key: 'about' as const, label: 'About', icon: <InfoIconSvg /> }] : []),
+    ...(hasContact ? [{ key: 'contact' as const, label: 'Contact', icon: <ContactIconSvg /> }] : []),
   ]
 
   return (
@@ -158,25 +175,31 @@ function TopBar({
       background: t.navBg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       borderBottom: `1px solid ${t.border}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 18px',
+      padding: '0 14px',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+      <button
+        onClick={() => onChange('menu')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1,
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left',
+        }}
+      >
         {restaurant.logo_url ? (
-          <img src={restaurant.logo_url} alt="" style={{ width: 32, height: 32, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
+          <img src={restaurant.logo_url} alt="" style={{ width: 30, height: 30, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{
-            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+            width: 30, height: 30, borderRadius: 9, flexShrink: 0,
             background: t.accentSoft, color: t.accent,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /></svg>
           </div>
         )}
         <span style={{
-          fontWeight: 600, fontSize: 15, color: t.navText, letterSpacing: '-0.2px',
+          fontWeight: 600, fontSize: nameFontSize(restaurant.name), color: t.navText, letterSpacing: '-0.1px',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>{restaurant.name}</span>
-      </div>
+      </button>
 
       {items.length > 1 && (
         <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
@@ -184,14 +207,16 @@ function TopBar({
             <button
               key={item.key}
               onClick={() => onChange(item.key)}
+              aria-label={item.label}
+              title={item.label}
               style={{
-                padding: '7px 14px', border: 'none', borderRadius: 999,
+                width: 34, height: 34, border: 'none', borderRadius: 999,
                 background: view === item.key ? t.accent : 'transparent',
                 color: view === item.key ? t.accentText : t.navMuted,
-                fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                fontFamily: t.font, transition: `all 0.2s ${EASE}`,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: `all 0.2s ${EASE}`,
               }}
-            >{item.label}</button>
+            >{item.icon}</button>
           ))}
         </div>
       )}
@@ -200,21 +225,46 @@ function TopBar({
 }
 
 // ─────────────────────────────────────────────────────────────
-// HERO CAROUSEL — reads real hero_slides data, each with its own
-// caption. Scrolls away normally; it is not sticky.
+// HERO CAROUSEL — auto-rotates AND is manually swipeable. A swipe
+// (or drag) interrupts the auto-timer and jumps straight to the
+// target slide rather than waiting out the loop. Title (left,
+// larger) + short description (left, smaller) per slide.
 // ─────────────────────────────────────────────────────────────
 function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof themes.light }) {
   const slides = (restaurant.hero_slides || []).filter(s => s.image_url)
   const [index, setIndex] = useState(0)
+  const touchStartX = useRef<number | null>(null)
+  const touchDeltaX = useRef(0)
 
   useEffect(() => {
     if (slides.length < 2) return
     const id = setInterval(() => setIndex(i => (i + 1) % slides.length), 4500)
     return () => clearInterval(id)
-  }, [slides.length])
+  }, [slides.length, index])
+
+  function goTo(next: number) {
+    const wrapped = (next + slides.length) % slides.length
+    setIndex(wrapped)
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+    touchDeltaX.current = 0
+  }
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current
+  }
+  function handleTouchEnd() {
+    if (Math.abs(touchDeltaX.current) > 40) {
+      // Swiped left -> next slide. Swiped right -> previous slide.
+      goTo(touchDeltaX.current < 0 ? index + 1 : index - 1)
+    }
+    touchStartX.current = null
+    touchDeltaX.current = 0
+  }
 
   if (slides.length === 0) {
-    // Graceful fallback while a restaurant hasn't set up slides yet.
     return (
       <div style={{
         height: 220, background: `radial-gradient(circle at 30% 20%, ${t.accentSoft}, transparent 60%), linear-gradient(160deg, ${t.surfaceRaised}, ${t.bg})`,
@@ -223,8 +273,15 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
     )
   }
 
+  const current = slides[index]
+
   return (
-    <div style={{ position: 'relative', height: 260, overflow: 'hidden', background: t.surface }}>
+    <div
+      style={{ position: 'relative', height: 260, overflow: 'hidden', background: t.surface, touchAction: 'pan-y' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {slides.map((slide, i) => (
         <div
           key={slide.image_url + i}
@@ -232,7 +289,7 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
             position: 'absolute', inset: 0,
             backgroundImage: `url(${slide.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center',
             opacity: i === index ? 1 : 0,
-            transition: `opacity 1s ${EASE}`,
+            transition: `opacity 0.6s ${EASE}`,
           }}
         />
       ))}
@@ -242,23 +299,51 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
         background: `linear-gradient(180deg, ${t.heroOverlayFrom} 0%, ${t.heroOverlayTo} 100%)`,
       }} />
 
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 24px 26px', textAlign: 'center' }}>
-        {slides[index]?.caption && (
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={() => goTo(index - 1)}
+            aria-label="Previous"
+            style={{
+              position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 32, height: 32, borderRadius: '50%', border: 'none',
+              background: 'rgba(0,0,0,0.32)', color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
+            }}
+          ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+          <button
+            onClick={() => goTo(index + 1)}
+            aria-label="Next"
+            style={{
+              position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 32, height: 32, borderRadius: '50%', border: 'none',
+              background: 'rgba(0,0,0,0.32)', color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
+            }}
+          ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></button>
+        </>
+      )}
+
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 20px 24px', textAlign: 'left' }}>
+        {current?.title && (
           <p style={{
-            margin: 0, color: '#FFFFFF', fontSize: 17, fontWeight: 600, lineHeight: 1.4,
-            maxWidth: 380, marginLeft: 'auto', marginRight: 'auto',
-            textShadow: '0 2px 12px rgba(0,0,0,0.35)',
-          }}>
-            {slides[index].caption}
-          </p>
+            margin: '0 0 4px', color: '#FFFFFF', fontSize: 19, fontWeight: 700, lineHeight: 1.3,
+            maxWidth: 320, textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          }}>{current.title}</p>
+        )}
+        {current?.caption && (
+          <p style={{
+            margin: 0, color: 'rgba(255,255,255,0.85)', fontSize: 12.5, fontWeight: 400, lineHeight: 1.45,
+            maxWidth: 300, textShadow: '0 1px 8px rgba(0,0,0,0.4)',
+          }}>{current.caption}</p>
         )}
       </div>
 
       {slides.length > 1 && (
-        <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
+        <div style={{ position: 'absolute', bottom: 10, right: 16, display: 'flex', gap: 6, zIndex: 2 }}>
           {slides.map((_, i) => (
-            <div key={i} style={{
-              width: i === index ? 16 : 5, height: 5, borderRadius: 3,
+            <div key={i} onClick={() => goTo(i)} style={{
+              width: i === index ? 16 : 5, height: 5, borderRadius: 3, cursor: 'pointer',
               background: i === index ? '#fff' : 'rgba(255,255,255,0.4)',
               transition: `all 0.3s ${EASE}`,
             }} />
@@ -270,15 +355,33 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
 }
 
 // ─────────────────────────────────────────────────────────────
-// CATEGORY PILLS — sticky immediately under the top bar once
-// scrolled into that position. top is set to TOPBAR_HEIGHT so
-// the two sticky elements stack cleanly with no gap or overlap.
+// CATEGORY PILLS — centered, sticky under the top bar, and now
+// keeps the active pill scrolled into view automatically whether
+// the active category changed by scrolling the page OR by a
+// direct pill click.
 // ─────────────────────────────────────────────────────────────
 function CategoryPills({
   categories, active, onSelect, t,
 }: {
   categories: Category[]; active: string; onSelect: (id: string) => void; t: typeof themes.light
 }) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const pillRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  useEffect(() => {
+    const track = trackRef.current
+    const pill = pillRefs.current[active]
+    if (!track || !pill) return
+    const trackRect = track.getBoundingClientRect()
+    const pillRect = pill.getBoundingClientRect()
+    // Only scroll if the active pill isn't already fully visible —
+    // avoids fighting a scroll the user is mid-way through themselves.
+    if (pillRect.left < trackRect.left || pillRect.right > trackRect.right) {
+      const offset = pill.offsetLeft - (track.clientWidth - pill.clientWidth) / 2
+      track.scrollTo({ left: offset, behavior: 'smooth' })
+    }
+  }, [active])
+
   if (categories.length < 2) return null
   return (
     <div style={{
@@ -286,15 +389,20 @@ function CategoryPills({
       background: t.bg, borderBottom: `1px solid ${t.border}`,
       paddingTop: 10, paddingBottom: 10,
     }}>
-      <div style={{
-        display: 'flex', gap: 8, overflowX: 'auto', padding: '0 20px',
-        scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-      }}>
+      <div
+        ref={trackRef}
+        style={{
+          display: 'flex', gap: 8, overflowX: 'auto', padding: '0 20px',
+          justifyContent: categories.length <= 4 ? 'center' : 'flex-start',
+          scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+        }}
+      >
         {categories.map(cat => {
           const isActive = active === cat.id
           return (
             <button
               key={cat.id}
+              ref={el => { pillRefs.current[cat.id] = el }}
               onClick={() => onSelect(cat.id)}
               style={{
                 flexShrink: 0, padding: '8px 16px', borderRadius: 999,
@@ -385,7 +493,7 @@ function ItemPopup({ item, t, currency, onClose }: {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SWIPE LAYOUT
+// SWIPE LAYOUT (menu items, unrelated to hero carousel)
 // ─────────────────────────────────────────────────────────────
 function SwipeCategory({ category, items, t, currency, onItemClick }: {
   category: Category; items: MenuItem[]; t: typeof themes.light; currency: string
@@ -474,8 +582,6 @@ export default function MenuClient({ restaurant, categories }: {
     if (!activeCategory && availableCategories[0]) setActiveCategory(availableCategories[0].id)
   }, [availableCategories])
 
-  // Active-category highlight on scroll — same IntersectionObserver
-  // technique as before, watching each category's section element.
   useEffect(() => {
     if (view !== 'menu') return
     const observer = new IntersectionObserver(
@@ -523,8 +629,6 @@ export default function MenuClient({ restaurant, categories }: {
     )
   }
 
-  // ── ABOUT PANEL — now also carries the restaurant's name as a
-  // heading, since the hero no longer shows it.
   const AboutPanel = () => (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
       <PanelHeader title="About us" onBack={() => changeView('menu')} />
@@ -566,7 +670,6 @@ export default function MenuClient({ restaurant, categories }: {
     </div>
   )
 
-  // ── CONTACT PANEL ──────────────────────────────────────────
   const ContactPanel = () => (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
       <PanelHeader title="Contact and find us" onBack={() => changeView('menu')} />
@@ -628,7 +731,6 @@ export default function MenuClient({ restaurant, categories }: {
     </div>
   )
 
-  // ── MENU VIEW ──────────────────────────────────────────────
   const MenuView = () => (
     <div>
       <HeroCarousel restaurant={restaurant} t={t} />
