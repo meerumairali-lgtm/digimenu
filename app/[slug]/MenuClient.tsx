@@ -170,13 +170,30 @@ function TopBar({
   ]
 
   return (
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 200, height: TOPBAR_HEIGHT,
-      background: t.navBg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: `1px solid ${t.border}`,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 14px',
-    }}>
+    <div
+      className="menuberg-topbar"
+      style={{
+        position: 'sticky', top: 0, zIndex: 200, height: TOPBAR_HEIGHT,
+        background: t.navBg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: `1px solid ${t.border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 14px',
+      }}
+    >
+      <style>{`
+        /* Desktop default: full text labels, no icons */
+        .menuberg-nav-desktop { display: flex; }
+        .menuberg-nav-mobile { display: none; }
+
+        /* Below 640px: switch to icon + tiny label stack, since
+           that's where a long restaurant name plus three text
+           buttons starts to crowd the bar. */
+        @media (max-width: 640px) {
+          .menuberg-nav-desktop { display: none; }
+          .menuberg-nav-mobile { display: flex; }
+        }
+      `}</style>
+
       <button
         onClick={() => onChange('menu')}
         style={{
@@ -202,23 +219,45 @@ function TopBar({
       </button>
 
       {items.length > 1 && (
-        <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-          {items.map(item => (
-            <button
-              key={item.key}
-              onClick={() => onChange(item.key)}
-              aria-label={item.label}
-              title={item.label}
-              style={{
-                width: 34, height: 34, border: 'none', borderRadius: 999,
-                background: view === item.key ? t.accent : 'transparent',
-                color: view === item.key ? t.accentText : t.navMuted,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: `all 0.2s ${EASE}`,
-              }}
-            >{item.icon}</button>
-          ))}
-        </div>
+        <>
+          {/* Desktop: full text pills, same treatment as before */}
+          <div className="menuberg-nav-desktop" style={{ gap: 2, flexShrink: 0 }}>
+            {items.map(item => (
+              <button
+                key={item.key}
+                onClick={() => onChange(item.key)}
+                style={{
+                  padding: '8px 16px', border: 'none', borderRadius: 999,
+                  background: view === item.key ? t.accent : 'transparent',
+                  color: view === item.key ? t.accentText : t.navMuted,
+                  fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
+                  fontFamily: t.font, transition: `all 0.2s ${EASE}`,
+                }}
+              >{item.label}</button>
+            ))}
+          </div>
+
+          {/* Mobile: icon + tiny label stacked, compact but unambiguous */}
+          <div className="menuberg-nav-mobile" style={{ gap: 2, flexShrink: 0 }}>
+            {items.map(item => (
+              <button
+                key={item.key}
+                onClick={() => onChange(item.key)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                  padding: '5px 9px', border: 'none', borderRadius: 10,
+                  background: view === item.key ? t.accent : 'transparent',
+                  color: view === item.key ? t.accentText : t.navMuted,
+                  cursor: 'pointer', fontFamily: t.font,
+                  transition: `all 0.2s ${EASE}`,
+                }}
+              >
+                {item.icon}
+                <span style={{ fontSize: 8.5, fontWeight: 600, lineHeight: 1 }}>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

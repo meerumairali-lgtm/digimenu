@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import LandingNav from './components/LandingNav'
 import ContactSection from './components/ContactSection'
 import PricingBanner from './components/PricingBanner'
+import LivePriceStat from '@/app/components/LivePriceStat'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,9 +83,11 @@ export default async function Home() {
           [c.stat2v, c.stat2l],
           [c.stat3v, c.stat3l],
           [c.stat4v, c.stat4l],
-        ].map(([num, label]) => (
+        ].map(([num, label], i) => (
           <div key={label} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0D1B2A", letterSpacing: "-1px" }}>{num}</div>
+            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0D1B2A", letterSpacing: "-1px" }}>
+              {i === 2 ? <LivePriceStat /> : num}
+            </div>
             <div style={{ fontSize: "13px", color: "#1A3A5C", marginTop: "4px" }}>{label}</div>
           </div>
         ))}
@@ -100,14 +103,14 @@ export default async function Home() {
         <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 3.5rem" }}>
           <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>How it works</div>
           <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", letterSpacing: "-1px" }}>
-            From zero to live menu<br />in 3 simple steps
+            From zero to live website page<br />in 3 simple steps
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {[
             ["1", "Sign up free", "Create your account and choose your restaurant's unique URL in minutes."],
-            ["2", "Build your menu", "Add categories, dishes, prices, photos and contact details easily."],
-            ["3", "Print & share", "Download your QR code, stick it on your table, share your link everywhere."],
+            ["2", "Build your website", "Add your categories, dishes, prices, photos, and contact details. Choose your theme and layout, then publish your website in minutesAdd your menu, prices, photos, and contact details. Choose a theme and go live in minutes."],
+            ["3", "Go live & Go", "Launch your website, download your QR code, and share your business with the world."],
           ].map(([num, title, desc]) => (
             <div key={String(num)} style={{ textAlign: "center" }}>
               <div style={{ width: "52px", height: "52px", background: "#E0F2FE", border: "2px solid #7DD3FC", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.2rem", fontSize: "20px", fontWeight: 800, color: "#0D1B2A" }}>

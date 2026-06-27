@@ -61,7 +61,7 @@ export default function FeaturesCarousel({ features }: Props) {
           Why Menuberg
         </div>
         <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", marginBottom: "1rem", letterSpacing: "-1px" }}>
-          Everything a restaurant<br />actually needs
+          Everything a restaurant, Bar, Café<br />actually needs
         </h2>
         <p style={{ fontSize: "16px", color: "#666", maxWidth: "420px", margin: "0 auto", lineHeight: 1.7 }}>
           No bloated website builder. Just the features that bring customers in.
