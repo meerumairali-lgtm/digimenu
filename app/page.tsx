@@ -28,7 +28,7 @@ export default async function Home() {
     stat1l: cms.stat_1_label || 'Restaurants live',
     stat2v: cms.stat_2_value || '47',
     stat2l: cms.stat_2_label || 'Countries',
-    stat3v: cms.stat_3_value || '$4.99',
+    stat3v: cms.stat_3_value || '',
     stat3l: cms.stat_3_label || 'Per month',
     stat4v: cms.stat_4_value || '5 min',
     stat4l: cms.stat_4_label || 'To go live',
