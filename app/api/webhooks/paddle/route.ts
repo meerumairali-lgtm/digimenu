@@ -144,6 +144,7 @@ export async function POST(request: Request) {
             const { error: paymentInsertError } = await admin.from('payments').insert({
               restaurant_id: restaurantId,
               paddle_transaction_id: data?.id,
+              paddle_customer_id: data?.customer_id || null,
               amount: item?.totals?.total ? Number(item.totals.total) / 100 : null,
               currency: data?.currency_code || 'USD',
               type: dbType,

@@ -148,7 +148,7 @@ export default function SetupPage() {
     const phoneCountry = ALL_COUNTRIES.find(c => c.isoCode === phoneCountryIso)
     const phoneDialCode = phoneCountry ? getDialCode(phoneCountry) : ''
 
-    const { error } = await supabase.from('restaurants').insert({
+    const { data: newRestaurant, error } = await supabase.from('restaurants').insert({
       user_id: user.id,
       name,
       slug,
@@ -163,12 +163,38 @@ export default function SetupPage() {
       state: stateName,
       city: cityName,
       ...billing, // pricing_tier, subscription_status, paddle ids, coupon used, trial_started_at
-    })
+    }).select('id').single()
 
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
+      // If the user paid BEFORE finishing setup, the Paddle webhook
+      // inserted their payment row with restaurant_id = null, since no
+      // restaurant existed yet at that moment. Now that the restaurant
+      // exists, backfill any orphaned payment(s) tied to this user's
+      // Paddle customer ID so billing history shows up correctly.
+      // Routed through an API route (not the regular client) because
+      // RLS on payments only allows SELECT, not UPDATE, for normal users.
+      if (billing.paddle_customer_id && newRestaurant?.id) {
+        try {
+          const res = await fetch('/api/setup/backfill-payments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              restaurant_id: newRestaurant.id,
+              paddle_customer_id: billing.paddle_customer_id,
+            }),
+          })
+          if (!res.ok) {
+            console.error('Failed to backfill orphaned payment rows')
+          }
+        } catch (backfillErr) {
+          console.error('Failed to backfill orphaned payment rows:', backfillErr)
+          // Non-fatal — don't block the user
+        }
+      }
+
       await supabase.from('pending_signups').delete().eq('user_id', user.id)
 
       router.refresh()
