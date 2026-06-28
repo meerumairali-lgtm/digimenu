@@ -268,13 +268,13 @@ export default function CheckoutPage() {
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           {trialActive ? (
             <>
-              <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Your menu is already live</h1>
+              <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Your restaurant is already live</h1>
               <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>Subscribe now to keep it that way after your trial ends.</p>
             </>
           ) : (
             <>
               <h1 style={{ margin: 0, color: '#fff', fontSize: 22, fontWeight: 700 }}>Your trial has ended</h1>
-              <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>Subscribe to reactivate your menu.</p>
+              <p style={{ color: '#7DD3FC', fontSize: 14, marginTop: 8 }}>Subscribe to reactivate your restaurant.</p>
             </>
           )}
         </div>

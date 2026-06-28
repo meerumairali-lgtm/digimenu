@@ -26,8 +26,9 @@ const SUPER_ADMIN_EMAIL = 'meerumairali@gmail.com'
 export default async function RestaurantDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createClient()
   const {
     data: { user },
@@ -37,11 +38,15 @@ export default async function RestaurantDetailPage({
     redirect('/dashboard')
   }
 
-  const { data: restaurant } = await supabase
+  const { data: restaurant, error: restaurantError } = await supabase
     .from('restaurants')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
+
+  if (restaurantError) {
+    console.error('RestaurantDetailPage: failed to fetch restaurant', id, restaurantError)
+  }
 
   if (!restaurant) notFound()
 
@@ -112,7 +117,7 @@ export default async function RestaurantDetailPage({
 
         {/* FIXED LINK */}
         <Link
-          href={`/menu/${restaurant.slug}`}
+          href={`/${restaurant.slug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
