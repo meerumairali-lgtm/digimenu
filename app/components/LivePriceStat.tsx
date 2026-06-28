@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getCurrencyForCountry, convertUsd, formatCurrency } from '@/lib/currencyDisplay'
-
+``
 interface TierData {
   id: string
   monthly_price: number

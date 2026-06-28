@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Country, State, City } from 'country-state-city'
 import SearchableSelect from '../SearchableSelect'
 import { isReservedSlug } from '@/lib/reservedSlugs'
+import MarkdownEditor from '@/app/components/MarkdownEditor'
 
 const ALL_COUNTRIES = Country.getAllCountries()
 
@@ -406,13 +407,13 @@ export default function SettingsPage() {
           <div style={sectionStyle}>
             <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>About your restaurant{required}</h3>
             <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown in the About section of your menu page</p>
-            <textarea
+            <MarkdownEditor
               required
               value={form.about}
-              onChange={e => setForm({ ...form, about: e.target.value })}
+              onChange={(value) => setForm({ ...form, about: value })}
               placeholder="Tell your customers about your restaurant, your story, what makes you special..."
               rows={4}
-              style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+              textareaStyle={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6, width: '100%' }}
             />
           </div>
 

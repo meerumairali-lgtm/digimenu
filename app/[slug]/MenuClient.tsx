@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 type MenuItem = {
   id: string
@@ -147,6 +148,40 @@ function InfoIconSvg() {
 }
 function ContactIconSvg() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l9 6 9-6M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
+}
+
+// ─────────────────────────────────────────────────────────────
+// Renders item descriptions with limited markdown: bold + bullet
+// lists + line breaks only (no headings, no italic — kept simple
+// on purpose, since descriptions are short). Used in spots where
+// the full description is shown (popup, classic, swipe).
+// ─────────────────────────────────────────────────────────────
+function DescriptionText({ text, style }: { text: string; style?: React.CSSProperties }) {
+  return (
+    <div style={style}>
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
+          ul: ({ children }) => <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{children}</ul>,
+          li: ({ children }) => <li style={{ marginBottom: 2 }}>{children}</li>,
+          strong: ({ children }) => <strong>{children}</strong>,
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
+  )
+}
+
+// Strips markdown symbols down to flat text for truncated previews
+// (list/cards layouts use line-clamp, which doesn't play well with
+// mixed block elements like a paragraph + bullet list together).
+function flattenDescription(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')   // bold
+    .replace(/^[-*]\s+/gm, '')         // bullet markers
+    .replace(/\n+/g, ' ')              // line breaks -> space
+    .trim()
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -523,7 +558,7 @@ function ItemPopup({ item, t, currency, onClose }: {
             </span>
           </div>
           {item.description && (
-            <p style={{ margin: '14px 0 0', fontSize: 14.5, color: t.subtext, lineHeight: 1.65 }}>{item.description}</p>
+            <DescriptionText text={item.description} style={{ margin: '14px 0 0', fontSize: 14.5, color: t.subtext, lineHeight: 1.65 }} />
           )}
         </div>
       </div>
@@ -582,7 +617,7 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
               )}
               <div style={{ padding: '16px 18px 20px' }}>
                 <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 15.5, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
-                {item.description && <p style={{ margin: '0 0 12px', fontSize: 13, color: t.subtext, lineHeight: 1.5 }}>{item.description}</p>}
+                {item.description && <DescriptionText text={item.description} style={{ margin: '0 0 12px', fontSize: 13, color: t.subtext, lineHeight: 1.5 }} />}
                 <span style={{ fontWeight: 600, fontSize: 14, color: t.priceText, background: t.priceBg, padding: '6px 13px', borderRadius: 8 }}>{currency} {item.price}</span>
               </div>
             </div>
@@ -679,7 +714,19 @@ export default function MenuClient({ restaurant, categories }: {
 
       {restaurant.about && (
         <div style={{ background: t.surface, borderRadius: 20, padding: 22, marginBottom: 18, border: `1px solid ${t.border}` }}>
-          <p style={{ margin: 0, fontSize: 14.5, color: t.subtext, lineHeight: 1.75 }}>{restaurant.about}</p>
+          <div style={{ fontSize: 14.5, color: t.subtext, lineHeight: 1.75 }}>
+            <ReactMarkdown
+              components={{
+                h2: ({ children }) => <h2 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', color: t.text }}>{children}</h2>,
+                p: ({ children }) => <p style={{ margin: '0 0 10px' }}>{children}</p>,
+                ul: ({ children }) => <ul style={{ margin: '0 0 10px', paddingLeft: 20 }}>{children}</ul>,
+                li: ({ children }) => <li style={{ marginBottom: 4 }}>{children}</li>,
+                strong: ({ children }) => <strong style={{ color: t.text }}>{children}</strong>,
+              }}
+            >
+              {restaurant.about}
+            </ReactMarkdown>
+          </div>
         </div>
       )}
 
@@ -790,7 +837,7 @@ export default function MenuClient({ restaurant, categories }: {
                   >
                     <div style={{ flex: 1, paddingRight: 16 }}>
                       <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: t.text }}>{item.name}</p>
-                      {item.description && <p style={{ margin: '4px 0 0', fontSize: 13, color: t.subtext, lineHeight: 1.5 }}>{item.description}</p>}
+                      {item.description && <DescriptionText text={item.description} style={{ margin: '4px 0 0', fontSize: 13, color: t.subtext, lineHeight: 1.5 }} />}
                       <span style={{ display: 'inline-block', marginTop: 8, fontWeight: 600, fontSize: 13, color: t.priceText, background: t.priceBg, padding: '4px 11px', borderRadius: 7 }}>{currency} {item.price}</span>
                     </div>
                     {item.image_url && (
@@ -821,7 +868,7 @@ export default function MenuClient({ restaurant, categories }: {
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: t.text }}>{item.name}</p>
-                      {item.description && <p style={{ margin: '3px 0 8px', fontSize: 12.5, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{item.description}</p>}
+                      {item.description && <p style={{ margin: '3px 0 8px', fontSize: 12.5, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{flattenDescription(item.description)}</p>}
                       <span style={{ fontWeight: 600, fontSize: 13, color: t.priceText, background: t.priceBg, padding: '4px 10px', borderRadius: 7 }}>{currency} {item.price}</span>
                     </div>
                   </div>
@@ -849,7 +896,7 @@ export default function MenuClient({ restaurant, categories }: {
                     )}
                     <div style={{ padding: '12px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
-                      {item.description && <p style={{ margin: 0, fontSize: 12, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{item.description}</p>}
+                      {item.description && <p style={{ margin: 0, fontSize: 12, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{flattenDescription(item.description)}</p>}
                       <div style={{ marginTop: 'auto', paddingTop: 8 }}>
                         <span style={{ fontWeight: 600, fontSize: 12.5, color: t.priceText, background: t.priceBg, padding: '4px 10px', borderRadius: 7 }}>{currency} {item.price}</span>
                       </div>

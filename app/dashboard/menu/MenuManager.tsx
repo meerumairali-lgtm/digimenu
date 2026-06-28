@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Bold, List } from 'lucide-react'
 
 type MenuItem = {
   id: string
@@ -22,6 +23,78 @@ type Restaurant = {
   id: string
   name: string
   slug: string
+}
+
+// ── Tiny markdown toolbar (Bold + Bullet only) ────────────────────────────────
+function MiniMarkdownToolbar({
+  textareaRef,
+  value,
+  onChange,
+}: {
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
+  value: string
+  onChange: (value: string) => void
+}) {
+  function wrapSelection(before: string, after: string = before) {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selected = value.slice(start, end)
+
+    const newValue = value.slice(0, start) + before + selected + after + value.slice(end)
+    onChange(newValue)
+
+    requestAnimationFrame(() => {
+      textarea.focus()
+      const cursorPos = selected
+        ? start + before.length + selected.length + after.length
+        : start + before.length
+      textarea.setSelectionRange(cursorPos, cursorPos)
+    })
+  }
+
+  function insertLinePrefix(prefix: string) {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1
+
+    const newValue = value.slice(0, lineStart) + prefix + value.slice(lineStart)
+    onChange(newValue)
+
+    requestAnimationFrame(() => {
+      textarea.focus()
+      const cursorPos = start + prefix.length
+      textarea.setSelectionRange(cursorPos, cursorPos)
+    })
+  }
+
+  const btnStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    border: '1px solid #ddd',
+    background: '#fff',
+    color: '#444',
+    cursor: 'pointer',
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+      <button type="button" onClick={() => wrapSelection('**')} style={btnStyle} title="Bold">
+        <Bold size={13} />
+      </button>
+      <button type="button" onClick={() => insertLinePrefix('- ')} style={btnStyle} title="Bullet point">
+        <List size={13} />
+      </button>
+    </div>
+  )
 }
 
 // ── Three-dot menu component ──────────────────────────────────────────────────
@@ -87,6 +160,7 @@ function EditItemModal({ item, restaurantId, onSave, onClose }: {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const supabase = createClient()
 
   async function handleImageUpload(file: File) {
@@ -129,7 +203,19 @@ function EditItemModal({ item, restaurantId, onSave, onClose }: {
           </div>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#444', display: 'block', marginBottom: 5 }}>Description</label>
-            <input style={inputStyle} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional" />
+            <MiniMarkdownToolbar
+              textareaRef={descriptionRef}
+              value={form.description}
+              onChange={(value) => setForm(f => ({ ...f, description: value }))}
+            />
+            <textarea
+              ref={descriptionRef}
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Optional"
+              rows={3}
+              style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: 1.5 }}
+            />
           </div>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#444', display: 'block', marginBottom: 5 }}>Price</label>
@@ -187,6 +273,7 @@ export default function MenuManager({ restaurant, initialCategories }: {
   const [editingItem, setEditingItem] = useState<{ item: MenuItem; categoryId: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ message: string; onConfirm: () => void } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const newItemDescriptionRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const supabase = createClient()
   const router = useRouter()
 
@@ -426,7 +513,7 @@ export default function MenuManager({ restaurant, initialCategories }: {
 
               <div style={{ flex: 1 }}>
                 <p style={{ margin: 0, fontWeight: 500, color: item.is_available ? '#0D1B2A' : '#aaa' }}>{item.name}</p>
-                {item.description && <p style={{ margin: '2px 0 0', fontSize: 13, color: '#888' }}>{item.description}</p>}
+                {item.description && <p style={{ margin: '2px 0 0', fontSize: 13, color: '#888', whiteSpace: 'pre-line' as const }}>{item.description}</p>}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -456,7 +543,21 @@ export default function MenuManager({ restaurant, initialCategories }: {
           {addingItem === category.id ? (
             <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
               <input type="text" placeholder="Item name *" value={newItems[category.id]?.name || ''} onChange={e => setNewItems({ ...newItems, [category.id]: { ...newItems[category.id], name: e.target.value } })} style={inputStyle} />
-              <input type="text" placeholder="Description" value={newItems[category.id]?.description || ''} onChange={e => setNewItems({ ...newItems, [category.id]: { ...newItems[category.id], description: e.target.value } })} style={inputStyle} />
+
+              <MiniMarkdownToolbar
+                textareaRef={{ current: newItemDescriptionRefs.current[category.id] }}
+                value={newItems[category.id]?.description || ''}
+                onChange={(value) => setNewItems({ ...newItems, [category.id]: { ...newItems[category.id], description: value } })}
+              />
+              <textarea
+                ref={el => { newItemDescriptionRefs.current[category.id] = el }}
+                placeholder="Description"
+                value={newItems[category.id]?.description || ''}
+                onChange={e => setNewItems({ ...newItems, [category.id]: { ...newItems[category.id], description: e.target.value } })}
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: 1.5 }}
+              />
+
               <input type="number" placeholder="Price" value={newItems[category.id]?.price || ''} onChange={e => setNewItems({ ...newItems, [category.id]: { ...newItems[category.id], price: e.target.value } })} style={inputStyle} />
 
               <div
@@ -498,4 +599,3 @@ export default function MenuManager({ restaurant, initialCategories }: {
     </div>
   )
 }
-

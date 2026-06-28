@@ -16,9 +16,9 @@ interface TierData {
 }
 
 const STATIC_FEATURES = [
-  'Your storefront live at — menuberg.com/yourname',
-  'High-quality QR codes to print on tables and packaging',
+  'Your storefront live at — menuberg.com/restaurant-name',
   'Unlimited categories, items, and photos',
+  'High-quality QR codes to print on tables and packaging',
   'An affordable digital presence that works just like a website',
   'Complete pages featuring your Menu, About section, and Contact info',
   'Instant updates to change prices or hide sold-out items',
