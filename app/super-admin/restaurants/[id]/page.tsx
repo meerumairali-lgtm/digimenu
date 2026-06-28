@@ -17,6 +17,7 @@ import {
   Hash,
   User,
   Calendar,
+  Flag,
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -29,6 +30,7 @@ export default async function RestaurantDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -50,7 +52,7 @@ export default async function RestaurantDetailPage({
 
   if (!restaurant) notFound()
 
-  const [{ count: categoryCount }, { count: itemCount }] = await Promise.all([
+  const [{ count: categoryCount }, { count: itemCount }, { data: payments }] = await Promise.all([
     supabase
       .from('categories')
       .select('*', { count: 'exact', head: true })
@@ -59,7 +61,23 @@ export default async function RestaurantDetailPage({
       .from('menu_items')
       .select('*', { count: 'exact', head: true })
       .eq('restaurant_id', restaurant.id),
+    supabase
+      .from('payments')
+      .select('amount, currency, type, status, created_at')
+      .eq('restaurant_id', restaurant.id)
+      .order('created_at', { ascending: false }),
   ])
+
+  const lastPayment = payments?.[0] ?? null
+  const totalPaid = (payments ?? [])
+    .filter((p) => p.status === 'completed')
+    .reduce((sum, p) => sum + (p.amount ?? 0), 0)
+
+  const isInTrial = restaurant.subscription_status === 'pending' && !!restaurant.trial_started_at
+  const trialDaysElapsed = isInTrial
+    ? Math.floor((Date.now() - new Date(restaurant.trial_started_at).getTime()) / (1000 * 60 * 60 * 24))
+    : null
+  const trialDaysLeft = trialDaysElapsed !== null ? Math.max(0, 7 - trialDaysElapsed) : null
 
   const infoRows = [
     { label: 'Restaurant ID', value: restaurant.id, icon: Hash, mono: true },
@@ -69,12 +87,13 @@ export default async function RestaurantDetailPage({
       value: new Date(restaurant.created_at).toLocaleString('en-GB'),
       icon: Calendar,
     },
+    { label: 'Country', value: restaurant.country, icon: Flag },
     { label: 'Address', value: restaurant.address, icon: MapPin },
     { label: 'Phone', value: restaurant.phone, icon: Phone },
     { label: 'Email', value: restaurant.email, icon: Mail },
     { label: 'WhatsApp', value: restaurant.whatsapp, icon: MessageCircle },
-   { label: 'Instagram', value: restaurant.instagram, icon: Share2 },
-{ label: 'Facebook', value: restaurant.facebook, icon: Globe },
+    { label: 'Instagram', value: restaurant.instagram, icon: Share2 },
+    { label: 'Facebook', value: restaurant.facebook, icon: Globe },
     { label: 'Theme', value: restaurant.theme, icon: Palette },
     { label: 'Layout', value: restaurant.layout, icon: LayoutTemplate },
     { label: 'Currency', value: restaurant.currency, icon: DollarSign },
@@ -115,7 +134,6 @@ export default async function RestaurantDetailPage({
           )}
         </div>
 
-        {/* FIXED LINK */}
         <Link
           href={`/${restaurant.slug}`}
           target="_blank"
@@ -191,8 +209,60 @@ export default async function RestaurantDetailPage({
 
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-400">Plan</span>
-                <span className="text-xs bg-gray-700 text-gray-400 px-2 py-1 rounded-full">
-                  Free
+                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full uppercase">
+                  {restaurant.pricing_tier === 'tier_b' ? 'Tier B' : 'Tier A'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Billing */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+              Billing
+            </h2>
+
+            <div className="space-y-3">
+              {isInTrial && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-400">Trial</span>
+                  <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded-full">
+                    {trialDaysLeft} day{trialDaysLeft === 1 ? '' : 's'} left
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Status</span>
+                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full capitalize">
+                  {restaurant.bypass_payment ? 'VIP' : restaurant.subscription_status?.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Next payment</span>
+                <span className="text-sm text-white">
+                  {restaurant.next_billed_at
+                    ? new Date(restaurant.next_billed_at).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                      })
+                    : '—'}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Last payment</span>
+                <span className="text-sm text-white">
+                  {lastPayment
+                    ? `$${lastPayment.amount.toFixed(2)} — ${new Date(lastPayment.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                    : '—'}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t border-gray-800">
+                <span className="text-sm text-gray-400">Total paid</span>
+                <span className="text-sm font-semibold text-white">
+                  {totalPaid > 0 ? `$${totalPaid.toFixed(2)}` : '—'}
                 </span>
               </div>
             </div>
