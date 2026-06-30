@@ -6,6 +6,7 @@ import { Country, State, City } from 'country-state-city'
 import SearchableSelect from '../SearchableSelect'
 import { isReservedSlug } from '@/lib/reservedSlugs'
 import MarkdownEditor from '@/app/components/MarkdownEditor'
+import { Pencil } from 'lucide-react'
 
 const ALL_COUNTRIES = Country.getAllCountries()
 
@@ -122,6 +123,9 @@ export default function SettingsPage() {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([])
   const [heroUploadingIndex, setHeroUploadingIndex] = useState<number | null>(null)
   const heroFileRefs = useRef<Record<number, HTMLInputElement | null>>({})
+
+  const [editingSlug, setEditingSlug] = useState(false)
+  const [showSlugWarning, setShowSlugWarning] = useState(false)
 
   const supabase = createClient()
   const router = useRouter()
@@ -468,12 +472,70 @@ export default function SettingsPage() {
                 <input style={inputStyle} value={form.tagline} onChange={e => setForm({ ...form, tagline: e.target.value })} placeholder="Taste the Spice!" />
               </div>
               <div>
-                <label style={labelStyle}>Menu URL slug</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
-                  <input style={{ ...inputStyle, flex: 1 }} value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} required />
-                </div>
+                <label style={labelStyle}>Website URL</label>
+                {!editingSlug ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', background: '#f8fafc' }}>
+                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
+                    <span style={{ fontSize: 14, color: '#0D1B2A', fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{form.slug}</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowSlugWarning(true)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#38BDF8', flexShrink: 0, display: 'flex', alignItems: 'center' }}
+                      title="Change menu URL"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
+                    <input
+                      autoFocus
+                      style={{ ...inputStyle, flex: 1 }}
+                      value={form.slug}
+                      onChange={e => setForm({ ...form, slug: e.target.value })}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditingSlug(false)}
+                      style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontSize: 13, flexShrink: 0 }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#888' }}>
+                  This is your menu's public web address.
+                </p>
               </div>
+
+              {showSlugWarning && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, padding: 28, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+                    <h3 style={{ margin: '0 0 12px', color: '#0D1B2A', fontSize: 17 }}>Change your menu URL?</h3>
+                    <p style={{ margin: '0 0 24px', fontSize: 14, color: '#555', lineHeight: 1.6 }}>
+                      Changing your URL will break any printed QR codes, shared links, or bookmarks customers already have for <strong>menuberg.com/{form.slug}</strong>. Only continue if you're sure.
+                    </p>
+                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowSlugWarning(false)}
+                        style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontSize: 14 }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowSlugWarning(false); setEditingSlug(true) }}
+                        style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}
+                      >
+                        Yes, I understand
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -482,7 +544,7 @@ export default function SettingsPage() {
         <div style={{ display: activeTab === 'cover' ? 'flex' : 'none', flexDirection: 'column', gap: 20 }}>
           <div style={sectionStyle}>
             <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Logo</h3>
-            <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown next to your restaurant name on the menu page</p>
+            <p style={{ margin: '0 0 14px', fontSize: 13, color: '#888' }}>Shown next to your restaurant name on the web page</p>
             <div
               onClick={() => logoFileRef.current?.click()}
               style={{ border: '1px dashed #bae6fd', borderRadius: 8, padding: 14, textAlign: 'center', cursor: 'pointer', background: '#f0f9ff' }}
@@ -504,7 +566,7 @@ export default function SettingsPage() {
           <div style={sectionStyle}>
             <h3 style={{ margin: '0 0 4px', fontSize: 15, color: '#0D1B2A' }}>Website Cover Slides{required}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>
-              The rotating images customers see first. We've started you off with 2 sample images — replace them anytime. Add {MIN_HERO_SLIDES}–{MAX_HERO_SLIDES} images. For best results use landscape photos around 1600×900px.
+              Add {MIN_HERO_SLIDES}–{MAX_HERO_SLIDES} landscape images (recommended: 1600×900px). We've included 2 sample images to get you started—replace them anytime.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
