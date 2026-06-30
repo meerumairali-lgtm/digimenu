@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 export type SearchableOption = {
   value: string
   label: string
+  key?: string
 }
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
   disabled?: boolean
   variant?: 'light' | 'dark'
   width?: string | number
+  selectedLabelOverride?: string
 }
 
 export default function SearchableSelect({
@@ -26,6 +28,7 @@ export default function SearchableSelect({
   disabled = false,
   variant = 'light',
   width = '100%',
+  selectedLabelOverride,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -103,7 +106,7 @@ export default function SearchableSelect({
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {selected ? selected.label : placeholder}
+          {selectedLabelOverride || (selected ? selected.label : placeholder)}
         </span>
         <span style={{ color: dark ? '#7DD3FC' : '#999', fontSize: 11, marginLeft: 8, flexShrink: 0 }}>▼</span>
       </div>
@@ -145,7 +148,7 @@ export default function SearchableSelect({
             )}
             {filtered.map((opt, i) => (
               <div
-                key={opt.value}
+                key={opt.key || opt.value}
                 onClick={() => selectOption(opt)}
                 onMouseEnter={() => setHighlight(i)}
                 style={{

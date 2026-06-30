@@ -46,77 +46,125 @@ const themes: Record<string, {
   navBg: string; navText: string; navMuted: string
   priceBg: string; priceText: string
   heroOverlayFrom: string; heroOverlayTo: string
-  shadow: string; shadowHover: string
+  shadow: string
   font: string
 }> = {
   light: {
-    bg: '#F9F6F0', surface: '#FFFFFF', surfaceRaised: '#FFFFFF', text: '#1E1B18', subtext: '#6E6A66',
-    border: 'rgba(30,27,24,0.06)', accent: '#E06B43', accentSoft: 'rgba(224,107,67,0.08)', accentText: '#FFFFFF',
-    navBg: 'rgba(255,255,255,0.85)', navText: '#1E1B18', navMuted: '#948F8A',
-    priceBg: 'rgba(224,107,67,0.08)', priceText: '#C8532B',
-    heroOverlayFrom: 'rgba(30,27,24,0.1)', heroOverlayTo: 'rgba(18,16,14,0.75)',
-    shadow: '0 4px 20px -4px rgba(30,27,24,0.04), 0 12px 40px -8px rgba(30,27,24,0.08)',
-    shadowHover: '0 8px 30px -4px rgba(224,107,67,0.12), 0 20px 50px -12px rgba(30,27,24,0.16)',
-    font: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    bg: '#FAF8F5', surface: '#FFFFFF', surfaceRaised: '#FFFFFF', text: '#1C1917', subtext: '#78716C',
+    border: 'rgba(28,25,23,0.07)', accent: '#D97757', accentSoft: 'rgba(217,119,87,0.12)', accentText: '#FFFFFF',
+    navBg: 'rgba(255,255,255,0.92)', navText: '#1C1917', navMuted: '#9C9893',
+    priceBg: 'rgba(217,119,87,0.10)', priceText: '#B25B3F',
+    heroOverlayFrom: 'rgba(20,16,14,0.05)', heroOverlayTo: 'rgba(20,16,14,0.7)',
+    shadow: '0 8px 30px -8px rgba(28,25,23,0.12)',
+    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
   dark: {
-    bg: '#0F0E13', surface: '#17161D', surfaceRaised: '#201F27', text: '#F5F4F7', subtext: '#9894A0',
-    border: 'rgba(255,255,255,0.06)', accent: '#F0A93C', accentSoft: 'rgba(240,169,60,0.1)', accentText: '#0F0E13',
-    navBg: 'rgba(15,14,19,0.82)', navText: '#F5F4F7', navMuted: '#6C6877',
-    priceBg: 'rgba(240,169,60,0.12)', priceText: '#F0A93C',
-    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(10,9,14,0.9)',
-    shadow: '0 4px 24px -6px rgba(0,0,0,0.5), 0 16px 48px -12px rgba(0,0,0,0.7)',
-    shadowHover: '0 8px 32px -4px rgba(240,169,60,0.15), 0 24px 60px -10px rgba(0,0,0,0.8)',
-    font: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    bg: '#16151A', surface: '#1F1E24', surfaceRaised: '#26252C', text: '#F2EFEA', subtext: '#9A968F',
+    border: 'rgba(255,255,255,0.07)', accent: '#E8A33D', accentSoft: 'rgba(232,163,61,0.14)', accentText: '#16151A',
+    navBg: 'rgba(22,21,26,0.9)', navText: '#F2EFEA', navMuted: '#75726C',
+    priceBg: 'rgba(232,163,61,0.14)', priceText: '#E8A33D',
+    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(10,9,7,0.82)',
+    shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
+    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
   gold: {
-    bg: '#0B0906', surface: '#14100A', surfaceRaised: '#1C170F', text: '#F4E8D1', subtext: '#AA9C84',
-    border: 'rgba(218,165,32,0.12)', accent: '#E1A926', accentSoft: 'rgba(225,169,38,0.1)', accentText: '#0B0906',
-    navBg: 'rgba(11,9,6,0.85)', navText: '#F4E8D1', navMuted: '#7A6E59',
-    priceBg: 'rgba(225,169,38,0.12)', priceText: '#E1A926',
-    heroOverlayFrom: 'rgba(0,0,0,0.3)', heroOverlayTo: 'rgba(11,9,6,0.95)',
-    shadow: '0 4px 24px -4px rgba(0,0,0,0.6)',
-    shadowHover: '0 8px 36px -2px rgba(225,169,38,0.15), 0 20px 50px -8px rgba(0,0,0,0.8)',
-    font: '"Playfair Display", "Georgia", serif',
+    bg: '#0E0B05', surface: '#181206', surfaceRaised: '#201805', text: '#F5E6C8', subtext: '#A6936B',
+    border: 'rgba(212,160,23,0.14)', accent: '#D4A017', accentSoft: 'rgba(212,160,23,0.14)', accentText: '#15110A',
+    navBg: 'rgba(14,11,5,0.92)', navText: '#F5E6C8', navMuted: '#8A7A54',
+    priceBg: 'rgba(212,160,23,0.14)', priceText: '#D4A017',
+    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(8,6,2,0.85)',
+    shadow: '0 8px 30px -8px rgba(0,0,0,0.6)',
+    font: '"Georgia", "Iowan Old Style", serif',
   },
   vibrant: {
-    bg: '#070F1E', surface: '#0F1A30', surfaceRaised: '#172440', text: '#F8FAFC', subtext: '#94A3B8',
-    border: 'rgba(56,189,248,0.08)', accent: '#38BDF8', accentSoft: 'rgba(56,189,248,0.1)', accentText: '#070F1E',
-    navBg: 'rgba(7,15,30,0.85)', navText: '#F8FAFC', navMuted: '#475569',
-    priceBg: 'rgba(56,189,248,0.12)', priceText: '#38BDF8',
-    heroOverlayFrom: 'rgba(0,0,0,0.2)', heroOverlayTo: 'rgba(7,15,30,0.92)',
-    shadow: '0 4px 24px -6px rgba(0,0,0,0.4), 0 16px 40px -12px rgba(0,0,0,0.6)',
-    shadowHover: '0 4px 30px -2px rgba(56,189,248,0.25), 0 20px 50px -10px rgba(0,0,0,0.7)',
-    font: '"Plus Jakarta Sans", -apple-system, sans-serif',
+    bg: '#0F172A', surface: '#1A2436', surfaceRaised: '#202B40', text: '#F1F5F9', subtext: '#8B98AC',
+    border: 'rgba(255,255,255,0.08)', accent: '#38BDF8', accentSoft: 'rgba(56,189,248,0.14)', accentText: '#0D1B2A',
+    navBg: 'rgba(15,23,42,0.9)', navText: '#F1F5F9', navMuted: '#5B6B82',
+    priceBg: 'rgba(255,107,91,0.14)', priceText: '#FF8A77',
+    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(6,10,20,0.82)',
+    shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
+    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
   },
 }
 
-const EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-const TOPBAR_HEIGHT = 68
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
+const TOPBAR_HEIGHT = 58
 
+// Restaurant name shrinks in steps as it gets longer, so long names
+// stay fully visible (no ellipsis) instead of crowding the nav.
+// Ellipsis remains as a final safety net only for extreme lengths.
 function nameFontSize(name: string): number {
   const len = name.length
-  if (len <= 16) return 17
-  if (len <= 24) return 15
-  return 13
+  if (len <= 16) return 15
+  if (len <= 24) return 13
+  if (len <= 32) return 12
+  return 10.5
 }
 
-// Icons remain static structured assets
-function CloseIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg> }
-function PlateIcon() { return <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg> }
-function MenuIconSvg() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg> }
-function InfoIconSvg() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg> }
-function ContactIconSvg() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l9 6 9-6M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg> }
+function socialBtn(bg: string): React.CSSProperties {
+  return {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 46, height: 46, borderRadius: '50%',
+    background: bg, color: '#fff', textDecoration: 'none', flexShrink: 0,
+  }
+}
 
+function WhatsAppIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+}
+function InstagramIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
+}
+function FacebookIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+}
+function PhoneIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
+}
+function MapPinIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+}
+function EmailIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
+}
+function ClockIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" /></svg>
+}
+function CloseIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+}
+function BackIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+}
+function PlateIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /></svg>
+}
+function MenuIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+}
+function InfoIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+}
+function ContactIconSvg() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l9 6 9-6M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
+}
+
+// ─────────────────────────────────────────────────────────────
+// Renders item descriptions with limited markdown: bold + bullet
+// lists + line breaks only (no headings, no italic — kept simple
+// on purpose, since descriptions are short). Used in spots where
+// the full description is shown (popup, classic, swipe).
+// ─────────────────────────────────────────────────────────────
 function DescriptionText({ text, style }: { text: string; style?: React.CSSProperties }) {
   return (
     <div style={style}>
       <ReactMarkdown
         components={{
-          p: ({ children }) => <p style={{ margin: 0, marginBottom: 6 }}>{children}</p>,
-          ul: ({ children }) => <ul style={{ margin: '6px 0', paddingLeft: 16 }}>{children}</ul>,
-          li: ({ children }) => <li style={{ marginBottom: 4 }}>{children}</li>,
-          strong: ({ children }) => <strong style={{ fontWeight: 600, color: 'var(--text)' }}>{children}</strong>,
+          p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
+          ul: ({ children }) => <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{children}</ul>,
+          li: ({ children }) => <li style={{ marginBottom: 2 }}>{children}</li>,
+          strong: ({ children }) => <strong>{children}</strong>,
         }}
       >
         {text}
@@ -125,6 +173,22 @@ function DescriptionText({ text, style }: { text: string; style?: React.CSSPrope
   )
 }
 
+// Strips markdown symbols down to flat text for truncated previews
+// (list/cards layouts use line-clamp, which doesn't play well with
+// mixed block elements like a paragraph + bullet list together).
+function flattenDescription(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')   // bold
+    .replace(/^[-*]\s+/gm, '')         // bullet markers
+    .replace(/\n+/g, ' ')              // line breaks -> space
+    .trim()
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOP BAR — sticky at top: 0, always visible. Logo + name act as
+// a "home" button (returns to menu view). Name font scales down
+// for long names instead of truncating.
+// ─────────────────────────────────────────────────────────────
 function TopBar({
   restaurant, view, onChange, hasAbout, hasContact, t,
 }: {
@@ -142,69 +206,104 @@ function TopBar({
 
   return (
     <div
-      className="modern-topbar"
+      className="menuberg-topbar"
       style={{
         position: 'sticky', top: 0, zIndex: 200, height: TOPBAR_HEIGHT,
-        background: t.navBg, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+        background: t.navBg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: `1px solid ${t.border}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px', transition: `background 0.3s ${EASE}`,
+        padding: '0 14px',
       }}
     >
+      <style>{`
+        /* Desktop default: full text labels, no icons */
+        .menuberg-nav-desktop { display: flex; }
+        .menuberg-nav-mobile { display: none; }
+
+        /* Below 640px: switch to icon + tiny label stack, since
+           that's where a long restaurant name plus three text
+           buttons starts to crowd the bar. */
+        @media (max-width: 640px) {
+          .menuberg-nav-desktop { display: none; }
+          .menuberg-nav-mobile { display: flex; }
+        }
+      `}</style>
+
       <button
         onClick={() => onChange('menu')}
-        className="interactive-action"
         style={{
-          display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1,
+          display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1,
           background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left',
         }}
       >
         {restaurant.logo_url ? (
-          <img src={restaurant.logo_url} alt="" style={{ width: 36, height: 36, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
+          <img src={restaurant.logo_url} alt="" style={{ width: 30, height: 30, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{
-            width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+            width: 30, height: 30, borderRadius: 9, flexShrink: 0,
             background: t.accentSoft, color: t.accent,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /></svg>
           </div>
         )}
         <span style={{
-          fontWeight: 700, fontSize: nameFontSize(restaurant.name), color: t.navText, letterSpacing: '-0.3px',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: t.font
+          fontWeight: 600, fontSize: nameFontSize(restaurant.name), color: t.navText, letterSpacing: '-0.1px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>{restaurant.name}</span>
       </button>
 
       {items.length > 1 && (
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-          {items.map(item => {
-            const isSelected = view === item.key
-            return (
+        <>
+          {/* Desktop: full text pills, same treatment as before */}
+          <div className="menuberg-nav-desktop" style={{ gap: 2, flexShrink: 0 }}>
+            {items.map(item => (
               <button
                 key={item.key}
                 onClick={() => onChange(item.key)}
-                className={`nav-pill-btn ${isSelected ? 'active' : ''}`}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '10px 18px', border: 'none', borderRadius: 99,
-                  background: isSelected ? t.accent : 'transparent',
-                  color: isSelected ? t.accentText : t.navMuted,
-                  fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  fontFamily: t.font, transition: `all 0.25s ${EASE}`,
+                  padding: '8px 16px', border: 'none', borderRadius: 999,
+                  background: view === item.key ? t.accent : 'transparent',
+                  color: view === item.key ? t.accentText : t.navMuted,
+                  fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
+                  fontFamily: t.font, transition: `all 0.2s ${EASE}`,
+                }}
+              >{item.label}</button>
+            ))}
+          </div>
+
+          {/* Mobile: icon + tiny label stacked, compact but unambiguous */}
+          <div className="menuberg-nav-mobile" style={{ gap: 2, flexShrink: 0 }}>
+            {items.map(item => (
+              <button
+                key={item.key}
+                onClick={() => onChange(item.key)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                  padding: '5px 9px', border: 'none', borderRadius: 10,
+                  background: view === item.key ? t.accent : 'transparent',
+                  color: view === item.key ? t.accentText : t.navMuted,
+                  cursor: 'pointer', fontFamily: t.font,
+                  transition: `all 0.2s ${EASE}`,
                 }}
               >
                 {item.icon}
-                <span className="nav-label-text">{item.label}</span>
+                <span style={{ fontSize: 8.5, fontWeight: 600, lineHeight: 1 }}>{item.label}</span>
               </button>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// HERO CAROUSEL — auto-rotates AND is manually swipeable. A swipe
+// (or drag) interrupts the auto-timer and jumps straight to the
+// target slide rather than waiting out the loop. Title (left,
+// larger) + short description (left, smaller) per slide.
+// ─────────────────────────────────────────────────────────────
 function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof themes.light }) {
   const slides = (restaurant.hero_slides || []).filter(s => s.image_url)
   const [index, setIndex] = useState(0)
@@ -213,18 +312,36 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
 
   useEffect(() => {
     if (slides.length < 2) return
-    const id = setInterval(() => setIndex(i => (i + 1) % slides.length), 5000)
+    const id = setInterval(() => setIndex(i => (i + 1) % slides.length), 4500)
     return () => clearInterval(id)
-  }, [slides.length])
+  }, [slides.length, index])
 
   function goTo(next: number) {
-    setIndex((next + slides.length) % slides.length)
+    const wrapped = (next + slides.length) % slides.length
+    setIndex(wrapped)
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+    touchDeltaX.current = 0
+  }
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current
+  }
+  function handleTouchEnd() {
+    if (Math.abs(touchDeltaX.current) > 40) {
+      // Swiped left -> next slide. Swiped right -> previous slide.
+      goTo(touchDeltaX.current < 0 ? index + 1 : index - 1)
+    }
+    touchStartX.current = null
+    touchDeltaX.current = 0
   }
 
   if (slides.length === 0) {
     return (
       <div style={{
-        height: 240, background: `radial-gradient(circle at 50% 50%, ${t.accentSoft}, transparent 70%), ${t.surfaceRaised}`,
+        height: 220, background: `radial-gradient(circle at 30% 20%, ${t.accentSoft}, transparent 60%), linear-gradient(160deg, ${t.surfaceRaised}, ${t.bg})`,
         display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.accent,
       }}><PlateIcon /></div>
     )
@@ -234,10 +351,10 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
 
   return (
     <div
-      style={{ position: 'relative', height: 320, overflow: 'hidden', background: t.surface, touchAction: 'pan-y' }}
-      onTouchStart={e => { touchStartX.current = e.touches[0].clientX; touchDeltaX.current = 0 }}
-      onTouchMove={e => { if (touchStartX.current !== null) touchDeltaX.current = e.touches[0].clientX - touchStartX.current }}
-      onTouchEnd={() => { if (Math.abs(touchDeltaX.current) > 40) goTo(touchDeltaX.current < 0 ? index + 1 : index - 1); touchStartX.current = null }}
+      style={{ position: 'relative', height: 260, overflow: 'hidden', background: t.surface, touchAction: 'pan-y' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {slides.map((slide, i) => (
         <div
@@ -245,35 +362,63 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
           style={{
             position: 'absolute', inset: 0,
             backgroundImage: `url(${slide.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center',
-            opacity: i === index ? 1 : 0, transform: i === index ? 'scale(1)' : 'scale(1.04)',
-            transition: `opacity 0.8s ${EASE}, transform 0.8s ${EASE}`,
+            opacity: i === index ? 1 : 0,
+            transition: `opacity 0.6s ${EASE}`,
           }}
         />
       ))}
 
-      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${t.heroOverlayFrom} 0%, ${t.heroOverlayTo} 100%)` }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `linear-gradient(180deg, ${t.heroOverlayFrom} 0%, ${t.heroOverlayTo} 100%)`,
+      }} />
 
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 24px 32px', textAlign: 'left', zIndex: 3 }}>
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={() => goTo(index - 1)}
+            aria-label="Previous"
+            style={{
+              position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 32, height: 32, borderRadius: '50%', border: 'none',
+              background: 'rgba(0,0,0,0.32)', color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
+            }}
+          ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+          <button
+            onClick={() => goTo(index + 1)}
+            aria-label="Next"
+            style={{
+              position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 32, height: 32, borderRadius: '50%', border: 'none',
+              background: 'rgba(0,0,0,0.32)', color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
+            }}
+          ><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg></button>
+        </>
+      )}
+
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 20px 24px', textAlign: 'left' }}>
         {current?.title && (
-          <h1 style={{
-            margin: '0 0 8px', color: '#FFFFFF', fontSize: 26, fontWeight: 800, lineHeight: 1.2,
-            maxWidth: 400, letterSpacing: '-0.5px', textShadow: '0 4px 16px rgba(0,0,0,0.3)', fontFamily: t.font
-          }}>{current.title}</h1>
+          <p style={{
+            margin: '0 0 4px', color: '#FFFFFF', fontSize: 19, fontWeight: 700, lineHeight: 1.3,
+            maxWidth: 320, textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          }}>{current.title}</p>
         )}
         {current?.caption && (
           <p style={{
-            margin: 0, color: 'rgba(255,255,255,0.80)', fontSize: 14, fontWeight: 400, lineHeight: 1.5,
-            maxWidth: 360, textShadow: '0 2px 8px rgba(0,0,0,0.3)', fontFamily: t.font
+            margin: 0, color: 'rgba(255,255,255,0.85)', fontSize: 12.5, fontWeight: 400, lineHeight: 1.45,
+            maxWidth: 300, textShadow: '0 1px 8px rgba(0,0,0,0.4)',
           }}>{current.caption}</p>
         )}
       </div>
 
       {slides.length > 1 && (
-        <div style={{ position: 'absolute', bottom: 32, right: 24, display: 'flex', gap: 6, zIndex: 4 }}>
+        <div style={{ position: 'absolute', bottom: 10, right: 16, display: 'flex', gap: 6, zIndex: 2 }}>
           {slides.map((_, i) => (
             <div key={i} onClick={() => goTo(i)} style={{
-              width: i === index ? 24 : 6, height: 6, borderRadius: 3, cursor: 'pointer',
-              background: i === index ? '#fff' : 'rgba(255,255,255,0.35)',
+              width: i === index ? 16 : 5, height: 5, borderRadius: 3, cursor: 'pointer',
+              background: i === index ? '#fff' : 'rgba(255,255,255,0.4)',
               transition: `all 0.3s ${EASE}`,
             }} />
           ))}
@@ -283,6 +428,12 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// CATEGORY PILLS — centered, sticky under the top bar, and now
+// keeps the active pill scrolled into view automatically whether
+// the active category changed by scrolling the page OR by a
+// direct pill click.
+// ─────────────────────────────────────────────────────────────
 function CategoryPills({
   categories, active, onSelect, t,
 }: {
@@ -297,6 +448,8 @@ function CategoryPills({
     if (!track || !pill) return
     const trackRect = track.getBoundingClientRect()
     const pillRect = pill.getBoundingClientRect()
+    // Only scroll if the active pill isn't already fully visible —
+    // avoids fighting a scroll the user is mid-way through themselves.
     if (pillRect.left < trackRect.left || pillRect.right > trackRect.right) {
       const offset = pill.offsetLeft - (track.clientWidth - pill.clientWidth) / 2
       track.scrollTo({ left: offset, behavior: 'smooth' })
@@ -308,12 +461,12 @@ function CategoryPills({
     <div style={{
       position: 'sticky', top: TOPBAR_HEIGHT, zIndex: 100,
       background: t.bg, borderBottom: `1px solid ${t.border}`,
-      paddingTop: 12, paddingBottom: 12, backdropFilter: 'blur(10px)'
+      paddingTop: 10, paddingBottom: 10,
     }}>
       <div
         ref={trackRef}
         style={{
-          display: 'flex', gap: 8, overflowX: 'auto', padding: '0 24px',
+          display: 'flex', gap: 8, overflowX: 'auto', padding: '0 20px',
           justifyContent: categories.length <= 4 ? 'center' : 'flex-start',
           scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
         }}
@@ -325,19 +478,16 @@ function CategoryPills({
               key={cat.id}
               ref={el => { pillRefs.current[cat.id] = el }}
               onClick={() => onSelect(cat.id)}
-              className={`category-pill-btn ${isActive ? 'active' : ''}`}
               style={{
-                flexShrink: 0, padding: '10px 20px', borderRadius: 99,
+                flexShrink: 0, padding: '8px 16px', borderRadius: 999,
                 border: `1px solid ${isActive ? 'transparent' : t.border}`,
                 background: isActive ? t.accent : t.surface,
                 color: isActive ? t.accentText : t.subtext,
-                fontSize: 14, fontWeight: 600, fontFamily: t.font,
+                fontSize: 13, fontWeight: 500, fontFamily: t.font,
                 cursor: 'pointer', whiteSpace: 'nowrap',
-                transition: `all 0.25s ${EASE}`,
+                transition: `all 0.2s ${EASE}`,
               }}
-            >
-              {cat.name}
-            </button>
+            >{cat.name}</button>
           )
         })}
       </div>
@@ -345,6 +495,9 @@ function CategoryPills({
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// ITEM DETAIL POPUP
+// ─────────────────────────────────────────────────────────────
 function ItemPopup({ item, t, currency, onClose }: {
   item: MenuItem; t: typeof themes.light; currency: string; onClose: () => void
 }) {
@@ -358,53 +511,54 @@ function ItemPopup({ item, t, currency, onClose }: {
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 1000,
-        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        background: 'rgba(10,9,8,0.55)', backdropFilter: 'blur(2px)',
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        animation: 'modernFadeIn 0.25s ease-out',
+        animation: 'menubergFadeIn 0.2s ease',
       }}
     >
+      <style>{`
+        @keyframes menubergFadeIn { from { opacity:0 } to { opacity:1 } }
+        @keyframes menubergSlideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+      `}</style>
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 500,
-          background: t.surfaceRaised, borderRadius: '32px 32px 0 0',
-          overflow: 'hidden', animation: `modernSlideUp 0.4s ${EASE}`,
-          maxHeight: '90vh', display: 'flex', flexDirection: 'column',
-          boxShadow: t.shadowHover, border: `1px solid ${t.border}`
+          width: '100%', maxWidth: 480,
+          background: t.surfaceRaised, borderRadius: '28px 28px 0 0',
+          overflow: 'hidden', animation: 'menubergSlideUp 0.35s cubic-bezier(0.32,0.72,0,1)',
+          maxHeight: '88vh', display: 'flex', flexDirection: 'column',
         }}
       >
         <div style={{ position: 'relative', flexShrink: 0 }}>
           {item.image_url ? (
-            <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 280, objectFit: 'cover', display: 'block' }} />
+            <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block' }} />
           ) : (
-            <div style={{ width: '100%', height: 180, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100%', height: 160, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <PlateIcon />
             </div>
           )}
           <button
             onClick={onClose}
-            className="popup-close-btn"
             aria-label="Close"
             style={{
-              position: 'absolute', top: 16, right: 16,
-              width: 38, height: 38, borderRadius: '50%',
-              background: 'rgba(0,0,0,0.5)', border: 'none',
+              position: 'absolute', top: 14, right: 14,
+              width: 34, height: 34, borderRadius: '50%',
+              background: 'rgba(15,13,11,0.45)', border: 'none',
               color: '#fff', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backdropFilter: 'blur(4px)', transition: `all 0.2s ${EASE}`
+              backdropFilter: 'blur(6px)',
             }}
           ><CloseIcon /></button>
         </div>
-        <div style={{ padding: '28px 28px 40px', overflowY: 'auto' }}>
+        <div style={{ padding: '22px 24px 36px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: t.text, lineHeight: 1.3, letterSpacing: '-0.4px', fontFamily: t.font }}>{item.name}</h2>
-            <span style={{ fontWeight: 700, fontSize: 16, color: t.priceText, background: t.priceBg, padding: '8px 16px', borderRadius: 12, whiteSpace: 'nowrap', flexShrink: 0, fontFamily: t.font }}>
+            <h2 style={{ margin: 0, fontSize: 21, fontWeight: 600, color: t.text, lineHeight: 1.35, flex: 1 }}>{item.name}</h2>
+            <span style={{ fontWeight: 600, fontSize: 16, color: t.priceText, background: t.priceBg, padding: '7px 14px', borderRadius: 10, whiteSpace: 'nowrap', flexShrink: 0 }}>
               {currency} {item.price}
             </span>
           </div>
           {item.description && (
-            <DescriptionText text={item.description} style={{ margin: '20px 0 0', fontSize: 15, color: t.subtext, lineHeight: 1.6, fontFamily: t.font }} />
+            <DescriptionText text={item.description} style={{ margin: '14px 0 0', fontSize: 14.5, color: t.subtext, lineHeight: 1.65 }} />
           )}
         </div>
       </div>
@@ -412,6 +566,9 @@ function ItemPopup({ item, t, currency, onClose }: {
   )
 }
 
+// ─────────────────────────────────────────────────────────────
+// SWIPE LAYOUT (menu items, unrelated to hero carousel)
+// ─────────────────────────────────────────────────────────────
 function SwipeCategory({ category, items, t, currency, onItemClick }: {
   category: Category; items: MenuItem[]; t: typeof themes.light; currency: string
   onItemClick: (item: MenuItem) => void
@@ -419,12 +576,20 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
+  function scrollTo(index: number) {
+    if (index < 0 || index >= items.length) return
+    const container = scrollRef.current
+    if (!container) return
+    const card = container.children[index] as HTMLElement
+    if (card) { container.scrollTo({ left: card.offsetLeft - 20, behavior: 'smooth' }); setActiveIndex(index) }
+  }
+
   function handleScroll() {
     const container = scrollRef.current
     if (!container) return
     const card = container.children[0] as HTMLElement
     if (!card) return
-    const cardWidth = card.offsetWidth + 16
+    const cardWidth = card.offsetWidth + 12
     const index = Math.round(container.scrollLeft / cardWidth)
     setActiveIndex(Math.min(Math.max(index, 0), items.length - 1))
   }
@@ -432,41 +597,48 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
   if (!items[0]) return null
 
   return (
-    <div style={{ paddingTop: 40 }}>
-      <h2 style={{ margin: '0 0 16px', padding: '0 24px', fontSize: 14, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: t.subtext, fontFamily: t.font }}>{category.name}</h2>
-      <div style={{ padding: '0 24px' }}>
-        <div ref={scrollRef} onScroll={handleScroll} style={{ display: 'flex', gap: 16, overflowX: 'auto', scrollbarWidth: 'none', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
+    <div style={{ paddingTop: 32 }}>
+      <h2 style={{ margin: '0 0 12px', padding: '0 20px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+      <div style={{ padding: '0 20px' }}>
+        <div ref={scrollRef} onScroll={handleScroll} style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollbarWidth: 'none' as any, scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' as any }}>
           {items.map((item) => (
             <div
               key={item.id} onClick={() => onItemClick(item)}
-              className="modern-interactive-card"
               style={{
-                width: 'calc(100% - 40px)', minWidth: 'calc(100% - 40px)', flexShrink: 0, scrollSnapAlign: 'center',
-                background: t.surface, borderRadius: 24, overflow: 'hidden', cursor: 'pointer',
-                border: `1px solid ${t.border}`, boxShadow: t.shadow, transition: `all 0.3s ${EASE}`
+                width: 'calc(100% - 32px)', minWidth: 'calc(100% - 32px)', flexShrink: 0, scrollSnapAlign: 'center',
+                background: t.surface, borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
+                border: `1px solid ${t.border}`, boxShadow: t.shadow,
               }}
             >
               {item.image_url ? (
-                <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }} />
+                <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 190, objectFit: 'cover', display: 'block' }} />
               ) : (
-                <div style={{ width: '100%', height: 160, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
+                <div style={{ width: '100%', height: 190, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
               )}
-              <div style={{ padding: '20px 22px 24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 17, color: t.text, lineHeight: 1.3, fontFamily: t.font }}>{item.name}</p>
-                  <span style={{ fontWeight: 700, fontSize: 14, color: t.priceText, background: t.priceBg, padding: '6px 12px', borderRadius: 8, whiteSpace: 'nowrap', fontFamily: t.font }}>{currency} {item.price}</span>
-                </div>
-                {item.description && <p style={{ margin: 0, fontSize: 13.5, color: t.subtext, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontFamily: t.font }}>{item.description}</p>}
+              <div style={{ padding: '16px 18px 20px' }}>
+                <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 15.5, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
+                {item.description && <DescriptionText text={item.description} style={{ margin: '0 0 12px', fontSize: 13, color: t.subtext, lineHeight: 1.5 }} />}
+                <span style={{ fontWeight: 600, fontSize: 14, color: t.priceText, background: t.priceBg, padding: '6px 13px', borderRadius: 8 }}>{currency} {item.price}</span>
               </div>
             </div>
           ))}
         </div>
       </div>
+      {items.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+          {items.map((_, i) => (
+            <div key={i} onClick={() => scrollTo(i)} style={{ width: activeIndex === i ? 18 : 6, height: 6, borderRadius: 3, background: activeIndex === i ? t.accent : t.border, cursor: 'pointer', transition: `all 0.25s ${EASE}` }} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-export default function MenuClient({ restaurant, categories }: { restaurant: Restaurant; categories: Category[] }) {
+export default function MenuClient({ restaurant, categories }: {
+  restaurant: Restaurant
+  categories: Category[]
+}) {
   const t = themes[restaurant.theme || 'light']
   const currency = restaurant.currency || 'PKR'
   const layout = restaurant.layout || 'classic'
@@ -482,7 +654,7 @@ export default function MenuClient({ restaurant, categories }: { restaurant: Res
 
   useEffect(() => {
     if (!activeCategory && availableCategories[0]) setActiveCategory(availableCategories[0].id)
-  }, [availableCategories, activeCategory])
+  }, [availableCategories])
 
   useEffect(() => {
     if (view !== 'menu') return
@@ -492,7 +664,7 @@ export default function MenuClient({ restaurant, categories }: { restaurant: Res
           if (entry.isIntersecting) setActiveCategory(entry.target.id)
         })
       },
-      { rootMargin: `-${TOPBAR_HEIGHT + 80}px 0px -50% 0px`, threshold: 0 }
+      { rootMargin: `-${TOPBAR_HEIGHT + 60}px 0px -60% 0px`, threshold: 0 }
     )
     availableCategories.forEach(c => {
       const el = sectionRefs.current[c.id]
@@ -505,130 +677,260 @@ export default function MenuClient({ restaurant, categories }: { restaurant: Res
     setActiveCategory(id)
     const el = sectionRefs.current[id]
     if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - TOPBAR_HEIGHT - 40
+      const y = el.getBoundingClientRect().top + window.scrollY - TOPBAR_HEIGHT - 56
       window.scrollTo({ top: y, behavior: 'smooth' })
     }
   }
 
-  return (
-    <div style={{ background: t.bg, minHeight: '100vh', color: t.text, fontFamily: t.font, transition: 'background 0.3s ease' }}>
-      
-      {/* 1,000/hr Global CSS Injector Engine Strategy */}
-      <style>{`
-        @keyframes modernFadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes modernSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .interactive-action { transition: transform 0.2s ${EASE}, opacity 0.2s ${EASE}; }
-        .interactive-action:hover { opacity: 0.85; transform: scale(1.01); }
-        .interactive-action:active { transform: scale(0.98); }
+  function changeView(next: 'menu' | 'about' | 'contact') {
+    setView(next)
+    window.scrollTo({ top: 0 })
+  }
 
-        .nav-pill-btn { position: relative; overflow: hidden; }
-        .nav-pill-btn:not(.active):hover { background: ${t.border} !important; color: ${t.text} !important; }
-        .nav-pill-btn:active { transform: scale(0.96); }
+  function PanelHeader({ title, onBack }: { title: string; onBack: () => void }) {
+    return (
+      <button
+        onClick={onBack}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22,
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          color: t.subtext, fontFamily: t.font,
+        }}
+      >
+        <span style={{ display: 'flex', color: t.text }}><BackIcon /></span>
+        <span style={{ fontSize: 19, fontWeight: 600, color: t.text }}>{title}</span>
+      </button>
+    )
+  }
 
-        @media (max-width: 640px) {
-          .nav-label-text { display: none; }
-          .nav-pill-btn { padding: 10px !important; }
-        }
+  const AboutPanel = () => (
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
+      <PanelHeader title="About us" onBack={() => changeView('menu')} />
 
-        .category-pill-btn:not(.active):hover { border-color: ${t.accent} !important; color: ${t.text} !important; }
-        .category-pill-btn:active { transform: scale(0.95); }
+      <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: '-0.3px' }}>{restaurant.name}</h1>
+      {restaurant.tagline && (
+        <p style={{ margin: '0 0 20px', fontSize: 14, color: t.subtext, lineHeight: 1.5 }}>{restaurant.tagline}</p>
+      )}
 
-        .modern-interactive-card { transition: transform 0.3s ${EASE}, box-shadow 0.3s ${EASE}, border-color 0.3s ${EASE} !important; }
-        .modern-interactive-card:hover { transform: translateY(-6px); box-shadow: ${t.shadowHover} !important; border-color: rgba(224,107,67,0.2) !important; }
-        .modern-interactive-card:active { transform: translateY(-2px) scale(0.99); }
+      {restaurant.about && (
+        <div style={{ background: t.surface, borderRadius: 20, padding: 22, marginBottom: 18, border: `1px solid ${t.border}` }}>
+          <div style={{ fontSize: 14.5, color: t.subtext, lineHeight: 1.75 }}>
+            <ReactMarkdown
+              components={{
+                h2: ({ children }) => <h2 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', color: t.text }}>{children}</h2>,
+                p: ({ children }) => <p style={{ margin: '0 0 10px' }}>{children}</p>,
+                ul: ({ children }) => <ul style={{ margin: '0 0 10px', paddingLeft: 20 }}>{children}</ul>,
+                li: ({ children }) => <li style={{ marginBottom: 4 }}>{children}</li>,
+                strong: ({ children }) => <strong style={{ color: t.text }}>{children}</strong>,
+              }}
+            >
+              {restaurant.about}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
 
-        .popup-close-btn:hover { background: rgba(0,0,0,0.7) !important; transform: scale(1.08); }
-        .popup-close-btn:active { transform: scale(0.92); }
-
-        /* Classic Layout Grid Modernized */
-        .modern-menu-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-          gap: 24px;
-          padding: 0 24px;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-      `}</style>
-
-      <TopBar restaurant={restaurant} view={view} onChange={setView} hasAbout={hasAbout} hasContact={hasContact} t={t} />
-
-      {view === 'menu' && (
-        <>
-          <HeroCarousel restaurant={restaurant} t={t} />
-          <CategoryPills categories={availableCategories} active={activeCategory} onSelect={scrollToCategory} t={t} />
-          
-          <div style={{ paddingBottom: 80, paddingTop: 16 }}>
-            {availableCategories.map(category => {
-              const items = category.menu_items.filter(i => i.is_available)
-              
-              if (layout === 'swipe') {
-                return (
-                  <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }}>
-                    <SwipeCategory category={category} items={items} t={t} currency={currency} onItemClick={setSelectedItem} />
-                  </div>
-                )
-              }
-
+      {restaurant.opening_hours && (
+        <div style={{ background: t.surface, borderRadius: 20, padding: 22, border: `1px solid ${t.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <span style={{ color: t.accent }}><ClockIcon /></span>
+            <h3 style={{ margin: 0, fontSize: 12.5, fontWeight: 600, color: t.text, letterSpacing: '0.4px', textTransform: 'uppercase' }}>Opening hours</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {DAYS.map(day => {
+              const hours = restaurant.opening_hours?.[day]
+              const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
+              const isToday = day === today
               return (
-                <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 48 }}>
-                  <h2 style={{ maxWidth: 1200, margin: '0 auto 20px', padding: '0 24px', fontSize: 15, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: t.subtext }}>
-                    {category.name}
-                  </h2>
-                  
-                  <div className="modern-menu-grid">
-                    {items.map(item => (
-                      <div
-                        key={item.id}
-                        onClick={() => setSelectedItem(item)}
-                        className="modern-interactive-card"
-                        style={{
-                          background: t.surface, borderRadius: 20, border: `1px solid ${t.border}`,
-                          boxShadow: t.shadow, overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column'
-                        }}
-                      >
-                        {item.image_url && (
-                          <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 200, objectFit: 'cover' }} />
-                        )}
-                        <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-                              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: t.text, lineHeight: 1.3 }}>{item.name}</h3>
-                              <span style={{ fontSize: 14, fontWeight: 700, color: t.priceText, background: t.priceBg, padding: '4px 10px', borderRadius: 8, whiteSpace: 'nowrap' }}>
-                                {currency} {item.price}
-                              </span>
-                            </div>
-                            {item.description && (
-                              <p style={{ margin: 0, fontSize: 13.5, color: t.subtext, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 12px', borderRadius: 12, background: isToday ? t.accentSoft : 'transparent' }}>
+                  <span style={{ fontSize: 13.5, fontWeight: isToday ? 600 : 400, color: isToday ? t.accent : t.text }}>{day}</span>
+                  <span style={{ fontSize: 13.5, color: hours?.closed ? t.subtext : (isToday ? t.accent : t.subtext), fontWeight: isToday ? 600 : 400 }}>
+                    {!hours || hours.closed ? 'Closed' : `${hours.open} – ${hours.close}`}
+                  </span>
                 </div>
               )
             })}
           </div>
-        </>
-      )}
-
-      {/* Fallback View Placeholders polished with modern metrics */}
-      {view !== 'menu' && (
-        <div style={{ padding: '60px 24px', maxWidth: 600, margin: '0 auto', animation: 'modernSlideUp 0.4s ease' }}>
-          <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 16 }}>{view === 'about' ? 'About Us' : 'Contact'}</h2>
-          <p style={{ color: t.subtext, lineHeight: 1.6 }}>
-            {view === 'about' ? restaurant.about || "Welcome to our establishment." : `Reach out to us at ${restaurant.phone || restaurant.email || 'our coordinates'}.`}
-          </p>
         </div>
-      )}
-
-      {selectedItem && (
-        <ItemPopup item={selectedItem} t={t} currency={currency} onClose={() => setSelectedItem(null)} />
       )}
     </div>
   )
+
+  const ContactPanel = () => (
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
+      <PanelHeader title="Contact and find us" onBack={() => changeView('menu')} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {restaurant.address && (
+          <div style={{ background: t.surface, borderRadius: 20, padding: 20, border: `1px solid ${t.border}` }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              <span style={{ color: t.accent, flexShrink: 0, marginTop: 2 }}><MapPinIcon /></span>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 10px', fontSize: 14, color: t.text, lineHeight: 1.55 }}>{restaurant.address}</p>
+                {restaurant.google_maps_url && (
+                  <a href={restaurant.google_maps_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: t.accent, textDecoration: 'none', background: t.accentSoft, padding: '7px 14px', borderRadius: 999 }}>
+                    Open in Maps
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(restaurant.phone || restaurant.whatsapp || restaurant.email) && (
+          <div style={{ background: t.surface, borderRadius: 20, padding: 20, border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {restaurant.phone && (
+              <a href={`tel:${restaurant.phone}`} style={{ display: 'flex', gap: 14, alignItems: 'center', textDecoration: 'none' }}>
+                <span style={{ color: t.accent }}><PhoneIcon /></span>
+                <span style={{ fontSize: 14, color: t.text }}>{restaurant.phone}</span>
+              </a>
+            )}
+            {restaurant.whatsapp && (
+              <a href={`https://wa.me/${restaurant.whatsapp}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: 14, alignItems: 'center', textDecoration: 'none' }}>
+                <span style={{ color: '#25D366' }}><WhatsAppIcon /></span>
+                <span style={{ fontSize: 14, color: t.text }}>WhatsApp</span>
+              </a>
+            )}
+            {restaurant.email && (
+              <a href={`mailto:${restaurant.email}`} style={{ display: 'flex', gap: 14, alignItems: 'center', textDecoration: 'none' }}>
+                <span style={{ color: t.accent }}><EmailIcon /></span>
+                <span style={{ fontSize: 14, color: t.text }}>{restaurant.email}</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {(restaurant.instagram || restaurant.facebook) && (
+          <div style={{ background: t.surface, borderRadius: 20, padding: 20, border: `1px solid ${t.border}` }}>
+            <p style={{ margin: '0 0 14px', fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase', color: t.subtext }}>Follow us</p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {restaurant.instagram && (
+                <a href={`https://instagram.com/${restaurant.instagram}`} target="_blank" rel="noopener noreferrer" style={socialBtn('#E1306C')}><InstagramIcon /></a>
+              )}
+              {restaurant.facebook && (
+                <a href={`https://facebook.com/${restaurant.facebook}`} target="_blank" rel="noopener noreferrer" style={socialBtn('#1877F2')}><FacebookIcon /></a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const MenuView = () => (
+    <div>
+      <HeroCarousel restaurant={restaurant} t={t} />
+      <CategoryPills categories={availableCategories} active={activeCategory} onSelect={scrollToCategory} t={t} />
+
+      <div style={{ maxWidth: layout === 'cards' ? 640 : 600, margin: '0 auto', padding: layout === 'swipe' ? '0 0 48px' : '8px 20px 48px' }}>
+
+        {layout === 'classic' && availableCategories.map(category => {
+          const items = category.menu_items.filter(i => i.is_available)
+          return (
+            <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
+              <h2 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {items.map(item => (
+                  <div
+                    key={item.id} onClick={() => setSelectedItem(item)}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 4px', cursor: 'pointer', borderRadius: 14 }}
+                  >
+                    <div style={{ flex: 1, paddingRight: 16 }}>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: t.text }}>{item.name}</p>
+                      {item.description && <DescriptionText text={item.description} style={{ margin: '4px 0 0', fontSize: 13, color: t.subtext, lineHeight: 1.5 }} />}
+                      <span style={{ display: 'inline-block', marginTop: 8, fontWeight: 600, fontSize: 13, color: t.priceText, background: t.priceBg, padding: '4px 11px', borderRadius: 7 }}>{currency} {item.price}</span>
+                    </div>
+                    {item.image_url && (
+                      <img src={item.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+
+        {layout === 'list' && availableCategories.map(category => {
+          const items = category.menu_items.filter(i => i.is_available)
+          return (
+            <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
+              <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {items.map(item => (
+                  <div
+                    key={item.id} onClick={() => setSelectedItem(item)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, background: t.surface, borderRadius: 18, padding: '12px 14px', cursor: 'pointer', border: `1px solid ${t.border}` }}
+                  >
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} style={{ width: 68, height: 68, borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: 68, height: 68, borderRadius: 14, background: t.accentSoft, color: t.accent, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: t.text }}>{item.name}</p>
+                      {item.description && <p style={{ margin: '3px 0 8px', fontSize: 12.5, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{flattenDescription(item.description)}</p>}
+                      <span style={{ fontWeight: 600, fontSize: 13, color: t.priceText, background: t.priceBg, padding: '4px 10px', borderRadius: 7 }}>{currency} {item.price}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+
+        {layout === 'cards' && availableCategories.map(category => {
+          const items = category.menu_items.filter(i => i.is_available)
+          return (
+            <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
+              <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+                {items.map(item => (
+                  <div
+                    key={item.id} onClick={() => setSelectedItem(item)}
+                    style={{ background: t.surface, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer', border: `1px solid ${t.border}`, boxShadow: t.shadow }}
+                  >
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 128, objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: 128, background: t.accentSoft, color: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlateIcon /></div>
+                    )}
+                    <div style={{ padding: '12px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: t.text, lineHeight: 1.3 }}>{item.name}</p>
+                      {item.description && <p style={{ margin: 0, fontSize: 12, color: t.subtext, lineHeight: 1.45, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{flattenDescription(item.description)}</p>}
+                      <div style={{ marginTop: 'auto', paddingTop: 8 }}>
+                        <span style={{ fontWeight: 600, fontSize: 12.5, color: t.priceText, background: t.priceBg, padding: '4px 10px', borderRadius: 7 }}>{currency} {item.price}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+
+        {layout === 'swipe' && availableCategories.map(category => {
+          const items = category.menu_items.filter(i => i.is_available)
+          return <SwipeCategory key={category.id} category={category} items={items} t={t} currency={currency} onItemClick={setSelectedItem} />
+        })}
+
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight: '100vh', background: t.bg, fontFamily: t.font }}>
+      {selectedItem && <ItemPopup item={selectedItem} t={t} currency={currency} onClose={() => setSelectedItem(null)} />}
+
+      <TopBar restaurant={restaurant} view={view} onChange={changeView} hasAbout={hasAbout} hasContact={hasContact} t={t} />
+
+      {view === 'menu' && <MenuView />}
+      {view === 'about' && <AboutPanel />}
+      {view === 'contact' && <ContactPanel />}
+
+      <p style={{ textAlign: 'center', color: t.subtext, fontSize: 11, padding: '8px 0 36px', opacity: 0.45 }}>
+        Powered by Menuberg
+      </p>
+    </div>
+  )
 }
+

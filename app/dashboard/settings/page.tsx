@@ -27,7 +27,12 @@ const CURRENCY_OPTIONS = ALL_COUNTRIES
   .map(c => ({
     value: c.currency,
     label: `${c.flag} ${c.name} — ${c.currency}`,
+    key: c.isoCode, // unique per entry, even though value repeats
   }))
+
+function currencyDisplayLabel(code: string): string {
+  return code ? `Currency: ${code}` : ''
+}
 
 function currencyForCountryCode(isoCode: string): string {
   const match = ALL_COUNTRIES.find(c => c.isoCode === isoCode)
@@ -723,6 +728,7 @@ export default function SettingsPage() {
               options={CURRENCY_OPTIONS}
               placeholder="Select currency"
               searchPlaceholder="Search by country..."
+              selectedLabelOverride={currencyDisplayLabel(form.currency)}
             />
           </div>
         </div>

@@ -6,49 +6,167 @@ import QRCode from 'qrcode'
 interface Props {
   restaurantSlug: string
   restaurantName: string
+  logoUrl?: string | null
 }
 
-export default function QRPage({ restaurantSlug, restaurantName }: Props) {
+// Scales the restaurant name down in steps for longer names, so it
+// stays readable on the exported PNG instead of clipping or wrapping
+// awkwardly. Mirrors the same approach used on the public menu page.
+function nameFontSize(name: string): number {
+  const len = name.length
+  if (len <= 14) return 30
+  if (len <= 20) return 25
+  if (len <= 28) return 20
+  return 16
+}
+
+export default function QRPage({ restaurantSlug, restaurantName, logoUrl }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const previewRef = useRef<HTMLCanvasElement>(null)
   const [menuUrl, setMenuUrl] = useState('')
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const url = `${window.location.origin}/${restaurantSlug}`
     setMenuUrl(url)
-
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, url, {
-        width: 280,
-        margin: 2,
-        color: { dark: '#0D1B2A', light: '#ffffff' },
-      })
-    }
   }, [restaurantSlug])
 
-  const handleDownload = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+  // Draws the full branded card (logo/name header, QR in a bordered
+  // box, "Powered by" footer) onto a given canvas. Used both for the
+  // on-screen preview and the downloaded PNG, so they always match.
+  async function drawCard(canvas: HTMLCanvasElement, scale: number) {
+    const width = 360 * scale
+    const headerHeight = 84 * scale
+    const qrBoxSize = 280 * scale
+    const qrBoxPadding = 24 * scale
+    const footerHeight = 50 * scale
+    const sidePadding = 20 * scale
+    const gap = 16 * scale
 
-    const padding = 32
-    const labelHeight = 56
-    const exportCanvas = document.createElement('canvas')
-    exportCanvas.width = canvas.width + padding * 2
-    exportCanvas.height = canvas.height + padding * 2 + labelHeight
-    const ctx = exportCanvas.getContext('2d')!
+    const height = headerHeight + gap + (qrBoxSize + qrBoxPadding * 2) + gap + footerHeight
 
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Background
     ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
-    ctx.drawImage(canvas, padding, padding)
+    ctx.fillRect(0, 0, width, height)
 
+    // ── Header: logo + name ──
+    let logoImg: HTMLImageElement | null = null
+    if (logoUrl) {
+      try {
+        logoImg = await loadImage(logoUrl)
+      } catch {
+        logoImg = null // fall back to name-only header if it fails to load
+      }
+    }
+
+    const headerY = sidePadding
+    const headerInnerHeight = headerHeight - sidePadding
+
+    ctx.strokeStyle = '#0D1B2A'
+    ctx.lineWidth = 3 * scale
+
+    if (logoImg) {
+      // Logo circle, left-aligned; name in a box to the right —
+      // matches the reference: logo + name side by side.
+      const logoSize = headerInnerHeight
+      const logoX = sidePadding
+      const logoCenterX = logoX + logoSize / 2
+      const logoCenterY = headerY + logoSize / 2
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(logoCenterX, logoCenterY, logoSize / 2, 0, Math.PI * 2)
+      ctx.closePath()
+      ctx.clip()
+      ctx.drawImage(logoImg, logoX, headerY, logoSize, logoSize)
+      ctx.restore()
+
+      ctx.beginPath()
+      ctx.arc(logoCenterX, logoCenterY, logoSize / 2, 0, Math.PI * 2)
+      ctx.stroke()
+
+      const nameBoxX = logoX + logoSize + (12 * scale)
+      const nameBoxWidth = width - nameBoxX - sidePadding
+      ctx.strokeRect(nameBoxX, headerY, nameBoxWidth, headerInnerHeight)
+
+      ctx.fillStyle = '#0D1B2A'
+      ctx.font = `bold ${nameFontSize(restaurantName) * scale}px system-ui, sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      fitText(ctx, restaurantName, nameBoxX + nameBoxWidth / 2, headerY + headerInnerHeight / 2, nameBoxWidth - (16 * scale))
+    } else {
+      // No logo — restaurant name centered, full width.
+      ctx.strokeRect(sidePadding, headerY, width - sidePadding * 2, headerInnerHeight)
+      ctx.fillStyle = '#0D1B2A'
+      ctx.font = `bold ${nameFontSize(restaurantName) * scale}px system-ui, sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      fitText(ctx, restaurantName, width / 2, headerY + headerInnerHeight / 2, width - sidePadding * 2 - (16 * scale))
+    }
+
+    // ── QR box ──
+    const qrBoxY = headerY + headerInnerHeight + gap
+    const qrBoxX = (width - (qrBoxSize + qrBoxPadding * 2)) / 2
+    const qrBoxOuter = qrBoxSize + qrBoxPadding * 2
+
+    ctx.strokeRect(qrBoxX, qrBoxY, qrBoxOuter, qrBoxOuter)
+
+    const qrCanvas = document.createElement('canvas')
+    await QRCode.toCanvas(qrCanvas, menuUrl || `${window.location.origin}/${restaurantSlug}`, {
+      width: qrBoxSize,
+      margin: 0,
+      color: { dark: '#0D1B2A', light: '#ffffff' },
+    })
+    ctx.drawImage(qrCanvas, qrBoxX + qrBoxPadding, qrBoxY + qrBoxPadding, qrBoxSize, qrBoxSize)
+
+    // ── Footer ──
+    const footerY = qrBoxY + qrBoxOuter + gap
+    ctx.strokeRect(sidePadding, footerY, width - sidePadding * 2, footerHeight)
     ctx.fillStyle = '#0D1B2A'
-    ctx.font = 'bold 18px system-ui, sans-serif'
+    ctx.font = `bold ${13 * scale}px system-ui, sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(restaurantName, exportCanvas.width / 2, canvas.height + padding + 28)
+    ctx.textBaseline = 'middle'
+    ctx.fillText('Powered By: Menuberg.com', width / 2, footerY + footerHeight / 2)
+  }
 
-    ctx.fillStyle = '#38BDF8'
-    ctx.font = '12px system-ui, sans-serif'
-    ctx.fillText(menuUrl, exportCanvas.width / 2, canvas.height + padding + 48)
+  // Shrinks font size in steps until the text fits within maxWidth,
+  // so very long names never overflow their box on the card.
+  function fitText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
+    let fontSize = parseInt(ctx.font.match(/\d+/)?.[0] || '20', 10)
+    const fontFamily = ctx.font.split('px ')[1] || 'system-ui, sans-serif'
+    while (ctx.measureText(text).width > maxWidth && fontSize > 10) {
+      fontSize -= 1
+      ctx.font = `bold ${fontSize}px ${fontFamily}`
+    }
+    ctx.fillText(text, x, y)
+  }
+
+  function loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = src
+    })
+  }
+
+  // Render the on-screen preview whenever the relevant data is ready.
+  useEffect(() => {
+    if (!menuUrl || !previewRef.current) return
+    drawCard(previewRef.current, 1)
+  }, [menuUrl, logoUrl, restaurantName])
+
+  const handleDownload = async () => {
+    if (!menuUrl) return
+    const exportCanvas = document.createElement('canvas')
+    // Draw at 3x scale for a crisp, print-ready PNG.
+    await drawCard(exportCanvas, 3)
 
     const link = document.createElement('a')
     link.download = `${restaurantSlug}-qr-code.png`
@@ -70,14 +188,9 @@ export default function QRPage({ restaurantSlug, restaurantName }: Props) {
       </p>
 
       <div className="bg-white border border-sky-100 rounded-2xl p-8 flex flex-col items-center gap-6">
-        <div className="bg-white rounded-xl p-3 border border-sky-100">
-          <canvas ref={canvasRef} className="rounded-lg" />
-        </div>
+        <canvas ref={previewRef} className="rounded-lg max-w-full h-auto" />
 
-        <div className="text-center">
-          <p className="font-semibold text-[#0D1B2A]">{restaurantName}</p>
-          <p className="text-sky-400 text-xs mt-1 font-mono">{menuUrl}</p>
-        </div>
+        <p className="text-sky-400 text-xs font-mono break-all text-center">{menuUrl}</p>
 
         <div className="flex gap-3 w-full">
           <button
