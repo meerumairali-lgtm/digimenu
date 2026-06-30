@@ -23,6 +23,7 @@ type Restaurant = {
   id: string
   name: string
   slug: string
+  currency?: string
 }
 
 // ── Tiny markdown toolbar (Bold + Bullet only) ────────────────────────────────
@@ -517,7 +518,7 @@ export default function MenuManager({ restaurant, initialCategories }: {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontWeight: 600, color: item.is_available ? '#0D1B2A' : '#aaa', fontSize: 14 }}>Rs {item.price}</span>
+                <span style={{ fontWeight: 600, color: item.is_available ? '#0D1B2A' : '#aaa', fontSize: 14 }}>{restaurant.currency || 'USD'} {item.price}</span>
                 <div
                   onClick={() => toggleAvailable(category.id, item.id, item.is_available)}
                   style={{ width: 40, height: 22, borderRadius: 11, cursor: 'pointer', background: item.is_available ? '#22c55e' : '#d1d5db', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}
