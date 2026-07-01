@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Feature { icon: string; title: string; desc: string; image: string }
@@ -36,6 +36,8 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
+  const fileRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
   function set(key: string, value: string) {
     setC(prev => ({ ...prev, [key]: value }))
@@ -43,6 +45,24 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
 
   function setFeat(i: number, field: keyof Feature, value: string) {
     setFeatures(prev => prev.map((f, idx) => idx === i ? { ...f, [field]: value } : f))
+  }
+
+  async function handleFeatureImageUpload(index: number, file: File) {
+    setUploadingIndex(index)
+    const ext = file.name.split('.').pop()
+    const fileName = `_landing/features/feature-${index}-${Date.now()}.${ext}`
+    const { data, error } = await supabase.storage
+      .from('restaurant-branding')
+      .upload(fileName, file, { upsert: true })
+    if (!error && data) {
+      const { data: urlData } = supabase.storage
+        .from('restaurant-branding')
+        .getPublicUrl(fileName)
+      setFeat(index, 'image', urlData.publicUrl)
+    } else {
+      console.error('Feature image upload failed:', error)
+    }
+    setUploadingIndex(null)
   }
 
   async function save() {
@@ -129,6 +149,7 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
                 <button onClick={() => setFeatures(prev => prev.filter((_, idx) => idx !== i))}
                   style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '12px', cursor: 'pointer' }}>Remove</button>
               </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ color: '#9ca3af', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Icon</label>
@@ -141,11 +162,54 @@ export default function ContentClient({ initialContent }: { initialContent: Reco
                     style={{ width: '100%', background: '#111827', color: '#fff', border: '1px solid #374151', borderRadius: '6px', padding: '6px 8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
                 </div>
               </div>
+
               <div>
                 <label style={{ color: '#9ca3af', fontSize: '11px', display: 'block', marginBottom: '4px' }}>Description</label>
                 <input type="text" value={f.desc} onChange={e => setFeat(i, 'desc', e.target.value)}
                   style={{ width: '100%', background: '#111827', color: '#fff', border: '1px solid #374151', borderRadius: '6px', padding: '6px 8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
               </div>
+
+              {/* Image upload */}
+              <div>
+                <label style={{ color: '#9ca3af', fontSize: '11px', display: 'block', marginBottom: '6px' }}>Image</label>
+                <div
+                  onClick={() => fileRefs.current[i]?.click()}
+                  style={{ border: '1px dashed #374151', borderRadius: '8px', padding: '12px', cursor: 'pointer', background: '#111827', display: 'flex', alignItems: 'center', gap: '12px' }}
+                >
+                  {uploadingIndex === i ? (
+                    <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>Uploading...</p>
+                  ) : f.image ? (
+                    <>
+                      <img
+                        src={f.image}
+                        alt=""
+                        style={{ width: 56, height: 56, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }}
+                      />
+                      <div>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#38BDF8' }}>Tap to change image</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#6b7280', wordBreak: 'break-all' }}>
+                          {f.image.split('/').pop()}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>
+                      📷 Tap to upload feature image
+                    </p>
+                  )}
+                  <input
+                    ref={el => { fileRefs.current[i] = el }}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) handleFeatureImageUpload(i, file)
+                    }}
+                  />
+                </div>
+              </div>
+
             </div>
           ))}
           <button

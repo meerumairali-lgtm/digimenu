@@ -8,8 +8,8 @@ import {
   CheckCircle,
   XCircle,
   CalendarDays,
-  Database,
 } from 'lucide-react'
+import RevenueCard from './RevenueCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,14 +18,24 @@ const SUPER_ADMIN_EMAIL = 'meerumairali@gmail.com'
 async function getStats() {
   const supabase = await createClient()
 
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
   const [
     { count: totalRestaurants },
     { count: activeRestaurants },
     { count: suspendedRestaurants },
     { count: totalCategories },
     { count: totalItems },
+    { count: newThisMonth },
+    { count: paidSubscribers },
+    { data: paymentsThisMonth },
+    { data: paymentsAllTime },
   ] = await Promise.all([
-    supabase.from('restaurants').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('restaurants')
+      .select('*', { count: 'exact', head: true }),
     supabase
       .from('restaurants')
       .select('*', { count: 'exact', head: true })
@@ -34,19 +44,40 @@ async function getStats() {
       .from('restaurants')
       .select('*', { count: 'exact', head: true })
       .eq('is_suspended', true),
-    supabase.from('categories').select('*', { count: 'exact', head: true }),
-    supabase.from('menu_items').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true }),
+    supabase
+      .from('menu_items')
+      .select('*', { count: 'exact', head: true }),
+    supabase
+      .from('restaurants')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', startOfMonth.toISOString()),
+    // Paid subscribers: active status, NOT a VIP bypass
+    supabase
+      .from('restaurants')
+      .select('*', { count: 'exact', head: true })
+      .eq('subscription_status', 'active')
+      .eq('bypass_payment', false),
+    // Revenue this month
+    supabase
+      .from('payments')
+      .select('amount')
+      .eq('status', 'completed')
+      .gte('created_at', startOfMonth.toISOString()),
+    // Revenue all time
+    supabase
+      .from('payments')
+      .select('amount')
+      .eq('status', 'completed'),
   ])
 
-  // New signups this month
-  const startOfMonth = new Date()
-  startOfMonth.setDate(1)
-  startOfMonth.setHours(0, 0, 0, 0)
+  const revenueThisMonth = (paymentsThisMonth ?? [])
+    .reduce((sum, p) => sum + (p.amount ?? 0), 0)
 
-  const { count: newThisMonth } = await supabase
-    .from('restaurants')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', startOfMonth.toISOString())
+  const revenueAllTime = (paymentsAllTime ?? [])
+    .reduce((sum, p) => sum + (p.amount ?? 0), 0)
 
   return {
     totalRestaurants: totalRestaurants ?? 0,
@@ -55,6 +86,9 @@ async function getStats() {
     totalCategories: totalCategories ?? 0,
     totalItems: totalItems ?? 0,
     newThisMonth: newThisMonth ?? 0,
+    paidSubscribers: paidSubscribers ?? 0,
+    revenueThisMonth,
+    revenueAllTime,
   }
 }
 
@@ -121,21 +155,11 @@ export default async function SuperAdminDashboard() {
     },
     {
       label: 'Paid Subscribers',
-      value: '—',
+      value: stats.paidSubscribers,
       icon: Users,
-      color: 'text-gray-500',
-      bg: 'bg-gray-800',
-      border: 'border-gray-700',
-      future: true,
-    },
-    {
-      label: 'Monthly Revenue',
-      value: '—',
-      icon: Database,
-      color: 'text-gray-500',
-      bg: 'bg-gray-800',
-      border: 'border-gray-700',
-      future: true,
+      color: 'text-sky-400',
+      bg: 'bg-sky-500/10',
+      border: 'border-sky-500/20',
     },
   ]
 
@@ -144,7 +168,7 @@ export default async function SuperAdminDashboard() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Platform Overview</h1>
         <p className="text-gray-400 text-sm mt-1">
-          Live stats across all DigiMenu restaurants
+          Live stats across all Menuberg restaurants
         </p>
       </div>
 
@@ -154,13 +178,8 @@ export default async function SuperAdminDashboard() {
           return (
             <div
               key={card.label}
-              className={`rounded-xl border ${card.border} ${card.bg} p-5 relative overflow-hidden`}
+              className={`rounded-xl border ${card.border} ${card.bg} p-5`}
             >
-              {card.future && (
-                <span className="absolute top-3 right-3 text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full">
-                  Soon
-                </span>
-              )}
               <div className={`${card.color} mb-3`}>
                 <Icon size={20} />
               </div>
@@ -169,6 +188,12 @@ export default async function SuperAdminDashboard() {
             </div>
           )
         })}
+
+        {/* Revenue card is client-side for the month/all-time dropdown */}
+        <RevenueCard
+          thisMonth={stats.revenueThisMonth}
+          allTime={stats.revenueAllTime}
+        />
       </div>
     </div>
   )
