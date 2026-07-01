@@ -41,10 +41,9 @@ export default function SetupPage() {
     paddle_customer_id: null as string | null,
     paddle_subscription_id: null as string | null,
     coupon_code_used: null as string | null,
-    // Defaults to "right now" in case pending_signups doesn't have a row
-    // for this user. If it does have a row, this gets overwritten below
-    // with the REAL trial start time from signup.
     trial_started_at: new Date().toISOString() as string | null,
+    referral_code: null as string | null,
+    referred_by: null as string | null,
   })
 
   useEffect(() => {
@@ -68,7 +67,7 @@ export default function SetupPage() {
 
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at')
+        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at, referral_code, referred_by')
         .eq('user_id', user.id)
         .maybeSingle()
 

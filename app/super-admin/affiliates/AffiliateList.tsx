@@ -106,35 +106,26 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
     setAdding(true)
     setAddError('')
 
-    // Hash password using Supabase auth — create a real auth user
-    const { data: authData, error: authError } = await supabase.auth.admin?.createUser?.({
-      email: `${addForm.username}@affiliate.menuberg.com`,
-      password: addForm.password,
-      email_confirm: true,
-    }) as any
+    const res = await fetch('/api/affiliates/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(addForm),
+    })
 
-    // If admin createUser not available client-side, store hashed manually
-    // We'll use a simple approach: store in affiliates table directly
-    // Password stored as plain for now (admin-only table, no public access)
-    // In production you'd use a server action or API route for this
-    const { data: newAffiliate, error } = await supabase
-      .from('affiliates')
-      .insert({
-        name: addForm.name.trim(),
-        username: addForm.username.trim().toLowerCase(),
-        password_hash: addForm.password, // stored as-is, admin only
-        current_rank: 'none',
-      })
-      .select()
-      .single()
+    const data = await res.json()
 
-    if (error) {
-      setAddError(error.message)
+    if (!res.ok) {
+      setAddError(data.error || 'Failed to create affiliate')
       setAdding(false)
       return
     }
 
-    setAffiliates(prev => [{ ...newAffiliate, total_restaurants: 0, affiliate_monthly_stats: [], affiliate_payments: [] }, ...prev])
+    setAffiliates(prev => [{
+      ...data.affiliate,
+      total_restaurants: 0,
+      affiliate_monthly_stats: [],
+      affiliate_payments: [],
+    }, ...prev])
     setAddForm({ name: '', username: '', password: '' })
     setShowAdd(false)
     setAdding(false)
@@ -246,11 +237,11 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
                     >
                       <Eye size={15} />
                     </button>
-                    
-                      href={`/affiliate/dashboard?preview=${a.id}`}
-                      target="_blank"
-                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                      title="View dashboard"
+
+                    href={`/affiliate/dashboard?preview=${a.id}`}
+                    target="_blank"
+                    className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    title="View dashboard"
                     <a>
                       <ExternalLink size={15} />
                     </a>
@@ -361,10 +352,10 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
 
               {/* Actions */}
               <div className="flex gap-3 pt-2">
-                
-                  href={`/affiliate/dashboard?preview=${selected.id}`}
-                  target="_blank"
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+
+                href={`/affiliate/dashboard?preview=${selected.id}`}
+                target="_blank"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
                 <a>
                   <ExternalLink size={14} /> View Dashboard
                 </a>

@@ -19,7 +19,7 @@ import {
   LifeBuoy,
   Contact,
   DollarSign,
-  share-2,
+  Users2,
 } from 'lucide-react'
 
 const navItems = [
@@ -33,7 +33,7 @@ const navItems = [
   { label: 'Settings', href: '/super-admin/settings', icon: Settings },
   { label: 'Contact', href: '/super-admin/contact-submissions', icon: Contact },
   { label: 'Pricing', href: '/super-admin/pricing', icon: DollarSign },
-  { label: 'Affiliates', href: '/super-admin/affiliates', icon: share-2 },
+  { label: 'Affiliates', href: '/super-admin/affiliates', icon: Users2 },
 ]
 
 export default function SuperAdminLayout({

@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import Navbar from '@/app/components/Navbar'
@@ -15,8 +15,15 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [confirmationSent, setConfirmationSent] = useState(false)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) setReferralCode(ref.toLowerCase().trim())
+  }, [searchParams])
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -38,6 +45,27 @@ export default function SignupPage() {
       return
     }
 
+    // If a referral code was present, look up the affiliate and store
+    // the referral on the pending_signups row so it gets carried through
+    // to the restaurants row when setup is completed.
+    if (referralCode) {
+      try {
+        const res = await fetch('/api/affiliates/resolve-referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: data.user.id,
+            referral_code: referralCode,
+          }),
+        })
+        if (!res.ok) {
+          console.warn('Referral code could not be resolved — signup continues normally')
+        }
+      } catch {
+        // Non-fatal — don't block signup if referral lookup fails
+      }
+    }
+
     if (data.session) {
       router.push('/dashboard/setup')
     } else {
@@ -56,6 +84,11 @@ export default function SignupPage() {
             <p className="text-gray-500 text-sm">
               We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click it to activate your account, then log in to get started.
             </p>
+            {referralCode && (
+              <p className="text-sky-500 text-xs mt-3">
+                ✓ Referred by <strong>{referralCode}</strong> — tracked successfully.
+              </p>
+            )}
             <Link href="/login" className="inline-block mt-6 text-sky-500 font-medium hover:underline text-sm">
               Go to login
             </Link>
@@ -75,7 +108,12 @@ export default function SignupPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h1>
-          <p className="text-gray-500 text-sm mb-8">Start your Menuberg account today</p>
+          <p className="text-gray-500 text-sm mb-8">
+            Start your Menuberg account today
+            {referralCode && (
+              <span className="ml-2 text-sky-500 font-medium">· Referred by {referralCode}</span>
+            )}
+          </p>
 
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
             <div>
