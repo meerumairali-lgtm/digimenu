@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -7,6 +8,14 @@ import { Eye, EyeOff } from 'lucide-react'
 import Navbar from '@/app/components/Navbar'
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupClient />
+    </Suspense>
+  )
+}
+
+function SignupClient() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -16,6 +25,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [confirmationSent, setConfirmationSent] = useState(false)
   const [referralCode, setReferralCode] = useState<string | null>(null)
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
