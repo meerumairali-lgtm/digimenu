@@ -83,11 +83,15 @@ function formatMonth(d: string) {
 
 export default function AffiliateDashboardClient({
   affiliate, restaurants, monthlyStats, payments,
+  totalEarned, totalPaid, thisMonthCount,
 }: {
   affiliate: Affiliate
   restaurants: Restaurant[]
   monthlyStats: MonthlyStats[]
   payments: Payment[]
+  totalEarned: number
+  totalPaid: number
+  thisMonthCount: number
 }) {
   const [activeTab, setActiveTab] = useState<'overview' | 'restaurants' | 'earnings' | 'settings'>('overview')
   const [changePw, setChangePw] = useState({ current: '', newPw: '', confirm: '' })
@@ -96,19 +100,12 @@ export default function AffiliateDashboardClient({
   const [pwLoading, setPwLoading] = useState(false)
   const router = useRouter()
 
-  const totalEarned = monthlyStats.reduce((sum, s) => sum + (s.total_earned || 0), 0)
-  const totalPaid = payments.reduce((sum, p) => sum + (p.amount_paid || 0), 0)
-  const balance = totalEarned - totalPaid
-
   const rankColor = RANK_COLORS[affiliate.current_rank] || RANK_COLORS.none
   const rankLabel = RANK_LABELS[affiliate.current_rank] || 'No Rank'
   const rankNext = RANK_REQUIREMENTS[affiliate.current_rank] || ''
 
   // This month's restaurants (for rank progress)
-  const now = new Date()
-  const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  const thisMonthStats = monthlyStats.find(s => s.month.startsWith(thisMonthStr))
-  const thisMonthCount = thisMonthStats?.restaurants_signed || 0
+const balance = totalEarned - totalPaid
 
   async function handleLogout() {
     await fetch('/api/affiliates/logout', { method: 'POST' })
