@@ -61,11 +61,14 @@ export default async function AffiliateDashboardPage() {
   // Fetch all payments for their referred restaurants
   const { data: allPayments } = restaurantIds.length > 0
     ? await admin
-        .from('payments')
-        .select('restaurant_id, amount, type, status, created_at')
-        .in('restaurant_id', restaurantIds)
-        .eq('status', 'completed')
+      .from('payments')
+      .select('restaurant_id, amount, type, status, created_at')
+      .in('restaurant_id', restaurantIds)
+      .eq('status', 'completed')
     : { data: [] }
+
+  console.log('DEBUG restaurantIds:', restaurantIds)
+  console.log('DEBUG allPayments:', allPayments)
 
   // Fetch payment history (what's been paid OUT to this affiliate)
   const { data: paymentHistory } = await admin
@@ -90,25 +93,25 @@ export default async function AffiliateDashboardPage() {
   // Track which restaurants have had their setup fee counted
   const setupFeesCounted = new Set<string>()
 
-  // For each restaurant, figure out which month they joined
-  // and calculate setup fee + recurring per month active
-  ;(restaurants || []).forEach(restaurant => {
-    const joinedDate = new Date(restaurant.created_at)
-    const joinedMonthKey = `${joinedDate.getFullYear()}-${String(joinedDate.getMonth() + 1).padStart(2, '0')}`
+    // For each restaurant, figure out which month they joined
+    // and calculate setup fee + recurring per month active
+    ; (restaurants || []).forEach(restaurant => {
+      const joinedDate = new Date(restaurant.created_at)
+      const joinedMonthKey = `${joinedDate.getFullYear()}-${String(joinedDate.getMonth() + 1).padStart(2, '0')}`
 
-    // Initialize month if needed
-    if (!monthlyMap[joinedMonthKey]) {
-      monthlyMap[joinedMonthKey] = {
-        month: joinedMonthKey,
-        restaurants_signed: 0,
-        setup_fee_earned: 0,
-        recurring_earned: 0,
-        total_earned: 0,
-        rank_at_month: 'none',
+      // Initialize month if needed
+      if (!monthlyMap[joinedMonthKey]) {
+        monthlyMap[joinedMonthKey] = {
+          month: joinedMonthKey,
+          restaurants_signed: 0,
+          setup_fee_earned: 0,
+          recurring_earned: 0,
+          total_earned: 0,
+          rank_at_month: 'none',
+        }
       }
-    }
-    monthlyMap[joinedMonthKey].restaurants_signed += 1
-  })
+      monthlyMap[joinedMonthKey].restaurants_signed += 1
+    })
 
   // Assign ranks to each month based on restaurants signed that month
   Object.keys(monthlyMap).forEach(monthKey => {
@@ -116,36 +119,36 @@ export default async function AffiliateDashboardPage() {
     month.rank_at_month = getRankForCount(month.restaurants_signed)
   })
 
-  // Now calculate earnings from actual payments
-  ;(allPayments || []).forEach(payment => {
-    const payDate = new Date(payment.created_at)
-    const monthKey = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`
+    // Now calculate earnings from actual payments
+    ; (allPayments || []).forEach(payment => {
+      const payDate = new Date(payment.created_at)
+      const monthKey = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`
 
-    if (!monthlyMap[monthKey]) {
-      monthlyMap[monthKey] = {
-        month: monthKey,
-        restaurants_signed: 0,
-        setup_fee_earned: 0,
-        recurring_earned: 0,
-        total_earned: 0,
-        rank_at_month: 'none',
+      if (!monthlyMap[monthKey]) {
+        monthlyMap[monthKey] = {
+          month: monthKey,
+          restaurants_signed: 0,
+          setup_fee_earned: 0,
+          recurring_earned: 0,
+          total_earned: 0,
+          rank_at_month: 'none',
+        }
       }
-    }
 
-    const month = monthlyMap[monthKey]
+      const month = monthlyMap[monthKey]
 
-    if (payment.type === 'setup' && !setupFeesCounted.has(payment.restaurant_id)) {
-      // $5 flat setup bonus, counted once per restaurant
-      month.setup_fee_earned += SETUP_BONUS
-      setupFeesCounted.add(payment.restaurant_id)
-    } else if (payment.type === 'subscription') {
-      // Recurring % based on the rank the affiliate had that month
-      const pct = RANK_RECURRING_PCT[month.rank_at_month] || 0
-      month.recurring_earned += MONTHLY_SUBSCRIPTION * pct
-    }
+      if (payment.type === 'setup' && !setupFeesCounted.has(payment.restaurant_id)) {
+        // $5 flat setup bonus, counted once per restaurant
+        month.setup_fee_earned += SETUP_BONUS
+        setupFeesCounted.add(payment.restaurant_id)
+      } else if (payment.type === 'subscription') {
+        // Recurring % based on the rank the affiliate had that month
+        const pct = RANK_RECURRING_PCT[month.rank_at_month] || 0
+        month.recurring_earned += MONTHLY_SUBSCRIPTION * pct
+      }
 
-    month.total_earned = month.setup_fee_earned + month.recurring_earned
-  })
+      month.total_earned = month.setup_fee_earned + month.recurring_earned
+    })
 
   // Sort months descending
   const monthlyStats = Object.values(monthlyMap)
