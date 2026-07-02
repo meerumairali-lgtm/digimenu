@@ -31,7 +31,7 @@ type Restaurant = {
 }
 
 type MonthlyStats = {
-  id: string
+  id?: string
   month: string
   restaurants_signed: number
   setup_fee_earned: number
