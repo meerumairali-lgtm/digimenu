@@ -14,8 +14,6 @@ const RANK_RECURRING_PCT: Record<string, number> = {
   diamond: 0.23,
 }
 
-const MONTHLY_SUBSCRIPTION = 7.99
-const SETUP_BONUS = 5.00
 
 function getRankForCount(count: number): string {
   if (count >= 20) return 'diamond' // simplified — proper 2-month logic handled separately
@@ -138,14 +136,14 @@ export default async function AffiliateDashboardPage() {
       const month = monthlyMap[monthKey]
 
       if (payment.type === 'setup' && !setupFeesCounted.has(payment.restaurant_id)) {
-        // $5 flat setup bonus, counted once per restaurant
-        month.setup_fee_earned += SETUP_BONUS
-        setupFeesCounted.add(payment.restaurant_id)
-      } else if (payment.type === 'subscription') {
-        // Recurring % based on the rank the affiliate had that month
-        const pct = RANK_RECURRING_PCT[month.rank_at_month] || 0
-        month.recurring_earned += MONTHLY_SUBSCRIPTION * pct
-      }
+      // 28.5% of actual setup fee charged — works for both Tier A and B
+      month.setup_fee_earned += (payment.amount ?? 0) * 0.285
+      setupFeesCounted.add(payment.restaurant_id)
+    } else if (payment.type === 'subscription') {
+      // Recurring % of actual monthly amount charged — works for both tiers
+      const pct = RANK_RECURRING_PCT[month.rank_at_month] || 0
+      month.recurring_earned += (payment.amount ?? 0) * pct
+    }
 
       month.total_earned = month.setup_fee_earned + month.recurring_earned
     })
