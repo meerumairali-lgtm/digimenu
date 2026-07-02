@@ -42,8 +42,6 @@ export default function SetupPage() {
     paddle_subscription_id: null as string | null,
     coupon_code_used: null as string | null,
     trial_started_at: new Date().toISOString() as string | null,
-    referral_code: null as string | null,
-    referred_by: null as string | null,
   })
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export default function SetupPage() {
 
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at, referral_code, referred_by')
+        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -147,6 +145,21 @@ export default function SetupPage() {
     const phoneCountry = ALL_COUNTRIES.find(c => c.isoCode === phoneCountryIso)
     const phoneDialCode = phoneCountry ? getDialCode(phoneCountry) : ''
 
+    // Read referral from server-side HTTP-only cookie — tamper-proof
+    let referredBy: string | null = null
+    let resolvedReferralCode: string | null = null
+    try {
+      const refRes = await fetch('/api/affiliates/apply-referral')
+      if (refRes.ok) {
+        const refData = await refRes.json()
+        if (refData.referral) {
+          referredBy = refData.referral.affiliate_id
+          resolvedReferralCode = refData.referral.code
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
     const { data: newRestaurant, error } = await supabase.from('restaurants').insert({
       user_id: user.id,
       name,
@@ -161,7 +174,9 @@ export default function SetupPage() {
       country_code: countryCode,
       state: stateName,
       city: cityName,
-      ...billing, // pricing_tier, subscription_status, paddle ids, coupon used, trial_started_at
+      referral_code: resolvedReferralCode,
+      referred_by: referredBy,
+      ...billing,
     }).select('id').single()
 
     if (error) {
@@ -195,6 +210,10 @@ export default function SetupPage() {
       }
 
       await supabase.from('pending_signups').delete().eq('user_id', user.id)
+      // Clear referral cookie now that it's been applied
+      try { await fetch('/api/affiliates/apply-referral', { method: 'DELETE' }) } catch { }
+
+      // ... rest of existing else block unchanged
 
       router.refresh()
       router.push('/dashboard')

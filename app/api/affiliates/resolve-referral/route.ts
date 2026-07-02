@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
   try {
-    const { user_id, referral_code } = await request.json()
+    const { referral_code } = await request.json()
 
-    if (!user_id || !referral_code) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+    if (!referral_code) {
+      return NextResponse.json({ error: 'Missing referral code' }, { status: 400 })
     }
 
     const admin = createAdminClient()
 
-    // Look up the affiliate by username (which is the referral code)
+    // Verify the referral code actually exists before setting cookie —
+    // prevents someone from setting a cookie with a made-up username
     const { data: affiliate } = await admin
       .from('affiliates')
       .select('id, username')
@@ -22,19 +24,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Referral code not found' }, { status: 404 })
     }
 
-    // Store on pending_signups so it carries through to restaurant setup
-    const { error } = await admin
-      .from('pending_signups')
-      .update({
-        referral_code: affiliate.username,
-        referred_by: affiliate.id,
-      })
-      .eq('user_id', user_id)
-
-    if (error) {
-      console.error('resolve-referral: update failed', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    // Set HTTP-only cookie — can't be read or modified by JavaScript
+    const cookieStore = await cookies()
+    cookieStore.set('menuberg_referral', JSON.stringify({
+      code: affiliate.username,
+      affiliate_id: affiliate.id,
+    }), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days — survives email confirmation wait
+      path: '/',
+    })
 
     return NextResponse.json({ success: true, affiliate_username: affiliate.username })
   } catch (err) {

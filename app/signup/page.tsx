@@ -60,20 +60,13 @@ function SignupClient() {
     // to the restaurants row when setup is completed.
     if (referralCode) {
       try {
-        const res = await fetch('/api/affiliates/resolve-referral', {
+        await fetch('/api/affiliates/resolve-referral', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: data.user.id,
-            referral_code: referralCode,
-          }),
+          body: JSON.stringify({ referral_code: referralCode }),
         })
-        if (!res.ok) {
-          console.warn('Referral code could not be resolved — signup continues normally')
-        }
-      } catch {
-        // Non-fatal — don't block signup if referral lookup fails
-      }
+        // Non-fatal if this fails — signup continues normally
+      } catch {}
     }
 
     if (data.session) {
