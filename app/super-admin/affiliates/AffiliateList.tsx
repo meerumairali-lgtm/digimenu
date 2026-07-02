@@ -238,11 +238,11 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
                       <Eye size={15} />
                     </button>
 
-                    href={`/affiliate/dashboard?preview=${a.id}`}
-                    target="_blank"
-                    className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                    title="View dashboard"
-                    <a>
+                    <a href={`/affiliate/dashboard?preview=${a.id}`}
+                      target="_blank"
+                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                      title="View dashboard">
+
                       <ExternalLink size={15} />
                     </a>
                     <button
@@ -353,10 +353,9 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
               {/* Actions */}
               <div className="flex gap-3 pt-2">
 
-                href={`/affiliate/dashboard?preview=${selected.id}`}
-                target="_blank"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
-                <a>
+                <a href={`/affiliate/dashboard?preview=${selected.id}`}
+                  target="_blank"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
                   <ExternalLink size={14} /> View Dashboard
                 </a>
                 <button
