@@ -30,6 +30,15 @@ type Restaurant = {
   pricing_tier: string
 }
 
+type Payment = {
+  id: string
+  period_start: string
+  period_end: string
+  amount_paid: number
+  paid_at: string
+  notes: string | null
+}
+
 type MonthlyStats = {
   id?: string
   month: string
@@ -38,15 +47,6 @@ type MonthlyStats = {
   recurring_earned: number
   total_earned: number
   rank_at_month: string
-}
-
-type Payment = {
-  id: string
-  period_start: string
-  period_end: string
-  amount_paid: number
-  paid_at: string
-  notes: string | null
 }
 
 const RANK_COLORS: Record<string, string> = {
@@ -65,47 +65,78 @@ const RANK_LABELS: Record<string, string> = {
   diamond: 'Diamond Partner',
 }
 
-const RANK_REQUIREMENTS: Record<string, string> = {
-  none: 'Sign 2+ restaurants/month to reach Silver',
-  silver: '6+ restaurants/month to reach Gold',
-  gold: '11+ restaurants/month to reach Platinum',
-  platinum: '20+ restaurants/month for 2 consecutive months to reach Diamond',
-  diamond: 'Maintain 20+ restaurants/month to keep Diamond',
-}
-
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(d).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  })
 }
 
 function formatMonth(d: string) {
-  return new Date(d).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+  return new Date(d).toLocaleDateString('en-GB', {
+    month: 'long', year: 'numeric'
+  })
+}
+
+function formatMonthFromKey(key: string) {
+  // key is YYYY-MM-DD
+  return new Date(key).toLocaleDateString('en-GB', {
+    month: 'long', year: 'numeric'
+  })
+}
+
+const performanceColors: Record<string, string> = {
+  Promoted: '#10b981',
+  Demoted: '#ef4444',
+  Sustained: '#f59e0b',
 }
 
 export default function AffiliateDashboardClient({
-  affiliate, restaurants, monthlyStats, payments,
-  totalEarned, totalPaid, thisMonthCount,
+  affiliate,
+  restaurants,
+  payments,
+  prevMonthStats,
+  prevMonthPayment,
+  prevMonthStart,
+  prevMonthEnd,
+  nextPayoutDate,
+  thisMonthCount,
+  projectedRank,
+  nextRankInfo,
+  estimatedTotal,
+  performanceLabel,
+  totalEarned,
+  totalPaid,
 }: {
   affiliate: Affiliate
   restaurants: Restaurant[]
-  monthlyStats: MonthlyStats[]
   payments: Payment[]
+  prevMonthStats: MonthlyStats | null
+  prevMonthPayment: Payment | null
+  prevMonthStart: string
+  prevMonthEnd: string
+  nextPayoutDate: string
+  thisMonthCount: number
+  projectedRank: string
+  nextRankInfo: { label: string; needed: number }
+  estimatedTotal: number
+  performanceLabel: string | null
   totalEarned: number
   totalPaid: number
-  thisMonthCount: number
 }) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'restaurants' | 'earnings' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'restaurants' | 'history' | 'settings'>('overview')
   const [changePw, setChangePw] = useState({ current: '', newPw: '', confirm: '' })
   const [pwError, setPwError] = useState('')
   const [pwSuccess, setPwSuccess] = useState('')
   const [pwLoading, setPwLoading] = useState(false)
   const router = useRouter()
 
+  const balance = totalEarned - totalPaid
   const rankColor = RANK_COLORS[affiliate.current_rank] || RANK_COLORS.none
-  const rankLabel = RANK_LABELS[affiliate.current_rank] || 'No Rank'
-  const rankNext = RANK_REQUIREMENTS[affiliate.current_rank] || ''
+  const projectedColor = RANK_COLORS[projectedRank] || RANK_COLORS.none
 
-  // This month's restaurants (for rank progress)
-const balance = totalEarned - totalPaid
+  // Current month name
+  const now = new Date()
+  const currentMonthName = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
 
   async function handleLogout() {
     await fetch('/api/affiliates/logout', { method: 'POST' })
@@ -116,16 +147,8 @@ const balance = totalEarned - totalPaid
     e.preventDefault()
     setPwError('')
     setPwSuccess('')
-
-    if (changePw.newPw !== changePw.confirm) {
-      setPwError('New passwords do not match')
-      return
-    }
-    if (changePw.newPw.length < 8) {
-      setPwError('New password must be at least 8 characters')
-      return
-    }
-
+    if (changePw.newPw !== changePw.confirm) { setPwError('New passwords do not match'); return }
+    if (changePw.newPw.length < 8) { setPwError('New password must be at least 8 characters'); return }
     setPwLoading(true)
     const res = await fetch('/api/affiliates/change-password', {
       method: 'POST',
@@ -133,9 +156,7 @@ const balance = totalEarned - totalPaid
       body: JSON.stringify({ currentPassword: changePw.current, newPassword: changePw.newPw }),
     })
     const data = await res.json()
-    if (!res.ok) {
-      setPwError(data.error || 'Failed to change password')
-    } else {
+    if (!res.ok) { setPwError(data.error || 'Failed') } else {
       setPwSuccess('Password changed successfully!')
       setChangePw({ current: '', newPw: '', confirm: '' })
     }
@@ -170,10 +191,7 @@ const balance = totalEarned - totalPaid
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ color: '#7DD3FC', fontSize: 13 }}>Hi, {affiliate.name.split(' ')[0]}</span>
-          <button
-            onClick={handleLogout}
-            style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(56,189,248,0.2)', background: 'none', color: '#7DD3FC', fontSize: 13, cursor: 'pointer' }}
-          >
+          <button onClick={handleLogout} style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(56,189,248,0.2)', background: 'none', color: '#7DD3FC', fontSize: 13, cursor: 'pointer' }}>
             Sign out
           </button>
         </div>
@@ -189,7 +207,7 @@ const balance = totalEarned - totalPaid
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 28, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
-          {(['overview', 'restaurants', 'earnings', 'settings'] as const).map(t => (
+          {(['overview', 'restaurants', 'history', 'settings'] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)} style={s.tab(activeTab === t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -199,24 +217,107 @@ const balance = totalEarned - totalPaid
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Rank card */}
-            <div style={{ ...s.card, borderColor: `${rankColor}33` }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                <div>
-                  <p style={{ margin: 0, fontSize: 12, color: '#7DD3FC', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Current rank</p>
-                  <p style={{ margin: '6px 0 4px', fontSize: 24, fontWeight: 800, color: rankColor }}>{rankLabel}</p>
-                  <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>{rankNext}</p>
+
+            {/* Two payment cards side by side */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+
+              {/* Previous month — locked payout card */}
+              <div style={{ ...s.card, borderColor: 'rgba(16,185,129,0.2)', background: 'rgba(16,185,129,0.04)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: 1 }}>
+                      Next payout
+                    </p>
+                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#7DD3FC' }}>
+                      {formatDate(nextPayoutDate)}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                    🔒 Locked
+                  </span>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: 0, fontSize: 12, color: '#7DD3FC' }}>This month</p>
-                  <p style={{ margin: '4px 0 0', fontSize: 32, fontWeight: 800, color: '#fff' }}>{thisMonthCount}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: '#64748B' }}>restaurants signed</p>
+
+                <p style={{ margin: '0 0 4px', fontSize: 11, color: '#4A6FA5' }}>
+                  Period: {formatDate(prevMonthStart)} – {formatDate(prevMonthEnd)}
+                </p>
+
+                <p style={{ margin: '0 0 16px', fontSize: 32, fontWeight: 800, color: '#fff' }}>
+                  ${prevMonthStats ? prevMonthStats.total_earned.toFixed(2) : '0.00'}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>New clients</span>
+                    <span style={{ color: '#fff', fontWeight: 600 }}>{prevMonthStats?.restaurants_signed ?? 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>Rank</span>
+                    <span style={{ color: RANK_COLORS[prevMonthStats?.rank_at_month || 'none'], fontWeight: 600 }}>
+                      {RANK_LABELS[prevMonthStats?.rank_at_month || 'none']}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>Performance</span>
+                    <span style={{ color: performanceColors[performanceLabel || 'Sustained'] || '#f59e0b', fontWeight: 600 }}>
+                      {performanceLabel || '—'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, paddingTop: 8, borderTop: '1px solid rgba(56,189,248,0.1)' }}>
+                    <span style={{ color: '#7DD3FC' }}>Status</span>
+                    {prevMonthPayment ? (
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>✓ Paid on {formatDate(prevMonthPayment.paid_at)}</span>
+                    ) : (
+                      <span style={{ color: '#f59e0b', fontWeight: 700 }}>⏳ Pending</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Current month — live projected card */}
+              <div style={{ ...s.card, borderColor: `${projectedColor}33` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: projectedColor, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      Current month
+                    </p>
+                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#7DD3FC' }}>{currentMonthName}</p>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: `${projectedColor}15`, color: projectedColor, border: `1px solid ${projectedColor}33` }}>
+                    Live
+                  </span>
+                </div>
+
+                <p style={{ margin: '0 0 4px', fontSize: 11, color: '#4A6FA5' }}>Estimated earnings</p>
+                <p style={{ margin: '0 0 16px', fontSize: 32, fontWeight: 800, color: '#fff' }}>
+                  ${estimatedTotal.toFixed(2)}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>New restaurants</span>
+                    <span style={{ color: '#fff', fontWeight: 600 }}>{thisMonthCount}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>Projected rank</span>
+                    <span style={{ color: projectedColor, fontWeight: 600 }}>{RANK_LABELS[projectedRank]}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#7DD3FC' }}>Total portfolio</span>
+                    <span style={{ color: '#fff', fontWeight: 600 }}>{restaurants.length} restaurants</span>
+                  </div>
+                  {nextRankInfo.needed > 0 && (
+                    <div style={{ marginTop: 8, padding: '10px 12px', borderRadius: 8, background: `${projectedColor}10`, border: `1px solid ${projectedColor}22` }}>
+                      <p style={{ margin: 0, fontSize: 12, color: projectedColor }}>
+                        🎯 Need <strong>{nextRankInfo.needed} more</strong> restaurant{nextRankInfo.needed !== 1 ? 's' : ''} this month to reach <strong>{nextRankInfo.label}</strong>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Stats grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
+            {/* Summary stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
               {[
                 { label: 'Total restaurants', value: restaurants.length, color: '#38BDF8' },
                 { label: 'Earned to date', value: `$${totalEarned.toFixed(2)}`, color: '#10b981' },
@@ -225,7 +326,7 @@ const balance = totalEarned - totalPaid
               ].map(stat => (
                 <div key={stat.label} style={s.card}>
                   <p style={{ margin: '0 0 6px', fontSize: 12, color: '#7DD3FC' }}>{stat.label}</p>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: stat.color }}>{stat.value}</p>
+                  <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: stat.color }}>{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -244,16 +345,18 @@ const balance = totalEarned - totalPaid
                   Copy
                 </button>
               </div>
-              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#4A6FA5' }}>Share this link with restaurants — when they sign up through it, they're automatically tracked to you.</p>
+              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#4A6FA5' }}>
+                Share this link — restaurants that sign up through it are automatically tracked to you.
+              </p>
             </div>
 
-            {/* Payment model reminder */}
+            {/* Payment schedule reminder */}
             <div style={{ ...s.card, background: 'rgba(56,189,248,0.04)' }}>
               <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 700, color: '#38BDF8', textTransform: 'uppercase', letterSpacing: 1 }}>Payment schedule</p>
               <p style={{ margin: 0, fontSize: 13, color: '#7DD3FC', lineHeight: 1.7 }}>
-                💰 <strong style={{ color: '#fff' }}>$5 setup bonus</strong> for each restaurant that signs up and pays their setup fee.<br />
-                🔄 <strong style={{ color: '#fff' }}>Monthly recurring</strong> based on your rank — paid on the 15th of the following month.<br />
-                📅 Example: July earnings → paid by August 15th.
+                💰 <strong style={{ color: '#fff' }}>Setup bonus</strong> — 28.5% of setup fee for each new restaurant that pays.<br />
+                🔄 <strong style={{ color: '#fff' }}>Monthly recurring</strong> — % of each restaurant's monthly subscription based on your rank.<br />
+                📅 <strong style={{ color: '#fff' }}>Payout cycle</strong> — Month closes on last day → paid by 15th of following month.
               </p>
             </div>
           </div>
@@ -263,7 +366,7 @@ const balance = totalEarned - totalPaid
         {activeTab === 'restaurants' && (
           <div style={s.card}>
             <p style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 700, color: '#fff' }}>
-              {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} referred
+              {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} in your portfolio
             </p>
             {restaurants.length === 0 ? (
               <p style={{ color: '#4A6FA5', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>
@@ -275,17 +378,17 @@ const balance = totalEarned - totalPaid
                   <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0D1B2A', borderRadius: 10, padding: '12px 16px', gap: 12 }}>
                     <div>
                       <p style={{ margin: 0, fontWeight: 600, color: '#fff', fontSize: 14 }}>{r.name}</p>
-                      <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4A6FA5' }}>menuberg.com/{r.slug} · Joined {formatDate(r.created_at)}</p>
+                      <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4A6FA5' }}>
+                        menuberg.com/{r.slug} · Joined {formatDate(r.created_at)}
+                      </p>
                     </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <span style={{
-                        fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-                        color: r.subscription_status === 'active' ? '#10b981' : '#f59e0b',
-                        background: r.subscription_status === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                      }}>
-                        {r.subscription_status}
-                      </span>
-                    </div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, flexShrink: 0,
+                      color: r.subscription_status === 'active' ? '#10b981' : '#f59e0b',
+                      background: r.subscription_status === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                    }}>
+                      {r.subscription_status}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -293,54 +396,31 @@ const balance = totalEarned - totalPaid
           </div>
         )}
 
-        {/* ── EARNINGS ── */}
-        {activeTab === 'earnings' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {monthlyStats.length === 0 ? (
-              <div style={{ ...s.card, textAlign: 'center', padding: '48px 24px' }}>
-                <p style={{ color: '#4A6FA5', fontSize: 14 }}>No earnings recorded yet — your stats will appear here each month.</p>
-              </div>
+        {/* ── PAYMENT HISTORY ── */}
+        {activeTab === 'history' && (
+          <div style={s.card}>
+            <p style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 700, color: '#fff' }}>Payment history</p>
+            {payments.length === 0 ? (
+              <p style={{ color: '#4A6FA5', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>
+                No payments recorded yet.
+              </p>
             ) : (
-              monthlyStats.map(stat => (
-                <div key={stat.id} style={s.card}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {payments.map(p => (
+                  <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0D1B2A', borderRadius: 8, padding: '12px 16px' }}>
                     <div>
-                      <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#fff' }}>{formatMonth(stat.month)}</p>
-                      <p style={{ margin: '4px 0 0', fontSize: 13, color: '#7DD3FC' }}>
-                        {stat.restaurants_signed} restaurants · {RANK_LABELS[stat.rank_at_month] || stat.rank_at_month}
+                      <p style={{ margin: 0, fontSize: 13, color: '#fff' }}>
+                        {formatDate(p.period_start)} – {formatDate(p.period_end)}
+                      </p>
+                      <p style={{ margin: '2px 0 0', fontSize: 11, color: '#4A6FA5' }}>
+                        Paid {formatDate(p.paid_at)}{p.notes ? ` · ${p.notes}` : ''}
                       </p>
                     </div>
-                    <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#10b981' }}>${stat.total_earned.toFixed(2)}</p>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#10b981' }}>
+                      ${p.amount_paid.toFixed(2)}
+                    </p>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
-                    <div style={{ background: '#0D1B2A', borderRadius: 8, padding: '10px 14px' }}>
-                      <p style={{ margin: 0, fontSize: 11, color: '#4A6FA5' }}>Setup fees</p>
-                      <p style={{ margin: '4px 0 0', fontSize: 15, fontWeight: 700, color: '#fff' }}>${stat.setup_fee_earned.toFixed(2)}</p>
-                    </div>
-                    <div style={{ background: '#0D1B2A', borderRadius: 8, padding: '10px 14px' }}>
-                      <p style={{ margin: 0, fontSize: 11, color: '#4A6FA5' }}>Recurring</p>
-                      <p style={{ margin: '4px 0 0', fontSize: 15, fontWeight: 700, color: '#fff' }}>${stat.recurring_earned.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {/* Payment history */}
-            {payments.length > 0 && (
-              <div style={s.card}>
-                <p style={{ margin: '0 0 14px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Payment history</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {payments.map(p => (
-                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0D1B2A', borderRadius: 8, padding: '10px 14px' }}>
-                      <div>
-                        <p style={{ margin: 0, fontSize: 13, color: '#fff' }}>{formatDate(p.period_start)} – {formatDate(p.period_end)}</p>
-                        <p style={{ margin: '2px 0 0', fontSize: 11, color: '#4A6FA5' }}>Paid {formatDate(p.paid_at)}{p.notes ? ` · ${p.notes}` : ''}</p>
-                      </div>
-                      <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#10b981' }}>${p.amount_paid.toFixed(2)}</p>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
             )}
           </div>
@@ -349,10 +429,9 @@ const balance = totalEarned - totalPaid
         {/* ── SETTINGS ── */}
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Profile info (read-only) */}
             <div style={s.card}>
               <p style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: '#38BDF8', textTransform: 'uppercase', letterSpacing: 1 }}>Your profile</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
                 {[
                   { label: 'Full name', value: affiliate.name },
                   { label: 'Username', value: `@${affiliate.username}` },
@@ -374,7 +453,6 @@ const balance = totalEarned - totalPaid
               <p style={{ margin: '16px 0 0', fontSize: 12, color: '#4A6FA5' }}>To update your profile details, contact your manager.</p>
             </div>
 
-            {/* Change password */}
             <div style={s.card}>
               <p style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: '#38BDF8', textTransform: 'uppercase', letterSpacing: 1 }}>Change password</p>
               <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -392,11 +470,7 @@ const balance = totalEarned - totalPaid
                 </div>
                 {pwError && <p style={{ color: '#f87171', fontSize: 13, margin: 0 }}>{pwError}</p>}
                 {pwSuccess && <p style={{ color: '#10b981', fontSize: 13, margin: 0 }}>{pwSuccess}</p>}
-                <button
-                  type="submit"
-                  disabled={pwLoading}
-                  style={{ padding: '10px', borderRadius: 8, background: '#38BDF8', color: '#0D1B2A', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: pwLoading ? 0.7 : 1 }}
-                >
+                <button type="submit" disabled={pwLoading} style={{ padding: '10px', borderRadius: 8, background: '#38BDF8', color: '#0D1B2A', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: pwLoading ? 0.7 : 1 }}>
                   {pwLoading ? 'Updating...' : 'Update password'}
                 </button>
               </form>
