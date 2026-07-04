@@ -90,6 +90,57 @@ const performanceColors: Record<string, string> = {
   Sustained: '#f59e0b',
 }
 
+function ImpersonationBanner() {
+  const [isImpersonating, setIsImpersonating] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check if we're in impersonation mode by hitting a simple endpoint
+    fetch('/api/super-admin/check-impersonation')
+      .then(r => r.json())
+      .then(d => { if (d.impersonating) setIsImpersonating(true) })
+      .catch(() => {})
+  }, [])
+
+  async function handleExit() {
+    await fetch('/api/super-admin/impersonate-affiliate', { method: 'DELETE' })
+    router.push('/super-admin/affiliates')
+  }
+
+  if (!isImpersonating) return null
+
+  return (
+    <div style={{
+      background: '#f59e0b',
+      color: '#0D1B2A',
+      padding: '10px 24px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      fontSize: 13,
+      fontWeight: 600,
+      zIndex: 999,
+    }}>
+      <span>👁️ Super-admin view — you are impersonating this affiliate</span>
+      <button
+        onClick={handleExit}
+        style={{
+          padding: '6px 16px',
+          borderRadius: 8,
+          border: 'none',
+          background: '#0D1B2A',
+          color: '#f59e0b',
+          fontSize: 13,
+          fontWeight: 700,
+          cursor: 'pointer',
+        }}
+      >
+        ← Exit to admin
+      </button>
+    </div>
+  )
+}
+
 export default function AffiliateDashboardClient({
   affiliate,
   restaurants,
@@ -180,6 +231,9 @@ export default function AffiliateDashboardClient({
 
   return (
     <div style={s.page}>
+      {/* Impersonation banner — only shown when super-admin is viewing as this affiliate */}
+      <ImpersonationBanner />
+      
       {/* Top bar */}
       <div style={s.topbar}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

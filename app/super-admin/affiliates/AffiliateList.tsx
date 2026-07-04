@@ -3,7 +3,15 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { X, ExternalLink, DollarSign, Plus, Eye } from 'lucide-react'
+import {
+  Search,
+  Filter,
+  DollarSign,
+  Plus,
+  X,
+  LogIn,
+  ExternalLink,
+} from 'lucide-react'
 
 type MonthlyStats = {
   month: string
@@ -167,6 +175,17 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
     setPayNotes('')
   }
 
+  async function handleImpersonate(affiliateId: string) {
+    const res = await fetch('/api/super-admin/impersonate-affiliate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ affiliate_id: affiliateId }),
+    })
+    if (res.ok) {
+      window.open('/affiliate/dashboard', '_blank')
+    }
+  }
+
   const pending = selected ? calcPendingPayment(selected) : 0
   const lastPayment = selected?.affiliate_payments?.sort((a, b) =>
     new Date(b.paid_at).getTime() - new Date(a.paid_at).getTime()
@@ -213,7 +232,11 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
               </tr>
             )}
             {affiliates.map(a => (
-              <tr key={a.id} className="hover:bg-gray-800/50 transition-colors">
+              <tr
+                key={a.id}
+                className="hover:bg-gray-800/50 transition-colors cursor-pointer"
+                onClick={() => setSelected(a)}
+              >
                 <td className="px-4 py-3">
                   <p className="font-medium text-white">{a.name}</p>
                   <p className="text-xs text-gray-500 mt-0.5">Since {formatDate(a.created_at)}</p>
@@ -228,25 +251,19 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
                     <span className="text-xs bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-1 rounded-full">Active</span>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
+                    {/* Impersonate */}
                     <button
-                      onClick={() => setSelected(a)}
-                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                      title="View details"
+                      onClick={e => { e.stopPropagation(); handleImpersonate(a.id) }}
+                      className="p-1.5 text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
+                      title="View as this affiliate"
                     >
-                      <Eye size={15} />
+                      <LogIn size={15} />
                     </button>
-
-                    <a href={`/affiliate/dashboard?preview=${a.id}`}
-                      target="_blank"
-                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                      title="View dashboard">
-
-                      <ExternalLink size={15} />
-                    </a>
+                    {/* Record payment */}
                     <button
-                      onClick={() => { setSelected(a); setShowPay(true) }}
+                      onClick={e => { e.stopPropagation(); setSelected(a); setShowPay(true) }}
                       className="p-1.5 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                       title="Record payment"
                     >
