@@ -16,6 +16,8 @@ export default async function AffiliatesPage() {
     .from('affiliates')
     .select(`
       id, name, username, current_rank, payment_suspended, created_at,
+      email, phone, address, city, age, cnic,
+      bank_name, bank_account_number, bank_account_title,
       affiliate_monthly_stats (
         month, restaurants_signed, setup_fee_earned,
         recurring_earned, total_earned, rank_at_month

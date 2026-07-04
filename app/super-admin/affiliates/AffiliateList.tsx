@@ -11,6 +11,12 @@ import {
   X,
   LogIn,
   ExternalLink,
+  Mail,
+  Phone,
+  MapPin,
+  CreditCard,
+  Landmark,
+  IdCard,
 } from 'lucide-react'
 
 type MonthlyStats = {
@@ -39,6 +45,15 @@ type Affiliate = {
   payment_suspended: boolean
   created_at: string
   total_restaurants: number
+  email: string | null
+  phone: string | null
+  address: string | null
+  city: string | null
+  age: number | null
+  cnic: string | null
+  bank_name: string | null
+  bank_account_number: string | null
+  bank_account_title: string | null
   affiliate_monthly_stats: MonthlyStats[]
   affiliate_payments: Payment[]
 }
@@ -313,6 +328,63 @@ export default function AffiliateList({ initialAffiliates }: { initialAffiliates
                     <p className="text-lg font-bold text-white">{stat.value}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Profile & payment details */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Profile &amp; bank details</p>
+                <div className="bg-gray-800 rounded-xl p-4 flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    <Mail size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <p className="text-sm text-white">{selected.email || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Phone size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Phone</p>
+                      <p className="text-sm text-white">{selected.phone || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <MapPin size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Address</p>
+                      <p className="text-sm text-white">
+                        {selected.address || '—'}{selected.city ? `, ${selected.city}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <IdCard size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">CNIC / Age</p>
+                      <p className="text-sm text-white">
+                        {selected.cnic || '—'}{selected.age ? ` · Age ${selected.age}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-px bg-gray-700 my-1" />
+                  <div className="flex items-start gap-3">
+                    <Landmark size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Bank</p>
+                      <p className="text-sm text-white">{selected.bank_name || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CreditCard size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Account title / number</p>
+                      <p className="text-sm text-white">
+                        {selected.bank_account_title || '—'}
+                        {selected.bank_account_number ? ` · ${selected.bank_account_number}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Payment due */}
