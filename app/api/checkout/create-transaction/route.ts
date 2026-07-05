@@ -8,14 +8,14 @@ const PADDLE_IDS: Record<
   { productId: string; setupPriceId: string; monthlyPriceId: string }
 > = {
   tier_a: {
-    productId: 'pro_01kvkagr8dqm37w0kq3p6qeakj',
-    setupPriceId: 'pri_01kvkakwytrpft23tq4vs7sast',
-    monthlyPriceId: 'pri_01kvkar865vqnsabs6frwfatkg',
+    productId: 'pro_01kvhcmdcw917qkjadsk2aezg1',
+    setupPriceId: 'pri_01kvhcswa3a0wf6me8v7tvj882',
+    monthlyPriceId: 'pri_01kvhcz3hja1r3dem1kbeg4pbd',
   },
   tier_b: {
-    productId: 'pro_01kvka26fbqnm56sf0bdc02hps',
-    setupPriceId: 'pri_01kvka7a5mtbnzmeh3mxdjyk85',
-    monthlyPriceId: 'pri_01kvka88sbchnykgxpba8f5r6w',
+    productId: 'pro_01kvhd0tzzx7p1ydkeeyyg566a',
+    setupPriceId: 'pri_01kvhd3q571p0k8cabxt4r9vxz',
+    monthlyPriceId: 'pri_01kvhd59hydcrc7z94awczcsge',
   },
 }
 
