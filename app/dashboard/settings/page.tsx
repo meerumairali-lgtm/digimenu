@@ -6,7 +6,9 @@ import { Country, State, City } from 'country-state-city'
 import SearchableSelect from '../SearchableSelect'
 import { isReservedSlug } from '@/lib/reservedSlugs'
 import MarkdownEditor from '@/app/components/MarkdownEditor'
+import { compressImage } from '@/lib/imageCompression'
 import { Pencil } from 'lucide-react'
+
 
 const ALL_COUNTRIES = Country.getAllCountries()
 
@@ -269,9 +271,11 @@ export default function SettingsPage() {
   async function handleLogoUpload(file: File) {
     if (!restaurantId) return
     setLogoUploading(true)
-    const ext = file.name.split('.').pop()
-    const fileName = `${restaurantId}/logo-${Date.now()}.${ext}`
-    const { data, error } = await supabase.storage.from('restaurant-branding').upload(fileName, file, { upsert: true })
+    const compressed = await compressImage(file, 800, 0.85)
+    const fileName = `${restaurantId}/logo-${Date.now()}.webp`
+    const { data, error } = await supabase.storage
+      .from('restaurant-branding')
+      .upload(fileName, compressed, { upsert: true, contentType: 'image/webp' })
     if (!error && data) {
       const { data: urlData } = supabase.storage.from('restaurant-branding').getPublicUrl(fileName)
       setLogoUrl(urlData.publicUrl)
@@ -282,9 +286,11 @@ export default function SettingsPage() {
   async function handleHeroImageUpload(index: number, file: File) {
     if (!restaurantId) return
     setHeroUploadingIndex(index)
-    const ext = file.name.split('.').pop()
-    const fileName = `${restaurantId}/hero-${Date.now()}-${index}.${ext}`
-    const { data, error } = await supabase.storage.from('restaurant-branding').upload(fileName, file, { upsert: true })
+    const compressed = await compressImage(file, 1920, 0.8)
+    const fileName = `${restaurantId}/hero-${Date.now()}-${index}.webp`
+    const { data, error } = await supabase.storage
+      .from('restaurant-branding')
+      .upload(fileName, compressed, { upsert: true, contentType: 'image/webp' })
     if (!error && data) {
       const { data: urlData } = supabase.storage.from('restaurant-branding').getPublicUrl(fileName)
       setHeroSlides(slides => slides.map((s, i) => i === index ? { ...s, image_url: urlData.publicUrl } : s))

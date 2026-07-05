@@ -47,43 +47,63 @@ const themes: Record<string, {
   priceBg: string; priceText: string
   heroOverlayFrom: string; heroOverlayTo: string
   shadow: string
-  font: string
+  font: string; displayFont: string
 }> = {
   light: {
-    bg: '#FAF8F5', surface: '#FFFFFF', surfaceRaised: '#FFFFFF', text: '#1C1917', subtext: '#78716C',
-    border: 'rgba(28,25,23,0.07)', accent: '#D97757', accentSoft: 'rgba(217,119,87,0.12)', accentText: '#FFFFFF',
-    navBg: 'rgba(255,255,255,0.92)', navText: '#1C1917', navMuted: '#9C9893',
-    priceBg: 'rgba(217,119,87,0.10)', priceText: '#B25B3F',
-    heroOverlayFrom: 'rgba(20,16,14,0.05)', heroOverlayTo: 'rgba(20,16,14,0.7)',
-    shadow: '0 8px 30px -8px rgba(28,25,23,0.12)',
-    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
+    bg: 'linear-gradient(180deg, #FFFAF6 0%, #FDF1E7 100%)',
+    surface: '#FFFFFF', surfaceRaised: '#FFFFFF', text: '#241C18', subtext: '#8A7B6F',
+    border: 'rgba(36,28,24,0.08)',
+    accent: 'linear-gradient(135deg, #FF9466 0%, #E2664A 100%)',
+    accentSoft: 'rgba(226,102,74,0.10)', accentText: '#FFFFFF',
+    navBg: 'rgba(255,252,249,0.85)', navText: '#241C18', navMuted: '#B5A89C',
+    priceBg: 'linear-gradient(135deg, rgba(226,102,74,0.13), rgba(255,148,102,0.08))',
+    priceText: '#C2502F',
+    heroOverlayFrom: 'rgba(36,28,24,0.05)', heroOverlayTo: 'rgba(30,20,14,0.72)',
+    shadow: '0 14px 40px -12px rgba(226,102,74,0.25), 0 4px 12px rgba(36,28,24,0.06)',
+    font: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+    displayFont: '"Fraunces", Georgia, serif',
   },
   dark: {
-    bg: '#16151A', surface: '#1F1E24', surfaceRaised: '#26252C', text: '#F2EFEA', subtext: '#9A968F',
-    border: 'rgba(255,255,255,0.07)', accent: '#E8A33D', accentSoft: 'rgba(232,163,61,0.14)', accentText: '#16151A',
-    navBg: 'rgba(22,21,26,0.9)', navText: '#F2EFEA', navMuted: '#75726C',
-    priceBg: 'rgba(232,163,61,0.14)', priceText: '#E8A33D',
-    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(10,9,7,0.82)',
-    shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
-    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
+    bg: 'linear-gradient(160deg, #14131A 0%, #1B1A22 55%, #201C1F 100%)',
+    surface: '#1E1D24', surfaceRaised: '#26242C', text: '#F5F1EA', subtext: '#96908A',
+    border: 'rgba(255,255,255,0.06)',
+    accent: 'linear-gradient(135deg, #F0A63A 0%, #E8823D 100%)',
+    accentSoft: 'rgba(240,166,58,0.12)', accentText: '#1A1508',
+    navBg: 'rgba(18,17,22,0.82)', navText: '#F5F1EA', navMuted: '#69645D',
+    priceBg: 'linear-gradient(135deg, rgba(240,166,58,0.16), rgba(232,130,61,0.10))',
+    priceText: '#F0A63A',
+    heroOverlayFrom: 'rgba(0,0,0,0.05)', heroOverlayTo: 'rgba(8,7,5,0.85)',
+    shadow: '0 16px 44px -14px rgba(240,166,58,0.22), 0 4px 14px rgba(0,0,0,0.4)',
+    font: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+    displayFont: '"Plus Jakarta Sans", -apple-system, sans-serif',
   },
   gold: {
-    bg: '#0E0B05', surface: '#181206', surfaceRaised: '#201805', text: '#F5E6C8', subtext: '#A6936B',
-    border: 'rgba(212,160,23,0.14)', accent: '#D4A017', accentSoft: 'rgba(212,160,23,0.14)', accentText: '#15110A',
-    navBg: 'rgba(14,11,5,0.92)', navText: '#F5E6C8', navMuted: '#8A7A54',
-    priceBg: 'rgba(212,160,23,0.14)', priceText: '#D4A017',
-    heroOverlayFrom: 'rgba(0,0,0,0.15)', heroOverlayTo: 'rgba(8,6,2,0.85)',
-    shadow: '0 8px 30px -8px rgba(0,0,0,0.6)',
-    font: '"Georgia", "Iowan Old Style", serif',
+    bg: 'linear-gradient(160deg, #0B0906 0%, #14100A 55%, #1A140B 100%)',
+    surface: '#17130B', surfaceRaised: '#1F1810', text: '#F3E6C8', subtext: '#A9976E',
+    border: 'rgba(212,175,90,0.14)',
+    accent: 'linear-gradient(135deg, #E9C46A 0%, #C9942F 100%)',
+    accentSoft: 'rgba(212,175,90,0.13)', accentText: '#1A1408',
+    navBg: 'rgba(11,9,6,0.88)', navText: '#F3E6C8', navMuted: '#7A6C4B',
+    priceBg: 'linear-gradient(135deg, rgba(233,196,106,0.16), rgba(201,148,47,0.10))',
+    priceText: '#E9C46A',
+    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(6,5,2,0.88)',
+    shadow: '0 18px 48px -16px rgba(212,175,90,0.28), 0 4px 16px rgba(0,0,0,0.5)',
+    font: '"Iowan Old Style", Georgia, serif',
+    displayFont: '"Fraunces", Georgia, serif',
   },
   vibrant: {
-    bg: '#0F172A', surface: '#1A2436', surfaceRaised: '#202B40', text: '#F1F5F9', subtext: '#8B98AC',
-    border: 'rgba(255,255,255,0.08)', accent: '#38BDF8', accentSoft: 'rgba(56,189,248,0.14)', accentText: '#0D1B2A',
-    navBg: 'rgba(15,23,42,0.9)', navText: '#F1F5F9', navMuted: '#5B6B82',
-    priceBg: 'rgba(255,107,91,0.14)', priceText: '#FF8A77',
-    heroOverlayFrom: 'rgba(0,0,0,0.1)', heroOverlayTo: 'rgba(6,10,20,0.82)',
-    shadow: '0 8px 30px -8px rgba(0,0,0,0.5)',
-    font: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif',
+    bg: 'linear-gradient(160deg, #0B1120 0%, #151233 55%, #1B1240 100%)',
+    surface: '#1A1B33', surfaceRaised: '#22234A', text: '#F1F3FA', subtext: '#9098BE',
+    border: 'rgba(255,255,255,0.08)',
+    accent: 'linear-gradient(135deg, #38BDF8 0%, #A855F7 100%)',
+    accentSoft: 'rgba(129,140,248,0.14)', accentText: '#0B0F24',
+    navBg: 'rgba(11,17,32,0.8)', navText: '#F1F3FA', navMuted: '#585E82',
+    priceBg: 'linear-gradient(135deg, rgba(255,110,199,0.16), rgba(129,140,248,0.12))',
+    priceText: '#FF8AD8',
+    heroOverlayFrom: 'rgba(0,0,0,0.05)', heroOverlayTo: 'rgba(6,7,18,0.85)',
+    shadow: '0 18px 48px -14px rgba(129,140,248,0.3), 0 4px 16px rgba(0,0,0,0.4)',
+    font: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+    displayFont: '"Plus Jakarta Sans", -apple-system, sans-serif',
   },
 }
 
@@ -401,8 +421,8 @@ function HeroCarousel({ restaurant, t }: { restaurant: Restaurant; t: typeof the
       <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 20px 24px', textAlign: 'left' }}>
         {current?.title && (
           <p style={{
-            margin: '0 0 4px', color: '#FFFFFF', fontSize: 19, fontWeight: 700, lineHeight: 1.3,
-            maxWidth: 320, textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+            margin: '0 0 4px', color: '#FFFFFF', fontSize: 21, fontWeight: 700, lineHeight: 1.25,
+            maxWidth: 320, textShadow: '0 2px 12px rgba(0,0,0,0.4)', fontFamily: t.displayFont,
           }}>{current.title}</p>
         )}
         {current?.caption && (
@@ -552,7 +572,7 @@ function ItemPopup({ item, t, currency, onClose }: {
         </div>
         <div style={{ padding: '22px 24px 36px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 21, fontWeight: 600, color: t.text, lineHeight: 1.35, flex: 1 }}>{item.name}</h2>
+            <h2 style={{ margin: 0, fontSize: 21, fontWeight: 600, color: t.text, lineHeight: 1.35, flex: 1, fontFamily: t.displayFont }}>{item.name}</h2>
             <span style={{ fontWeight: 600, fontSize: 16, color: t.priceText, background: t.priceBg, padding: '7px 14px', borderRadius: 10, whiteSpace: 'nowrap', flexShrink: 0 }}>
               {currency} {item.price}
             </span>
@@ -707,7 +727,7 @@ export default function MenuClient({ restaurant, categories }: {
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 20px 56px' }}>
       <PanelHeader title="About us" onBack={() => changeView('menu')} />
 
-      <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: '-0.3px' }}>{restaurant.name}</h1>
+      <h1 style={{ margin: '0 0 4px', fontSize: 27, fontWeight: 700, color: t.text, letterSpacing: '-0.3px', fontFamily: t.displayFont }}>{restaurant.name}</h1>
       {restaurant.tagline && (
         <p style={{ margin: '0 0 20px', fontSize: 14, color: t.subtext, lineHeight: 1.5 }}>{restaurant.tagline}</p>
       )}
@@ -919,6 +939,7 @@ export default function MenuClient({ restaurant, categories }: {
 
   return (
     <div style={{ minHeight: '100vh', background: t.bg, fontFamily: t.font }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');`}</style>
       {selectedItem && <ItemPopup item={selectedItem} t={t} currency={currency} onClose={() => setSelectedItem(null)} />}
 
       <TopBar restaurant={restaurant} view={view} onChange={changeView} hasAbout={hasAbout} hasContact={hasContact} t={t} />

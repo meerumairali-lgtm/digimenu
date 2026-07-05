@@ -3,6 +3,7 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Bold, List } from 'lucide-react'
+import { compressImage } from '@/lib/imageCompression'
 
 type MenuItem = {
   id: string
@@ -166,9 +167,11 @@ function EditItemModal({ item, restaurantId, onSave, onClose }: {
 
   async function handleImageUpload(file: File) {
     setUploading(true)
-    const ext = file.name.split('.').pop()
-    const fileName = `${restaurantId}/${Date.now()}.${ext}`
-    const { data, error } = await supabase.storage.from('menu-images').upload(fileName, file, { upsert: true })
+    const compressed = await compressImage(file, 1200, 0.8)
+    const fileName = `${restaurantId}/${Date.now()}.webp`
+    const { data, error } = await supabase.storage
+      .from('menu-images')
+      .upload(fileName, compressed, { upsert: true, contentType: 'image/webp' })
     if (!error && data) {
       const { data: urlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
       setForm(f => ({ ...f, image_url: urlData.publicUrl }))
@@ -360,9 +363,11 @@ export default function MenuManager({ restaurant, initialCategories }: {
 
   async function handleImageUpload(categoryId: string, file: File) {
     setUploadingImage(categoryId)
-    const ext = file.name.split('.').pop()
-    const fileName = `${restaurant.id}/${Date.now()}.${ext}`
-    const { data, error } = await supabase.storage.from('menu-images').upload(fileName, file, { upsert: true })
+    const compressed = await compressImage(file, 1200, 0.8)
+    const fileName = `${restaurant.id}/${Date.now()}.webp`
+    const { data, error } = await supabase.storage
+      .from('menu-images')
+      .upload(fileName, compressed, { upsert: true, contentType: 'image/webp' })
     if (!error && data) {
       const { data: urlData } = supabase.storage.from('menu-images').getPublicUrl(fileName)
       setNewItems({ ...newItems, [categoryId]: { ...newItems[categoryId], image_url: urlData.publicUrl } })
