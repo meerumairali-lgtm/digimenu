@@ -38,6 +38,12 @@ type Restaurant = {
   google_maps_url?: string
   logo_url?: string
   hero_slides?: HeroSlide[]
+  cta_button?: {
+    enabled: boolean
+    type: 'call' | 'whatsapp' | 'reservation' | 'custom'
+    label: string
+    value: string
+  }
 }
 
 const themes: Record<string, {
@@ -655,6 +661,85 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
   )
 }
 
+type CtaButton = {
+  enabled: boolean
+  type: 'call' | 'whatsapp' | 'reservation' | 'custom'
+  label: string
+  value: string
+}
+
+function CallIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
+}
+function CalendarIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+}
+function LinkIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.5 1.5M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.49-1.49" /></svg>
+}
+
+function ctaIcon(type: CtaButton['type']) {
+  if (type === 'call') return <CallIcon />
+  if (type === 'whatsapp') return <WhatsAppIcon />
+  if (type === 'reservation') return <CalendarIcon />
+  return <LinkIcon />
+}
+
+function ctaHref(cta: CtaButton) {
+  if (cta.type === 'call') return `tel:${cta.value}`
+  if (cta.type === 'whatsapp') return `https://wa.me/${cta.value.replace(/\D/g, '')}`
+  return cta.value // reservation or custom: treat as a URL
+}
+
+function FloatingCTA({ cta, t }: { cta: CtaButton; t: typeof themes.light }) {
+  const [open, setOpen] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function expand() {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setOpen(true)
+  }
+  function scheduleCollapse() {
+    closeTimer.current = setTimeout(() => setOpen(false), 2600)
+  }
+  function handleTap() {
+    if (!open) { expand(); scheduleCollapse() }
+  }
+
+  return (
+    
+      <a href={ctaHref(cta)}
+      target={cta.type === 'reservation' || cta.type === 'custom' ? '_blank' : undefined}
+      rel="noopener noreferrer"
+      onMouseEnter={expand}
+      onMouseLeave={() => setOpen(false)}
+      onClick={handleTap}
+      style={{
+        position: 'fixed', left: 18, bottom: 22, zIndex: 300,
+        display: 'flex', alignItems: 'center',
+        height: 52, minWidth: 52, borderRadius: 26,
+        background: t.accent, color: t.accentText,
+        textDecoration: 'none', overflow: 'hidden',
+        boxShadow: '0 10px 30px -8px rgba(0,0,0,0.45)',
+        transition: `all 0.35s ${EASE}`,
+        paddingLeft: 15, paddingRight: open ? 20 : 15,
+        cursor: 'pointer',
+      }}
+    >
+      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {ctaIcon(cta.type)}
+      </span>
+      <span style={{
+        maxWidth: open ? 220 : 0, opacity: open ? 1 : 0,
+        marginLeft: open ? 10 : 0, whiteSpace: 'nowrap', overflow: 'hidden',
+        fontSize: 14, fontWeight: 600, transition: `all 0.35s ${EASE}`,
+      }}>
+        {cta.label}
+      </span>
+    </a>
+  )
+}
+
 export default function MenuClient({ restaurant, categories }: {
   restaurant: Restaurant
   categories: Category[]
@@ -951,6 +1036,10 @@ export default function MenuClient({ restaurant, categories }: {
       <p style={{ textAlign: 'center', color: t.subtext, fontSize: 11, padding: '8px 0 36px', opacity: 0.45 }}>
         Powered by Menuberg
       </p>
+
+      {restaurant.cta_button?.enabled && restaurant.cta_button.value && restaurant.cta_button.label && (
+        <FloatingCTA cta={restaurant.cta_button} t={t} />
+      )}
     </div>
   )
 }

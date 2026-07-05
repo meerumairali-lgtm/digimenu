@@ -134,6 +134,11 @@ export default function SettingsPage() {
   const [editingSlug, setEditingSlug] = useState(false)
   const [showSlugWarning, setShowSlugWarning] = useState(false)
 
+  const [ctaEnabled, setCtaEnabled] = useState(false)
+  const [ctaType, setCtaType] = useState<'call' | 'whatsapp' | 'reservation' | 'custom'>('call')
+  const [ctaLabel, setCtaLabel] = useState('')
+  const [ctaValue, setCtaValue] = useState('')
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -176,6 +181,12 @@ export default function SettingsPage() {
         if (data.opening_hours) setOpeningHours(data.opening_hours)
 
         if (data.logo_url) setLogoUrl(data.logo_url)
+        if (data.cta_button) {
+          setCtaEnabled(!!data.cta_button.enabled)
+          setCtaType(data.cta_button.type || 'call')
+          setCtaLabel(data.cta_button.label || '')
+          setCtaValue(data.cta_button.value || '')
+        }
         if (Array.isArray(data.hero_slides) && data.hero_slides.length > 0) {
           setHeroSlides(data.hero_slides.map((s: any) => ({
             image_url: s.image_url || '',
@@ -368,6 +379,9 @@ export default function SettingsPage() {
       opening_hours: openingHours,
       logo_url: logoUrl || null,
       hero_slides: completeSlides,
+      cta_button: ctaEnabled
+        ? { enabled: true, type: ctaType, label: ctaLabel.trim(), value: ctaValue.trim() }
+        : { enabled: false, type: ctaType, label: ctaLabel.trim(), value: ctaValue.trim() },
     }).eq('user_id', user.id)
     if (error) setError(error.message)
     else {
@@ -853,6 +867,83 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div style={sectionStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <h3 style={{ margin: 0, fontSize: 15, color: '#0D1B2A' }}>Floating action button</h3>
+              <div
+                onClick={() => setCtaEnabled(!ctaEnabled)}
+                style={{ width: 40, height: 22, borderRadius: 11, cursor: 'pointer', background: ctaEnabled ? '#22c55e' : '#d1d5db', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}
+              >
+                <div style={{ position: 'absolute', top: 3, left: ctaEnabled ? 21 : 3, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+              </div>
+            </div>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888' }}>
+              A small floating button on your menu page for quick actions like calling or booking a table.
+            </p>
+
+            {ctaEnabled && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={labelStyle}>Button action</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                    {[
+                      { id: 'call', label: 'Call' },
+                      { id: 'whatsapp', label: 'WhatsApp' },
+                      { id: 'reservation', label: 'Reservation link' },
+                      { id: 'custom', label: 'Custom link' },
+                    ].map(opt => (
+                      <div
+                        key={opt.id}
+                        onClick={() => setCtaType(opt.id as typeof ctaType)}
+                        style={{
+                          cursor: 'pointer', padding: '9px 12px', borderRadius: 8, textAlign: 'center',
+                          border: ctaType === opt.id ? '2px solid #38BDF8' : '1px solid #ddd',
+                          background: ctaType === opt.id ? '#e0f2fe' : '#fff',
+                          fontSize: 13, fontWeight: ctaType === opt.id ? 600 : 400,
+                          color: ctaType === opt.id ? '#0D1B2A' : '#555',
+                        }}
+                      >
+                        {opt.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Button label</label>
+                  <input
+                    style={inputStyle}
+                    value={ctaLabel}
+                    onChange={e => setCtaLabel(e.target.value)}
+                    placeholder={ctaType === 'call' ? 'Call to order' : ctaType === 'whatsapp' ? 'Order on WhatsApp' : ctaType === 'reservation' ? 'Book a table' : 'Visit our website'}
+                    maxLength={30}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    {ctaType === 'call' && 'Phone number'}
+                    {ctaType === 'whatsapp' && 'WhatsApp number'}
+                    {(ctaType === 'reservation' || ctaType === 'custom') && 'Link (URL)'}
+                  </label>
+                  <input
+                    style={inputStyle}
+                    value={ctaValue}
+                    onChange={e => setCtaValue(e.target.value)}
+                    placeholder={
+                      ctaType === 'call' ? '+923001234567' :
+                      ctaType === 'whatsapp' ? '923001234567' :
+                      'https://...'
+                    }
+                  />
+                  {ctaType === 'whatsapp' && (
+                    <p style={{ margin: '6px 0 0', fontSize: 12, color: '#888' }}>Numbers only, with country code, no + or spaces.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
