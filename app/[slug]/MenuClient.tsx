@@ -639,7 +639,10 @@ function SwipeCategory({ category, items, t, currency, onItemClick }: {
 
   return (
     <div style={{ paddingTop: 32 }}>
-      <h2 style={{ margin: '0 0 12px', padding: '0 20px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+      <div style={{ marginBottom: 14, padding: '0 20px' }}>
+        <h2 style={{ margin: 0, fontSize: 12.5, fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', color: t.text, fontFamily: t.displayFont }}>{category.name}</h2>
+        <div style={{ width: 36, height: 3, borderRadius: 2, marginTop: 8, background: t.accent }} />
+      </div>
       <div style={{ padding: '0 20px' }}>
         <div ref={scrollRef} onScroll={handleScroll} style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollbarWidth: 'none' as any, scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' as any }}>
           {items.map((item) => (
@@ -948,7 +951,10 @@ export default function MenuClient({ restaurant, categories }: {
           const items = category.menu_items.filter(i => i.is_available)
           return (
             <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
-              <h2 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ marginBottom: 14 }}>
+                <h2 style={{ margin: 0, fontSize: 12.5, fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', color: t.text, fontFamily: t.displayFont }}>{category.name}</h2>
+                <div style={{ width: 36, height: 3, borderRadius: 2, marginTop: 8, background: t.accent }} />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {items.map(item => (
                   <div
@@ -974,7 +980,10 @@ export default function MenuClient({ restaurant, categories }: {
           const items = category.menu_items.filter(i => i.is_available)
           return (
             <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
-              <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ marginBottom: 14 }}>
+                <h2 style={{ margin: 0, fontSize: 12.5, fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', color: t.text, fontFamily: t.displayFont }}>{category.name}</h2>
+                <div style={{ width: 36, height: 3, borderRadius: 2, marginTop: 8, background: t.accent }} />
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {items.map(item => (
                   <div
@@ -1002,7 +1011,10 @@ export default function MenuClient({ restaurant, categories }: {
           const items = category.menu_items.filter(i => i.is_available)
           return (
             <div key={category.id} id={category.id} ref={el => { sectionRefs.current[category.id] = el }} style={{ paddingTop: 32 }}>
-              <h2 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, letterSpacing: '0.3px', color: t.text }}>{category.name}</h2>
+              <div style={{ marginBottom: 14 }}>
+                <h2 style={{ margin: 0, fontSize: 12.5, fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', color: t.text, fontFamily: t.displayFont }}>{category.name}</h2>
+                <div style={{ width: 36, height: 3, borderRadius: 2, marginTop: 8, background: t.accent }} />
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
                 {items.map(item => (
                   <div
