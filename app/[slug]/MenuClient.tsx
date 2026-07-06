@@ -111,6 +111,21 @@ const themes: Record<string, {
     font: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif',
     displayFont: '"Plus Jakarta Sans", -apple-system, sans-serif',
   },
+
+  yellow: {
+    bg: 'linear-gradient(180deg, #F7CB4D 0%, #F0BA2E 100%)',
+    surface: '#FFF8E1', surfaceRaised: '#FFFDF5', text: '#1A1508', subtext: '#5C4A1E',
+    border: 'rgba(26,21,8,0.14)',
+    accent: 'linear-gradient(135deg, #E23D3D 0%, #A11D1D 100%)',
+    accentSoft: 'rgba(214,40,40,0.12)', accentText: '#FFFFFF',
+    navBg: 'rgba(247,203,77,0.92)', navText: '#1A1508', navMuted: '#8A7433',
+    priceBg: 'linear-gradient(135deg, rgba(226,61,61,0.14), rgba(161,29,29,0.08))',
+    priceText: '#A11D1D',
+    heroOverlayFrom: 'rgba(26,21,8,0.1)', heroOverlayTo: 'rgba(20,16,6,0.78)',
+    shadow: '0 14px 40px -12px rgba(26,21,8,0.28), 0 4px 12px rgba(26,21,8,0.1)',
+    font: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+    displayFont: '"Archivo Black", "Poppins", sans-serif',
+  },
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -1024,7 +1039,7 @@ export default function MenuClient({ restaurant, categories }: {
 
   return (
     <div style={{ minHeight: '100vh', background: t.bg, fontFamily: t.font }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');`}</style>
       {selectedItem && <ItemPopup item={selectedItem} t={t} currency={currency} onClose={() => setSelectedItem(null)} />}
 
       <TopBar restaurant={restaurant} view={view} onChange={changeView} hasAbout={hasAbout} hasContact={hasContact} t={t} />

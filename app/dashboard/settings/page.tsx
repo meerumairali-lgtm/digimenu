@@ -21,6 +21,7 @@ const THEMES = [
   { id: 'dark', label: 'Dark', bg: '#111111', accent: '#38BDF8' },
   { id: 'gold', label: 'Gold', bg: '#1a1200', accent: '#d4a017' },
   { id: 'vibrant', label: 'Vibrant', bg: '#0f172a', accent: '#38BDF8' },
+  { id: 'yellow', label: 'Diner Yellow', bg: '#F0BA2E', accent: '#A11D1D' },
 ]
 
 // One searchable entry per country, mapping to that country's currency.
