@@ -29,7 +29,7 @@ export default function QRPage({ restaurantSlug, restaurantName, logoUrl }: Prop
   const [logoLoadFailed, setLogoLoadFailed] = useState(false)
 
   useEffect(() => {
-    const url = `${window.location.origin}/${restaurantSlug}`
+    const url = `https://${restaurantSlug}.menuberg.com`
     setMenuUrl(url)
   }, [restaurantSlug])
 
@@ -138,7 +138,7 @@ export default function QRPage({ restaurantSlug, restaurantName, logoUrl }: Prop
     // ── QR code, true 2"x2" ──
     const qrX = (width - qrSize) / 2
     const qrCanvas = document.createElement('canvas')
-    await QRCode.toCanvas(qrCanvas, menuUrl || `${window.location.origin}/${restaurantSlug}`, {
+    await QRCode.toCanvas(qrCanvas, menuUrl || `https://${restaurantSlug}.menuberg.com`, {
       width: qrSize,
       margin: 1,
       color: { dark: '#0D1B2A', light: '#ffffff' },

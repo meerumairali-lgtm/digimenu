@@ -11,7 +11,7 @@ export default async function QRCodePage() {
 
   const { data: restaurant } = await supabase
     .from("restaurants")
-    .select("slug, name")
+    .select("slug, name, logo_url")
     .eq("user_id", user.id)
     .single();
 
@@ -21,6 +21,7 @@ export default async function QRCodePage() {
     <QRPage
       restaurantSlug={restaurant.slug}
       restaurantName={restaurant.name}
+      logoUrl={restaurant.logo_url}
     />
   );
 }

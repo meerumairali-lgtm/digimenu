@@ -501,8 +501,8 @@ export default function SettingsPage() {
                 <label style={labelStyle}>Website URL</label>
                 {!editingSlug ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', background: '#f8fafc' }}>
-                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
                     <span style={{ fontSize: 14, color: '#0D1B2A', fontWeight: 500, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{form.slug}</span>
+                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>.menuberg.com</span>
                     <button
                       type="button"
                       onClick={() => setShowSlugWarning(true)}
@@ -514,7 +514,6 @@ export default function SettingsPage() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>menuberg.com/</span>
                     <input
                       autoFocus
                       style={{ ...inputStyle, flex: 1 }}
@@ -522,6 +521,7 @@ export default function SettingsPage() {
                       onChange={e => setForm({ ...form, slug: e.target.value })}
                       required
                     />
+                    <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap' }}>.menuberg.com</span>
                     <button
                       type="button"
                       onClick={() => setEditingSlug(false)}

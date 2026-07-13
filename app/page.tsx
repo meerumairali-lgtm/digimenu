@@ -63,13 +63,13 @@ export default async function Home() {
         <p style={{ fontSize: "18px", color: "#7DD3FC", maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
           {c.heroSubtitle}
         </p>
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
+       <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
           <Link href="/signup" style={{ background: "#38BDF8", color: "#0D1B2A", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
             {c.heroCta1}
           </Link>
-          <Link href="/the-regent-room" style={{ background: "transparent", color: "#ffffff", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}>
+          <a href="https://the-regent-room.menuberg.com" style={{ background: "transparent", color: "#ffffff", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}>
             {c.heroCta2}
-          </Link>
+          </a>
         </div>
         <p style={{ marginTop: "1.2rem", fontSize: "13px", color: "rgba(125,211,252,0.6)" }}>
           Setup in under 5 minutes · No credit card required

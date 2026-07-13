@@ -282,8 +282,8 @@ export default function SetupPage() {
           <div>
             <label style={labelStyle}>Your menu URL</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: '#7DD3FC', fontSize: 13, whiteSpace: 'nowrap' as const }}>menuberg.com/</span>
               <input type="text" value={slug} onChange={e => setSlug(e.target.value)} required style={{ ...inputStyle, flex: 1, width: 'auto' }} placeholder="spicy-box" />
+              <span style={{ color: '#7DD3FC', fontSize: 13, whiteSpace: 'nowrap' as const }}>.menuberg.com</span>
             </div>
           </div>
 
