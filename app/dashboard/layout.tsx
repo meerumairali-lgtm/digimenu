@@ -79,7 +79,7 @@ export default async function DashboardLayout({
         trialDaysLeft = remaining
       }
 
-      if (restaurant.slug) menuUrl = `/${restaurant.slug}`
+      if (restaurant.slug) menuUrl = `https://${restaurant.slug}.menuberg.com`
     } else {
       let { data: pending } = await supabase
         .from('pending_signups')
