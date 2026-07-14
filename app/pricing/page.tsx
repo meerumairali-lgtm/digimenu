@@ -84,12 +84,13 @@ export default async function PricingPage() {
   const rates = await getUsdExchangeRates();
 
   const features = [
-    "Custom QR code menu",
-    "Unlimited menu items & categories",
-    "Mobile-optimized public menu page",
-    "Live menu editing dashboard",
-    "Analytics on menu views",
-    "Email support",
+    'Your website live at — your-restaurant.menuberg.com',
+    'Unlimited categories, items, and photos',
+    'High-quality QR codes to print on tables and packaging',
+    'Customize your website with 4 themes and 4 layouts.',
+    'Complete pages featuring your Menu, About section, and Contact info',
+    'Instant updates to change prices or hide sold-out items',
+    'Fully mobile-responsive for all screen sizes',
   ];
 
   const showIntro = tier?.intro_discount_active && tier?.intro_monthly_price != null;

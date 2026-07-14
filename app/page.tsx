@@ -109,7 +109,7 @@ export default async function Home() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
           {[
             ["1", "Sign up free", "Create your account and choose your restaurant's unique URL in minutes."],
-            ["2", "Build your website", "Add your categories, dishes, prices, photos, and contact details. Choose your theme and layout, then publish your website in minutesAdd your menu, prices, photos, and contact details. Choose a theme and go live in minutes."],
+            ["2", "Build your website", "Add your categories, dishes, prices, photos, and contact details. Choose a theme and layout."],
             ["3", "Go live & Go", "Launch your website, download your QR code, and share your business with the world."],
           ].map(([num, title, desc]) => (
             <div key={String(num)} style={{ textAlign: "center" }}>
@@ -152,7 +152,7 @@ export default async function Home() {
       <footer style={{ padding: "2rem", borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: "1rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <Image src="/logo.png" alt="Menuberg" width={28} height={28} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: "18px", fontWeight: 700, color: "#0D1B2A" }}>Menuberg <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Digital menus for everyone</span></span>
+          <span style={{ fontSize: "18px", fontWeight: 700, color: "#0D1B2A" }}>Menuberg <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Every business deserve a website</span></span>
         </div>
         <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
           <Link href="/pricing" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Pricing</Link>
