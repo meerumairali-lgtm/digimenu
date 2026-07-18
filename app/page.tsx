@@ -6,6 +6,24 @@ import LandingNav from './components/LandingNav'
 import ContactSection from './components/ContactSection'
 import PricingBanner from './components/PricingBanner'
 import LivePriceStat from '@/app/components/LivePriceStat'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Menuberg — Restaurant Website & Menu Builder | Live in Minutes',
+  description: 'Build a beautiful digital menu website for your restaurant or café in minutes. No coding, no expensive web agency. QR code menus, custom themes, and your own website — all in one place.',
+  keywords: ['restaurant website builder', 'menu website maker', 'QR code menu', 'digital menu creator', 'cafe website builder', 'online menu for restaurant'],
+  openGraph: {
+    title: 'Menuberg — Restaurant Website & Menu Builder',
+    description: 'Build a beautiful digital menu website for your restaurant in minutes. No coding required.',
+    type: 'website',
+    url: 'https://www.menuberg.com',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Menuberg — Restaurant Website & Menu Builder',
+    description: 'Build a beautiful digital menu website for your restaurant in minutes.',
+  },
+}
 
 export const dynamic = 'force-dynamic'
 

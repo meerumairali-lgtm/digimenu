@@ -2,8 +2,42 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import MenuClient from './MenuClient'
-
 export const dynamic = 'force-dynamic'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createClient()
+
+  const { data: restaurant } = await supabase
+    .from('restaurants')
+    .select('name, tagline, about, logo_url')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (!restaurant) {
+    return { title: 'Menu Not Found — Menuberg' }
+  }
+
+  const description = restaurant.tagline
+    || (restaurant.about ? restaurant.about.slice(0, 155) : `View the menu, hours, and location for ${restaurant.name}.`)
+
+  return {
+    title: `${restaurant.name} — Menu`,
+    description,
+    openGraph: {
+      title: `${restaurant.name} — Menu`,
+      description,
+      images: restaurant.logo_url ? [restaurant.logo_url] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${restaurant.name} — Menu`,
+      description,
+    },
+  }
+}
 
 const TRIAL_DAYS = 7
 
@@ -112,10 +146,77 @@ export default async function MenuPage({ params }: { params: Promise<{ slug: str
   // Log page view silently — only for unlocked/live menus
   await supabase.from('page_views').insert({ restaurant_id: restaurant.id })
 
+  // Build JSON-LD structured data so Google can show rich results
+  // (hours, price range, menu) for this restaurant in search.
+  function buildOpeningHoursSpec(openingHours: Record<string, { open: string; close: string; closed: boolean }> | null) {
+    if (!openingHours) return undefined
+    const dayMap: Record<string, string> = {
+      Monday: 'Monday', Tuesday: 'Tuesday', Wednesday: 'Wednesday',
+      Thursday: 'Thursday', Friday: 'Friday', Saturday: 'Saturday', Sunday: 'Sunday',
+    }
+    return Object.entries(openingHours)
+      .filter(([, hours]) => !hours.closed)
+      .map(([day, hours]) => ({
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: `https://schema.org/${dayMap[day]}`,
+        opens: hours.open,
+        closes: hours.close,
+      }))
+  }
+
+  const menuSchema = (categories || []).length > 0 ? {
+    '@type': 'Menu',
+    hasMenuSection: (categories || []).map((cat: any) => ({
+      '@type': 'MenuSection',
+      name: cat.name,
+      hasMenuItem: (cat.menu_items || [])
+        .filter((item: any) => item.is_available)
+        .map((item: any) => ({
+          '@type': 'MenuItem',
+          name: item.name,
+          description: item.description || undefined,
+          offers: {
+            '@type': 'Offer',
+            price: item.price,
+            priceCurrency: restaurant.currency || 'USD',
+          },
+        })),
+    })),
+  } : undefined
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: restaurant.name,
+    description: restaurant.tagline || restaurant.about || undefined,
+    image: restaurant.logo_url || (restaurant.hero_slides?.[0]?.image_url ?? undefined),
+    telephone: restaurant.phone || undefined,
+    address: restaurant.address ? {
+      '@type': 'PostalAddress',
+      streetAddress: restaurant.address,
+      addressLocality: restaurant.city || undefined,
+      addressRegion: restaurant.state || undefined,
+      addressCountry: restaurant.country || undefined,
+    } : undefined,
+    url: `https://${restaurant.slug}.menuberg.com`,
+    openingHoursSpecification: buildOpeningHoursSpec(restaurant.opening_hours),
+    hasMenu: menuSchema,
+    sameAs: [
+      restaurant.instagram ? `https://instagram.com/${restaurant.instagram}` : undefined,
+      restaurant.facebook ? `https://facebook.com/${restaurant.facebook}` : undefined,
+    ].filter(Boolean),
+  }
+
   return (
-    <MenuClient
-      restaurant={restaurant}
-      categories={categories || []}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MenuClient
+        restaurant={restaurant}
+        categories={categories || []}
+      />
+    </>
   )
 }
