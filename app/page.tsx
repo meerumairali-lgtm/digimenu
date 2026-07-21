@@ -8,6 +8,8 @@ import PricingBanner from './components/PricingBanner'
 import LivePriceStat from '@/app/components/LivePriceStat'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Menuberg — Restaurant Website & Menu Builder | Live in Minutes',
   description: 'Build a beautiful digital menu website for your restaurant or café in minutes. No coding, no expensive web agency. QR code menus, custom themes, and your own website — all in one place.',
@@ -25,7 +27,31 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Menuberg',
+  url: 'https://www.menuberg.com',
+  logo: 'https://www.menuberg.com/logo.png',
+  description: 'Menuberg is a website and menu builder for restaurants and cafés — create a digital menu website with QR codes in minutes, no coding required.',
+  sameAs: [] as string[], // add social media profile URLs here if/when you have them (Instagram, Facebook, etc.)
+}
+
+const softwareJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Menuberg',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description: 'Build a restaurant or café website and digital menu with QR code ordering — no coding required.',
+  offers: {
+    '@type': 'Offer',
+    price: '2.00',
+    priceCurrency: 'USD',
+    description: 'Starting monthly price, varies by region',
+  },
+}
+
 
 export default async function Home() {
   const supabase = await createClient()
@@ -64,9 +90,18 @@ export default async function Home() {
   try { features = JSON.parse(cms.features || '[]') } catch { features = [] }
 
   return (
-    <main style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: "#ffffff", color: "#111111", minHeight: "100vh" }}>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <main style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: "#ffffff", color: "#111111", minHeight: "100vh" }}>
 
-      <LandingNav />
+        <LandingNav />
 
       {/* HERO */}
       <section style={{ padding: "6rem 2rem 5rem", textAlign: "center", background: "#0D1B2A" }}>
@@ -183,5 +218,6 @@ export default async function Home() {
       </footer>
 
     </main>
+    </>
   )
 }

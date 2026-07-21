@@ -495,7 +495,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label style={labelStyle}>Tagline</label>
-                <input style={inputStyle} value={form.tagline} onChange={e => setForm({ ...form, tagline: e.target.value })} placeholder="Taste the Spice!" />
+                <input style={inputStyle} value={form.tagline} onChange={e => setForm({ ...form, tagline: e.target.value })} placeholder="Enter a short tagline" />
               </div>
               <div>
                 <label style={labelStyle}>Website URL</label>
@@ -821,7 +821,7 @@ export default function SettingsPage() {
                     placeholder="Code"
                     searchPlaceholder="Search..."
                   />
-                  <input required style={{ ...inputStyle, flex: 1, minWidth: 160 }} value={phone} onChange={e => setPhone(e.target.value)} placeholder="3001234567" />
+                  <input required style={{ ...inputStyle, flex: 1, minWidth: 160 }} value={phone} onChange={e => setPhone(e.target.value)} placeholder="Enter your number" />
                 </div>
               </div>
               <div>
@@ -831,7 +831,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label style={labelStyle}>Address</label>
-                <input style={inputStyle} value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="123 Food Street" />
+                <input style={inputStyle} value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="Enter your address" />
               </div>
               <div>
                 <label style={labelStyle}>Google Maps URL</label>
@@ -851,20 +851,20 @@ export default function SettingsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
                 <label style={labelStyle}>WhatsApp number</label>
-                <input style={inputStyle} value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} placeholder="923001234567" />
+                <input style={inputStyle} value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} placeholder="Enter your WhatsApp number" />
               </div>
               <div>
                 <label style={labelStyle}>Instagram handle</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 13, color: '#888' }}>instagram.com/</span>
-                  <input style={{ ...inputStyle, flex: 1 }} value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="spicybox" />
+                  <input style={{ ...inputStyle, flex: 1 }} value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="Instagram handle" />
                 </div>
               </div>
               <div>
                 <label style={labelStyle}>Facebook handle</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 13, color: '#888' }}>facebook.com/</span>
-                  <input style={{ ...inputStyle, flex: 1 }} value={form.facebook} onChange={e => setForm({ ...form, facebook: e.target.value })} placeholder="spicybox" />
+                  <input style={{ ...inputStyle, flex: 1 }} value={form.facebook} onChange={e => setForm({ ...form, facebook: e.target.value })} placeholder="Facebook handle" />
                 </div>
               </div>
             </div>
@@ -934,9 +934,9 @@ export default function SettingsPage() {
                     value={ctaValue}
                     onChange={e => setCtaValue(e.target.value)}
                     placeholder={
-                      ctaType === 'call' ? '+923001234567' :
-                      ctaType === 'whatsapp' ? '923001234567' :
-                      'https://...'
+                      ctaType === 'call' ? 'Enter phone number' :
+                        ctaType === 'whatsapp' ? 'Enter WhatsApp number' :
+                          'https://...'
                     }
                   />
                   {ctaType === 'whatsapp' && (
