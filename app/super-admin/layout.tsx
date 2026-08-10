@@ -20,6 +20,7 @@ import {
   Contact,
   DollarSign,
   Users2,
+  Newspaper,
 } from 'lucide-react'
 
 const navItems = [
@@ -27,6 +28,7 @@ const navItems = [
   { label: 'Restaurants', href: '/super-admin/restaurants', icon: Store },
   { label: 'Audit Logs', href: '/super-admin/audit', icon: ScrollText },
   { label: 'Content', href: '/super-admin/content', icon: FileText },
+  { label: 'Blog', href: '/super-admin/blog', icon: Newspaper },
   { label: 'Emails', href: '/super-admin/emails', icon: Mail },
   { label: 'Announcements', href: '/super-admin/announcements', icon: Megaphone },
   { label: 'Support', href: '/super-admin/support', icon: LifeBuoy },
