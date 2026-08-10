@@ -1,5 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+export const SITE_URL = 'https://www.menuberg.com'
+
 // ============================================================================
 // Types
 // ============================================================================
