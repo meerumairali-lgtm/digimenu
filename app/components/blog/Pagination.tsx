@@ -24,8 +24,8 @@ export default function Pagination({ currentPage, totalPages, basePath, searchPa
       <Link
         href={pageHref(Math.max(1, currentPage - 1))}
         aria-disabled={currentPage === 1}
-        className={`px-3 py-2 rounded-lg text-sm border border-sky-500/15 ${
-          currentPage === 1 ? 'text-gray-600 pointer-events-none' : 'text-gray-300 hover:text-white hover:border-sky-500/40'
+        className={`px-3 py-2 rounded-lg text-sm border border-gray-200 ${
+          currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#0D1B2A] hover:border-sky-400'
         }`}
       >
         Previous
@@ -37,7 +37,7 @@ export default function Pagination({ currentPage, totalPages, basePath, searchPa
           href={pageHref(page)}
           aria-current={page === currentPage ? 'page' : undefined}
           className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm ${
-            page === currentPage ? 'bg-sky-500 text-white font-semibold' : 'text-gray-300 hover:text-white border border-sky-500/15 hover:border-sky-500/40'
+            page === currentPage ? 'bg-sky-500 text-white font-semibold' : 'text-gray-600 hover:text-[#0D1B2A] border border-gray-200 hover:border-sky-400'
           }`}
         >
           {page}
@@ -47,8 +47,8 @@ export default function Pagination({ currentPage, totalPages, basePath, searchPa
       <Link
         href={pageHref(Math.min(totalPages, currentPage + 1))}
         aria-disabled={currentPage === totalPages}
-        className={`px-3 py-2 rounded-lg text-sm border border-sky-500/15 ${
-          currentPage === totalPages ? 'text-gray-600 pointer-events-none' : 'text-gray-300 hover:text-white hover:border-sky-500/40'
+        className={`px-3 py-2 rounded-lg text-sm border border-gray-200 ${
+          currentPage === totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#0D1B2A] hover:border-sky-400'
         }`}
       >
         Next

@@ -78,19 +78,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     post.published_at && new Date(post.updated_at).toDateString() !== new Date(post.published_at).toDateString()
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A] flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <ViewTracker event="article_view" params={{ post_slug: post.slug, post_title: post.title }} />
       <ArticleJsonLd post={post} />
       <LandingNav />
 
       <main className="flex-1 pt-12 pb-20 px-6 max-w-6xl mx-auto w-full">
         <p className="text-xs text-gray-500 mb-4">
-          <Link href="/" className="hover:text-sky-400">Home</Link> →{' '}
-          <Link href="/blog" className="hover:text-sky-400">Blog</Link>
+          <Link href="/" className="hover:text-sky-600">Home</Link> →{' '}
+          <Link href="/blog" className="hover:text-sky-600">Blog</Link>
           {post.category && (
             <>
               {' '}→{' '}
-              <Link href={`/blog/category/${post.category.slug}`} className="hover:text-sky-400">
+              <Link href={`/blog/category/${post.category.slug}`} className="hover:text-sky-600">
                 {post.category.name}
               </Link>
             </>
@@ -102,18 +102,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {post.category && (
             <Link
               href={`/blog/category/${post.category.slug}`}
-              className="inline-block text-xs font-semibold text-sky-400 uppercase tracking-wide mb-3 hover:text-sky-300"
+              className="inline-block text-xs font-semibold text-sky-600 uppercase tracking-wide mb-3 hover:text-sky-700"
             >
               {post.category.name}
             </Link>
           )}
 
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">{post.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] leading-tight mb-4">{post.title}</h1>
 
-          {post.excerpt && <p className="text-lg text-gray-300 mb-5">{post.excerpt}</p>}
+          {post.excerpt && <p className="text-lg text-gray-600 mb-5">{post.excerpt}</p>}
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400 mb-8">
-            {post.author && <span className="text-gray-300">{post.author.name}</span>}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-8">
+            {post.author && <span className="text-gray-700">{post.author.name}</span>}
             {post.author && <span>·</span>}
             <span>{formatDate(publishedDate)}</span>
             {wasUpdated && (
@@ -149,7 +149,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {related.length > 0 && (
               <section className="mt-14">
-                <h2 className="text-xl font-bold text-white mb-6">Related Articles</h2>
+                <h2 className="text-xl font-bold text-[#0D1B2A] mb-6">Related Articles</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {related.map((r) => (
                     <BlogCard key={r.id} post={r} trackingEvent="related_article_click" />
@@ -158,16 +158,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </section>
             )}
 
-            <div className="mt-14 pt-8 border-t border-sky-500/10 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 font-bold shrink-0">
+            <div className="mt-14 pt-8 border-t border-gray-200 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center text-sky-600 font-bold shrink-0">
                 M
               </div>
               <div>
-                <p className="text-white font-semibold text-sm mb-1">About Menuberg</p>
+                <p className="text-[#0D1B2A] font-semibold text-sm mb-1">About Menuberg</p>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   Menuberg helps restaurants create professional websites and digital storefronts without
                   complicated setup.{' '}
-                  <Link href="/" className="text-sky-400 hover:text-sky-300 underline underline-offset-2">
+                  <Link href="/" className="text-sky-600 hover:text-sky-700 underline underline-offset-2">
                     Learn more
                   </Link>
                   .

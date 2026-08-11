@@ -9,7 +9,7 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
         <li key={entry.id} className={entry.level === 3 ? 'pl-4' : ''}>
           <a
             href={`#${entry.id}`}
-            className="text-gray-400 hover:text-sky-400 transition-colors block leading-snug"
+            className="text-gray-600 hover:text-sky-600 transition-colors block leading-snug"
           >
             {entry.text}
           </a>
@@ -22,15 +22,15 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
     <>
       {/* Desktop: sticky sidebar */}
       <div className="hidden lg:block">
-        <div className="sticky top-24 bg-[#112240] border border-sky-500/10 rounded-xl p-5">
-          <p className="text-xs font-semibold text-sky-400 uppercase tracking-wide mb-3">Table of Contents</p>
+        <div className="sticky top-24 bg-gray-50 border border-gray-200 rounded-xl p-5">
+          <p className="text-xs font-semibold text-sky-600 uppercase tracking-wide mb-3">Table of Contents</p>
           {list}
         </div>
       </div>
 
       {/* Mobile: collapsible, no JS required */}
-      <details className="lg:hidden bg-[#112240] border border-sky-500/10 rounded-xl p-5 mb-8">
-        <summary className="text-sm font-semibold text-white cursor-pointer select-none">
+      <details className="lg:hidden bg-gray-50 border border-gray-200 rounded-xl p-5 mb-8">
+        <summary className="text-sm font-semibold text-[#0D1B2A] cursor-pointer select-none">
           Table of Contents
         </summary>
         <div className="mt-4">{list}</div>

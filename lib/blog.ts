@@ -167,6 +167,13 @@ export async function getPublishedPosts(
   supabase: SupabaseClient,
   options: GetPublishedPostsOptions = {}
 ): Promise<{ posts: Post[]; count: number }> {
+  // Search goes through the search_blog_posts() Postgres function (trigram +
+  // multi-word matching) instead of the posts_public view, since PostgREST's
+  // fluent query builder can't express fuzzy/tokenized matching on its own.
+  if (options.search?.trim()) {
+    return searchPublishedPosts(supabase, options)
+  }
+
   let query = supabase
     .from('posts_public')
     .select(PUBLIC_POST_COLUMNS, { count: 'exact' })
@@ -182,11 +189,6 @@ export async function getPublishedPosts(
     query = query.eq('category_id', category.id)
   }
 
-  if (options.search?.trim()) {
-    const term = options.search.trim().replace(/[%_]/g, '')
-    query = query.or(`title.ilike.%${term}%,excerpt.ilike.%${term}%,content.ilike.%${term}%`)
-  }
-
   if (options.excludeId) {
     query = query.neq('id', options.excludeId)
   }
@@ -198,6 +200,79 @@ export async function getPublishedPosts(
 
   const { data, count } = await query
   return { posts: (data as unknown as Post[]) || [], count: count ?? 0 }
+}
+
+interface SearchPostRow {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string
+  cover_image: string | null
+  author_id: string | null
+  category_id: string | null
+  status: PostStatus
+  published_at: string | null
+  created_at: string
+  updated_at: string
+  seo_title: string | null
+  seo_description: string | null
+  canonical_url: string | null
+  featured: boolean
+  reading_time: number | null
+  total_count: number
+}
+
+async function searchPublishedPosts(
+  supabase: SupabaseClient,
+  options: GetPublishedPostsOptions
+): Promise<{ posts: Post[]; count: number }> {
+  let categoryId: string | null = null
+  if (options.categorySlug) {
+    const { data: category } = await supabase
+      .from('blog_categories')
+      .select('id')
+      .eq('slug', options.categorySlug)
+      .maybeSingle()
+    if (!category) return { posts: [], count: 0 }
+    categoryId = category.id
+  }
+
+  const { data, error } = await supabase.rpc('search_blog_posts', {
+    search_query: options.search!.trim(),
+    filter_category_id: categoryId,
+    result_limit: options.limit ?? 50,
+    result_offset: options.offset ?? 0,
+  })
+
+  if (error || !data?.length) return { posts: [], count: 0 }
+
+  const rows = (data as SearchPostRow[]).filter((row) => row.id !== options.excludeId)
+  const count = rows.length ? Number(rows[0].total_count) : 0
+
+  // Hydrate category/author (the RPC returns raw columns, no embedded join).
+  const categoryIds = [...new Set(rows.map((r) => r.category_id).filter(Boolean))] as string[]
+  const authorIds = [...new Set(rows.map((r) => r.author_id).filter(Boolean))] as string[]
+
+  const [{ data: categories }, { data: authors }] = await Promise.all([
+    categoryIds.length
+      ? supabase.from('blog_categories').select('*').in('id', categoryIds)
+      : Promise.resolve({ data: [] as Category[] }),
+    authorIds.length
+      ? supabase.from('blog_authors').select('*').in('id', authorIds)
+      : Promise.resolve({ data: [] as BlogAuthor[] }),
+  ])
+
+  const categoryMap = new Map((categories || []).map((c) => [c.id, c]))
+  const authorMap = new Map((authors || []).map((a) => [a.id, a]))
+
+  const posts: Post[] = rows.map((row) => ({
+    ...row,
+    category: row.category_id ? categoryMap.get(row.category_id) ?? null : null,
+    author: row.author_id ? authorMap.get(row.author_id) ?? null : null,
+  }))
+
+  return { posts, count }
 }
 
 export async function getFeaturedPost(supabase: SupabaseClient): Promise<Post | null> {

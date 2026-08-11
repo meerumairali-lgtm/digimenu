@@ -53,17 +53,17 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const totalPages = Math.ceil(count / PAGE_SIZE)
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A] flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <ViewTracker event="category_view" params={{ category_slug: category.slug }} />
       <LandingNav />
 
       <main className="flex-1 pt-16 pb-20 px-6 max-w-6xl mx-auto w-full">
         <p className="text-xs text-gray-500 mb-4">
-          <Link href="/" className="hover:text-sky-400">Home</Link> → <Link href="/blog" className="hover:text-sky-400">Blog</Link> → {category.name}
+          <Link href="/" className="hover:text-sky-600">Home</Link> → <Link href="/blog" className="hover:text-sky-600">Blog</Link> → {category.name}
         </p>
 
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{category.name}</h1>
-        {category.description && <p className="text-gray-400 mb-10 max-w-xl">{category.description}</p>}
+        <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] mb-3">{category.name}</h1>
+        {category.description && <p className="text-gray-500 mb-10 max-w-xl">{category.description}</p>}
 
         {posts.length === 0 ? (
           <p className="text-gray-500 py-16 text-center">No articles in this category yet — check back soon.</p>

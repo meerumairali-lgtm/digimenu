@@ -45,12 +45,12 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     const totalPages = Math.ceil(count / PAGE_SIZE)
 
     return (
-      <div className="min-h-screen bg-[#0D1B2A] flex flex-col">
+      <div className="min-h-screen bg-white flex flex-col">
         <LandingNav />
         <main className="flex-1 pt-16 pb-20 px-6 max-w-6xl mx-auto w-full">
           <BlogHero categories={categories} initialSearch={search} />
 
-          <p className="text-gray-400 text-sm mb-6">
+          <p className="text-gray-500 text-sm mb-6">
             {count} result{count === 1 ? '' : 's'} for &ldquo;{search}&rdquo;
           </p>
 
@@ -89,7 +89,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const totalPages = Math.ceil(count / PAGE_SIZE)
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A] flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <LandingNav />
       <main className="flex-1 pt-16 pb-20 px-6 max-w-6xl mx-auto w-full">
         <BlogHero categories={categories} />
@@ -101,7 +101,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         )}
 
         <section>
-          <h2 className="text-xl font-bold text-white mb-6">Latest Articles</h2>
+          <h2 className="text-xl font-bold text-[#0D1B2A] mb-6">Latest Articles</h2>
           {gridPosts.length === 0 ? (
             <p className="text-gray-500 py-16 text-center">No articles published yet — check back soon.</p>
           ) : (
@@ -129,8 +129,8 @@ function BlogHero({
 }) {
   return (
     <div className="text-center mb-12">
-      <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">The Menuberg Blog</h1>
-      <p className="text-lg text-gray-400 mb-8 max-w-xl mx-auto">
+      <h1 className="text-4xl md:text-5xl font-bold text-[#0D1B2A] mb-4">The Menuberg Blog</h1>
+      <p className="text-lg text-gray-500 mb-8 max-w-xl mx-auto">
         Practical ideas, guides, and insights to help restaurants grow online.
       </p>
 
@@ -149,7 +149,7 @@ function BlogHero({
           <Link
             key={c.slug}
             href={`/blog/category/${c.slug}`}
-            className="px-4 py-2 rounded-full text-sm font-medium bg-[#112240] text-gray-300 border border-sky-500/10 hover:border-sky-500/40 hover:text-white transition-colors"
+            className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:border-sky-400 hover:text-[#0D1B2A] transition-colors"
           >
             {c.name}
           </Link>

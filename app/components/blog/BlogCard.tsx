@@ -22,9 +22,9 @@ export default function BlogCard({ post, trackingEvent, size = 'default' }: Blog
     <Link
       href={`/blog/${post.slug}`}
       onClick={() => trackingEvent && trackEvent(trackingEvent, { post_slug: post.slug, post_title: post.title })}
-      className="group block bg-[#112240] border border-sky-500/10 rounded-xl overflow-hidden hover:border-sky-500/40 transition-colors"
+      className="group block w-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:border-sky-300 transition-all"
     >
-      <div className={`relative w-full bg-[#0D1B2A] ${isLarge ? 'aspect-[16/8]' : 'aspect-[16/10]'}`}>
+      <div className={`relative w-full bg-gray-100 ${isLarge ? 'aspect-[16/8]' : 'aspect-[16/10]'}`}>
         {post.cover_image ? (
           <Image
             src={post.cover_image}
@@ -34,21 +34,21 @@ export default function BlogCard({ post, trackingEvent, size = 'default' }: Blog
             className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-sky-500/20 text-4xl font-bold">M</div>
+          <div className="w-full h-full flex items-center justify-center text-sky-600/20 text-4xl font-bold">M</div>
         )}
       </div>
 
       <div className={isLarge ? 'p-6 md:p-8' : 'p-5'}>
         {post.category && (
-          <span className="inline-block text-xs font-semibold text-sky-400 uppercase tracking-wide mb-2">
+          <span className="inline-block text-xs font-semibold text-sky-600 uppercase tracking-wide mb-2">
             {post.category.name}
           </span>
         )}
-        <h3 className={`font-bold text-white leading-snug mb-2 group-hover:text-sky-300 transition-colors ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}>
+        <h3 className={`font-bold text-[#0D1B2A] leading-snug mb-2 group-hover:text-sky-700 transition-colors ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}>
           {post.title}
         </h3>
         {post.excerpt && (
-          <p className={`text-gray-400 leading-relaxed mb-3 ${isLarge ? 'text-base line-clamp-3' : 'text-sm line-clamp-2'}`}>
+          <p className={`text-gray-600 leading-relaxed mb-3 ${isLarge ? 'text-base line-clamp-3' : 'text-sm line-clamp-2'}`}>
             {post.excerpt}
           </p>
         )}
