@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import GithubSlugger from 'github-slugger'
 
 export const SITE_URL = 'https://www.menuberg.com'
 
@@ -120,30 +121,34 @@ export function resolveSeoTitle(post: Pick<Post, 'seo_title' | 'title'>): string
 }
 
 /**
- * Extracts H2/H3 headings from Markdown for the article Table of Contents.
- * Returns slugified anchor ids matching what the article renderer assigns to each heading.
+ * Extracts H2 headings from Markdown for the article Table of Contents — H2 only
+ * (not H3) to keep the TOC to the handful of major sections rather than every
+ * minor sub-heading. Anchor ids are generated with the exact same slugger
+ * rehype-slug uses when rendering the article, so TOC links always land on
+ * the right heading. All headings are fed through the slugger in document
+ * order (even though only H2s are returned) so duplicate-title numbering
+ * (e.g. "-1", "-2") stays in sync with what's actually rendered.
  */
 export interface TocEntry {
   id: string
   text: string
-  level: 2 | 3
+  level: 2
 }
 
 export function extractToc(markdown: string): TocEntry[] {
+  const slugger = new GithubSlugger()
   const lines = markdown.split('\n')
-  const seen = new Map<string, number>()
   const entries: TocEntry[] = []
 
   for (const line of lines) {
-    const match = /^(#{2,3})\s+(.+)$/.exec(line.trim())
+    const match = /^(#{1,6})\s+(.+)$/.exec(line.trim())
     if (!match) continue
-    const level = match[1].length as 2 | 3
+    const level = match[1].length
     const text = match[2].trim()
-    let id = slugify(text)
-    const count = seen.get(id) ?? 0
-    seen.set(id, count + 1)
-    if (count > 0) id = `${id}-${count}`
-    entries.push({ id, text, level })
+    const id = slugger.slug(text)
+    if (level === 2) {
+      entries.push({ id, text, level: 2 })
+    }
   }
 
   return entries

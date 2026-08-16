@@ -6,7 +6,7 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
   const list = (
     <ol className="space-y-2 text-sm">
       {entries.map((entry) => (
-        <li key={entry.id} className={entry.level === 3 ? 'pl-4' : ''}>
+        <li key={entry.id}>
           <a
             href={`#${entry.id}`}
             className="text-gray-600 hover:text-sky-600 transition-colors block leading-snug"
@@ -20,9 +20,9 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
 
   return (
     <>
-      {/* Desktop: sticky sidebar */}
+      {/* Desktop: sticky sidebar, with its own scrollbar once it's taller than the viewport allows */}
       <div className="hidden lg:block">
-        <div className="sticky top-24 bg-gray-50 border border-gray-200 rounded-xl p-5">
+        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto bg-gray-50 border border-gray-200 rounded-xl p-5">
           <p className="text-xs font-semibold text-sky-600 uppercase tracking-wide mb-3">Table of Contents</p>
           {list}
         </div>
@@ -33,7 +33,7 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
         <summary className="text-sm font-semibold text-[#0D1B2A] cursor-pointer select-none">
           Table of Contents
         </summary>
-        <div className="mt-4">{list}</div>
+        <div className="mt-4 max-h-64 overflow-y-auto">{list}</div>
       </details>
     </>
   )
