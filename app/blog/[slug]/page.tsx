@@ -137,12 +137,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         )}
 
-        <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-12 max-w-6xl">
-          <aside className="mb-8 lg:mb-0">
+        <div className="lg:flex lg:gap-12 max-w-6xl">
+          <aside className="mb-8 lg:mb-0 lg:w-60 lg:shrink-0">
             <TableOfContents entries={toc} />
           </aside>
 
-          <div className="max-w-3xl">
+          <div className="max-w-3xl lg:flex-1 lg:min-w-0">
             <ArticleContent markdown={post.content} />
 
             <BlogCtaButton postSlug={post.slug} />
