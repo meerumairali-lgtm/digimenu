@@ -20,12 +20,16 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
 
   return (
     <>
-      {/* Desktop: sticky sidebar, with its own scrollbar once it's taller than the viewport allows */}
-      <div className="hidden lg:block">
-        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto bg-gray-50 border border-gray-200 rounded-xl p-5">
-          <p className="text-xs font-semibold text-sky-600 uppercase tracking-wide mb-3">Table of Contents</p>
-          {list}
-        </div>
+      {/*
+        Desktop: sticky sidebar. The sticky classes live directly on this box
+        (not on a wrapping div) on purpose — position:sticky is bounded by its
+        *immediate* parent's box. An extra wrapper div here would only be as
+        tall as its own content, cutting the sticky element's "room to stick"
+        down to almost nothing and making it scroll away almost immediately.
+      */}
+      <div className="hidden lg:block sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto bg-gray-50 border border-gray-200 rounded-xl p-5">
+        <p className="text-xs font-semibold text-sky-600 uppercase tracking-wide mb-3">Table of Contents</p>
+        {list}
       </div>
 
       {/* Mobile: collapsible, no JS required */}

@@ -135,6 +135,24 @@ export interface TocEntry {
   level: 2
 }
 
+/**
+ * Strips inline Markdown formatting from heading text (links, images, bold,
+ * italic, inline code) so the TOC shows clean text — e.g. a heading written
+ * as "## [Burger King](https://...)" shows as "Burger King", matching what
+ * actually renders on the page, not the raw Markdown source.
+ */
+function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images -> alt text
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links -> link text
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // **bold**
+    .replace(/__([^_]+)__/g, '$1') // __bold__
+    .replace(/\*([^*]+)\*/g, '$1') // *italic*
+    .replace(/_([^_]+)_/g, '$1') // _italic_
+    .replace(/`([^`]+)`/g, '$1') // `code`
+    .trim()
+}
+
 export function extractToc(markdown: string): TocEntry[] {
   const slugger = new GithubSlugger()
   const lines = markdown.split('\n')
@@ -144,7 +162,7 @@ export function extractToc(markdown: string): TocEntry[] {
     const match = /^(#{1,6})\s+(.+)$/.exec(line.trim())
     if (!match) continue
     const level = match[1].length
-    const text = match[2].trim()
+    const text = stripInlineMarkdown(match[2].trim())
     const id = slugger.slug(text)
     if (level === 2) {
       entries.push({ id, text, level: 2 })
