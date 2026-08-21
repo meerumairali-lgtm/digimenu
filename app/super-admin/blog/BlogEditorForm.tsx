@@ -355,7 +355,7 @@ export default function BlogEditorForm({ mode, post, initialCategories, initialA
       {/* Content */}
       <div className={sectionStyle}>
         <label className={labelStyle}>Content</label>
-        <BlogContentEditor value={content} onChange={setContent} />
+        <BlogContentEditor value={content} onChange={setContent} currentPostId={post?.id} />
       </div>
 
       {/* SEO */}
