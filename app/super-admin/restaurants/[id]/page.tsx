@@ -206,13 +206,6 @@ export default async function RestaurantDetailPage({
                   {itemCount ?? 0}
                 </span>
               </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-400">Plan</span>
-                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full uppercase">
-                  {restaurant.pricing_tier === 'tier_b' ? 'Tier B' : 'Tier A'}
-                </span>
-              </div>
             </div>
           </div>
 

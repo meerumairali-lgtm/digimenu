@@ -91,26 +91,7 @@ export default function CheckoutPage() {
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (pending?.subscription_status === 'active') {
-      router.push('/dashboard/setup')
-      return
-    }
-
-    // Work out whether the 7-day trial is still running, using
-    // whichever row actually has a trial_started_at value.
-    const trialStartedAt = restaurant?.trial_started_at || pending?.trial_started_at || null
-    if (trialStartedAt) {
-      const startedMs = new Date(trialStartedAt).getTime()
-      const elapsedMs = Date.now() - startedMs
-      const trialLengthMs = TRIAL_LENGTH_DAYS * 24 * 60 * 60 * 1000
-      setTrialActive(elapsedMs < trialLengthMs)
-    } else {
-      // No trial_started_at on either row yet -> treat as not active
-      // (covers brand-new self-heal case below, before insert happens)
-      setTrialActive(false)
-    }
-
-    if (!pending) {
+        if (!pending) {
       const { error: insertError } = await supabase
         .from('pending_signups')
         .insert({ user_id: user.id })
@@ -118,23 +99,23 @@ export default function CheckoutPage() {
       if (insertError) {
         console.error('Self-heal pending_signups insert failed:', insertError)
       }
-
-      // Currency estimate (display only — real local-currency billing
-      // happens inside Paddle's own checkout once that's wired up)
-      try {
-        const geo = await fetch('/api/dashboard/detect-country').then(r => r.json())
-        if (geo.country_code) {
-          const country = Country.getCountryByCode(geo.country_code)
-          if (country?.currency) setLocalCurrency(country.currency)
-        }
-        const rateRes = await fetch('/api/exchange-rate').then(r => r.json())
-        if (rateRes.rates) setRates(rateRes.rates)
-      } catch (e) {
-        console.error('Currency estimate failed:', e)
-      }
-
-      setLoading(false)
     }
+
+    // Currency estimate (display only — real local-currency billing
+    // happens inside Paddle's own checkout once that's wired up)
+    try {
+      const geo = await fetch('/api/dashboard/detect-country').then(r => r.json())
+      if (geo.country_code) {
+        const country = Country.getCountryByCode(geo.country_code)
+        if (country?.currency) setLocalCurrency(country.currency)
+      }
+      const rateRes = await fetch('/api/exchange-rate').then(r => r.json())
+      if (rateRes.rates) setRates(rateRes.rates)
+    } catch (e) {
+      console.error('Currency estimate failed:', e)
+    }
+
+    setLoading(false)
   }
 
   init() // Execute the async function safely inside the effect

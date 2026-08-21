@@ -4,9 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-
-// }
-
 const PRICE_ID_LOOKUP: Record<string, { kind: 'monthly' }> = {
   [process.env.PADDLE_MONTHLY_PRICE_ID!]: { kind: 'monthly' },
 }

@@ -25,7 +25,6 @@ type Restaurant = {
   theme: string | null
   currency: string | null
   layout: string | null
-  pricing_tier: string
   subscription_status: string
   bypass_payment: boolean
   country: string | null
@@ -43,7 +42,6 @@ type SortKey =
   | 'slug'
   | 'country'
   | 'created_at'
-  | 'pricing_tier'
   | 'subscription_status'
   | 'is_suspended'
 
@@ -57,7 +55,6 @@ export default function RestaurantList({
   const [restaurants, setRestaurants] = useState(initialRestaurants ?? [])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'suspended'>('all')
-  const [tierFilter, setTierFilter] = useState<'all' | 'tier_a' | 'tier_b'>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'past_due' | 'cancelled' | 'pending'>('all')
   const [vipFilter, setVipFilter] = useState<'all' | 'vip' | 'non_vip'>('all')
   const [countryFilter, setCountryFilter] = useState<'all' | string>('all')
@@ -94,8 +91,6 @@ export default function RestaurantList({
         (filter === 'active' && !r.is_suspended) ||
         (filter === 'suspended' && r.is_suspended)
 
-      const matchesTier = tierFilter === 'all' || r.pricing_tier === tierFilter
-
       const matchesStatus = statusFilter === 'all' || r.subscription_status === statusFilter
 
       const matchesVip =
@@ -105,7 +100,7 @@ export default function RestaurantList({
 
       const matchesCountry = countryFilter === 'all' || r.country === countryFilter
 
-      return matchesSearch && matchesFilter && matchesTier && matchesStatus && matchesVip && matchesCountry
+      return matchesSearch && matchesFilter && matchesStatus && matchesVip && matchesCountry
     })
 
     const sorted = [...result].sort((a, b) => {
@@ -129,10 +124,6 @@ export default function RestaurantList({
           aVal = a.created_at
           bVal = b.created_at
           break
-        case 'pricing_tier':
-          aVal = a.pricing_tier ?? ''
-          bVal = b.pricing_tier ?? ''
-          break
         case 'subscription_status':
           aVal = a.subscription_status ?? ''
           bVal = b.subscription_status ?? ''
@@ -153,7 +144,7 @@ export default function RestaurantList({
     })
 
     return sorted
-  }, [restaurants, search, filter, tierFilter, statusFilter, vipFilter, countryFilter, sortKey, sortDir])
+  }, [restaurants, search, filter, statusFilter, vipFilter, countryFilter, sortKey, sortDir])
 
   async function toggleSuspend(id: string, currentlySuspended: boolean, name: string) {
     setLoadingId(id)
@@ -306,16 +297,6 @@ export default function RestaurantList({
           ))}
 
           <select
-            value={tierFilter}
-            onChange={(e) => setTierFilter(e.target.value as typeof tierFilter)}
-            className={selectStyle}
-          >
-            <option value="all">All Tiers</option>
-            <option value="tier_a">Tier A</option>
-            <option value="tier_b">Tier B</option>
-          </select>
-
-          <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
             className={selectStyle}
@@ -356,11 +337,10 @@ export default function RestaurantList({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-800">
-                <SortHeader label="Restaurant" sortableKey="name" />
+                                <SortHeader label="Restaurant" sortableKey="name" />
                 <SortHeader label="Slug" sortableKey="slug" className="hidden md:table-cell" />
                 <SortHeader label="Country" sortableKey="country" className="hidden lg:table-cell" />
                 <SortHeader label="Created" sortableKey="created_at" className="hidden lg:table-cell" />
-                <SortHeader label="Billing" sortableKey="pricing_tier" />
                 <SortHeader label="Status" sortableKey="is_suspended" />
                 <th className="text-right px-4 py-3 text-gray-400 font-medium">
                   Actions
@@ -371,7 +351,7 @@ export default function RestaurantList({
             <tbody className="divide-y divide-gray-800">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-500">
+                  <td colSpan={6} className="text-center py-12 text-gray-500">
                     No restaurants found
                   </td>
                 </tr>
@@ -407,7 +387,6 @@ export default function RestaurantList({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs text-gray-500 uppercase">
-                        {r.pricing_tier === 'tier_b' ? 'Tier B' : 'Tier A'}
                       </span>
                       {r.bypass_payment ? (
                         <span className="inline-flex items-center gap-1 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-full">

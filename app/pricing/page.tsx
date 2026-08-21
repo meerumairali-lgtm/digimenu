@@ -101,9 +101,15 @@ const displayPrice =
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Simple, transparent pricing
         </h1>
-        <p className="text-[#7DD3FC] text-lg">
+               <p className="text-[#7DD3FC] text-lg">
           One simple monthly subscription. Cancel anytime.
         </p>
+        <div className="mt-6 flex items-end justify-center gap-1">
+          <span className="text-5xl font-extrabold text-white">
+            {displayPrice != null ? formatCurrency(displayPrice, currency) : "—"}
+          </span>
+          <span className="text-lg text-gray-400 mb-1">/month</span>
+        </div>
       </div>
 
       <div>

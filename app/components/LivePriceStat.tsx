@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getCurrencyForCountry, convertUsd, formatCurrency } from '@/lib/currencyDisplay'
-``
 
 export default function LivePriceStat() {
   const [displayPrice, setDisplayPrice] = useState<string | null>(null)

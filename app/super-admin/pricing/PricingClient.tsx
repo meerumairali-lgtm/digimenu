@@ -73,7 +73,7 @@ export default function PricingClient({ initialPricing }: { initialPricing: Pric
         <div>
           <h1 style={{ color: '#fff', fontSize: '22px', fontWeight: 700, margin: 0 }}>Pricing</h1>
           <p style={{ color: '#6b7280', fontSize: '13px', margin: '4px 0 0' }}>
-            Changes apply immediately to checkout — no deploy needed. Paddle never needs to be touched.
+            This only updates the displayed price on the pricing page and homepage. What customers are actually charged is set directly in Paddle (the price behind PADDLE_MONTHLY_PRICE_ID) — update that too if you change this number.
           </p>
         </div>
         <button onClick={save} disabled={saving}
