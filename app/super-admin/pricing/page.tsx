@@ -9,10 +9,11 @@ export default async function PricingSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.email !== 'meerumairali@gmail.com') redirect('/dashboard')
 
-  const { data: tiers } = await supabase
-    .from('pricing_tiers')
-    .select('id, label, setup_fee, monthly_price, intro_discount_active, intro_monthly_price, intro_duration_months, countries')
-    .order('id', { ascending: true })
+  const { data: pricing } = await supabase
+  .from('pricing_tiers')
+  .select('id, label, monthly_price')
+  .eq('id', 'standard')
+  .single()
 
-  return <PricingClient initialTiers={tiers || []} />
+return <PricingClient initialPricing={pricing} />
 }

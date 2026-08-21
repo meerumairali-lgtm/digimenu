@@ -94,41 +94,20 @@ export default async function DashboardLayout({
       // the row is missing or never got its trial_started_at, create/fix it
       // here, using the admin client to bypass RLS safely server-side.
       if (!pending || !pending.trial_started_at) {
-        const admin = createAdminClient()
+  const admin = createAdminClient()
+  const trialStartedAt = new Date().toISOString()
 
-        let tier = 'tier_a'
-        try {
-          const { data: tiers } = await admin
-            .from('pricing_tiers')
-            .select('id, countries')
+  await admin.from('pending_signups').upsert(
+    { user_id: user.id, trial_started_at: trialStartedAt },
+    { onConflict: 'user_id' }
+  )
 
-          const { headers } = await import('next/headers')
-          const h = await headers()
-          const countryCode = h.get('x-vercel-ip-country') || ''
-          const tierB = tiers?.find((t: any) => t.id === 'tier_b')
-          if (countryCode && tierB?.countries?.includes(countryCode)) {
-            tier = 'tier_b'
-          }
-        } catch (e) {
-          console.error('Tier detection failed in self-heal, defaulting to tier_a:', e)
-        }
-
-        const trialStartedAt = new Date().toISOString()
-
-        await admin
-          .from('pending_signups')
-          .upsert({
-            user_id: user.id,
-            pricing_tier: tier,
-            trial_started_at: trialStartedAt,
-          }, { onConflict: 'user_id' })
-
-        pending = {
-          subscription_status: pending?.subscription_status ?? null,
-          bypass_payment: pending?.bypass_payment ?? false,
-          trial_started_at: trialStartedAt,
-        }
-      }
+  pending = {
+    subscription_status: pending?.subscription_status ?? null,
+    bypass_payment: pending?.bypass_payment ?? false,
+    trial_started_at: trialStartedAt,
+  }
+}
 
       const unlocked = pending?.subscription_status === 'active' || pending?.bypass_payment === true
 

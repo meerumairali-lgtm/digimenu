@@ -10,7 +10,6 @@ declare global {
   }
 }
 
-interface Tier { id: string; label: string; setup_fee: number; monthly_price: number }
 interface Coupon {
   code: string
   discount_type: 'percent' | 'fixed'
@@ -22,7 +21,6 @@ const TRIAL_LENGTH_DAYS = 7
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
-  const [tier, setTier] = useState<Tier | null>(null)
   const [localCurrency, setLocalCurrency] = useState<string | null>(null)
   const [rates, setRates] = useState<Record<string, number> | null>(null)
 
@@ -71,87 +69,55 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+  async function init() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
 
-      // Already have a paid/bypassed restaurant -> nothing to do here
-      const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('subscription_status, bypass_payment, trial_started_at')
-        .eq('user_id', user.id)
-        .maybeSingle()
+    // Already have a paid/bypassed restaurant -> nothing to do here
+    const { data: restaurant } = await supabase
+      .from('restaurants')
+      .select('subscription_status, bypass_payment, trial_started_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-      if (restaurant && (restaurant.subscription_status === 'active' || restaurant.bypass_payment)) {
-        router.push('/dashboard')
-        return
-      }
+    if (restaurant && (restaurant.subscription_status === 'active' || restaurant.bypass_payment)) {
+      router.push('/dashboard')
+      return
+    }
 
-      const { data: pending } = await supabase
+    const { data: pending } = await supabase
+      .from('pending_signups')
+      .select('subscription_status, trial_started_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (pending?.subscription_status === 'active') {
+      router.push('/dashboard/setup')
+      return
+    }
+
+    // Work out whether the 7-day trial is still running, using
+    // whichever row actually has a trial_started_at value.
+    const trialStartedAt = restaurant?.trial_started_at || pending?.trial_started_at || null
+    if (trialStartedAt) {
+      const startedMs = new Date(trialStartedAt).getTime()
+      const elapsedMs = Date.now() - startedMs
+      const trialLengthMs = TRIAL_LENGTH_DAYS * 24 * 60 * 60 * 1000
+      setTrialActive(elapsedMs < trialLengthMs)
+    } else {
+      // No trial_started_at on either row yet -> treat as not active
+      // (covers brand-new self-heal case below, before insert happens)
+      setTrialActive(false)
+    }
+
+    if (!pending) {
+      const { error: insertError } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status, trial_started_at')
-        .eq('user_id', user.id)
-        .maybeSingle()
+        .insert({ user_id: user.id })
 
-      if (pending?.subscription_status === 'active') {
-        router.push('/dashboard/setup')
-        return
+      if (insertError) {
+        console.error('Self-heal pending_signups insert failed:', insertError)
       }
-
-      // Work out whether the 7-day trial is still running, using
-      // whichever row actually has a trial_started_at value.
-      const trialStartedAt = restaurant?.trial_started_at || pending?.trial_started_at || null
-      if (trialStartedAt) {
-        const startedMs = new Date(trialStartedAt).getTime()
-        const elapsedMs = Date.now() - startedMs
-        const trialLengthMs = TRIAL_LENGTH_DAYS * 24 * 60 * 60 * 1000
-        setTrialActive(elapsedMs < trialLengthMs)
-      } else {
-        // No trial_started_at on either row yet -> treat as not active
-        // (covers brand-new self-heal case below, before insert happens)
-        setTrialActive(false)
-      }
-
-      let resolvedTierId = pending?.pricing_tier
-
-      // Self-heal: if this user has no pending_signups row at all, it
-      // likely means signup's insert ran before email confirmation
-      // (no session yet -> RLS silently blocked it). Create it now
-      // that we have a real authenticated session.
-      if (!pending) {
-        let detectedTier = 'tier_a'
-        try {
-          const [geoRes, tiersRes] = await Promise.all([
-            fetch('/api/dashboard/detect-country').then(r => r.json()),
-            supabase.from('pricing_tiers').select('id, countries'),
-          ])
-          const tierB = tiersRes.data?.find((t: any) => t.id === 'tier_b')
-          if (geoRes.country_code && tierB?.countries?.includes(geoRes.country_code)) {
-            detectedTier = 'tier_b'
-          }
-        } catch (e) {
-          console.error('Tier detection failed during self-heal, defaulting to tier_a:', e)
-        }
-
-        const { error: insertError } = await supabase
-          .from('pending_signups')
-          .insert({ user_id: user.id, pricing_tier: detectedTier })
-
-        if (insertError) {
-          console.error('Self-heal pending_signups insert failed:', insertError)
-        } else {
-          resolvedTierId = detectedTier
-        }
-      }
-
-      const tierId = resolvedTierId || 'tier_a'
-      const { data: tierRow } = await supabase
-        .from('pricing_tiers')
-        .select('id, label, setup_fee, monthly_price')
-        .eq('id', tierId)
-        .single()
-
-      if (tierRow) setTier(tierRow)
 
       // Currency estimate (display only — real local-currency billing
       // happens inside Paddle's own checkout once that's wired up)
@@ -169,8 +135,10 @@ export default function CheckoutPage() {
 
       setLoading(false)
     }
-    init()
-  }, [])
+  }
+
+  init() // Execute the async function safely inside the effect
+}, [])
 
   function formatLocal(usdAmount: number): string | null {
     if (!localCurrency || !rates) return null
@@ -204,13 +172,6 @@ export default function CheckoutPage() {
     if (data.max_redemptions && data.times_redeemed >= data.max_redemptions) { setCouponError('This coupon has reached its usage limit'); return }
 
     setCoupon(data)
-  }
-
-  function discounted(amount: number, type: 'setup' | 'monthly'): number {
-    if (!coupon) return amount
-    if (coupon.applies_to !== 'both' && coupon.applies_to !== type) return amount
-    if (coupon.discount_type === 'percent') return Math.max(0, amount - (amount * coupon.discount_value) / 100)
-    return Math.max(0, amount - coupon.discount_value)
   }
 
   async function handleContinueToPayment() {
@@ -250,16 +211,13 @@ export default function CheckoutPage() {
     }
   }
 
-  if (loading || !tier) {
+  if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0D1B2A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ color: '#7DD3FC', fontSize: 14 }}>Loading...</p>
       </div>
     )
   }
-
-  const setupPrice = discounted(tier.setup_fee, 'setup')
-  const monthlyPrice = discounted(tier.monthly_price, 'monthly')
 
   return (
     <div style={{ minHeight: '100vh', background: '#0D1B2A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
@@ -279,29 +237,13 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
-          <span style={{ color: '#7DD3FC', fontSize: 14 }}>One-time setup</span>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ color: '#fff', fontSize: 18, fontWeight: 700 }}>
-              ${setupPrice.toFixed(2)}
-              {coupon && setupPrice !== tier.setup_fee && (
-                <span style={{ color: '#64748b', fontSize: 13, fontWeight: 400, textDecoration: 'line-through', marginLeft: 8 }}>${tier.setup_fee.toFixed(2)}</span>
-              )}
-            </div>
-            {formatLocal(setupPrice) && <div style={{ color: '#64748b', fontSize: 12 }}>≈ {formatLocal(setupPrice)}</div>}
-          </div>
-        </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
-          <span style={{ color: '#7DD3FC', fontSize: 14 }}>Then monthly</span>
+          <span style={{ color: '#7DD3FC', fontSize: 14 }}>Monthly</span>
           <div style={{ textAlign: 'right' }}>
             <div style={{ color: '#fff', fontSize: 18, fontWeight: 700 }}>
-              ${monthlyPrice.toFixed(2)}<span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>/mo</span>
-              {coupon && monthlyPrice !== tier.monthly_price && (
-                <span style={{ color: '#64748b', fontSize: 13, fontWeight: 400, textDecoration: 'line-through', marginLeft: 8 }}>${tier.monthly_price.toFixed(2)}</span>
-              )}
+              $4.99<span style={{ fontSize: 13, color: '#64748b', fontWeight: 400 }}>/mo</span>
             </div>
-            {formatLocal(monthlyPrice) && <div style={{ color: '#64748b', fontSize: 12 }}>≈ {formatLocal(monthlyPrice)}/mo</div>}
           </div>
         </div>
 

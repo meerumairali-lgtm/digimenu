@@ -3,21 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-const PADDLE_IDS: Record<
-  string,
-  { productId: string; setupPriceId: string; monthlyPriceId: string }
-> = {
-  tier_a: {
-    productId: 'pro_01kvhcmdcw917qkjadsk2aezg1',
-    setupPriceId: 'pri_01kvhcswa3a0wf6me8v7tvj882',
-    monthlyPriceId: 'pri_01kvhcz3hja1r3dem1kbeg4pbd',
-  },
-  tier_b: {
-    productId: 'pro_01kvhd0tzzx7p1ydkeeyyg566a',
-    setupPriceId: 'pri_01kvhd3q571p0k8cabxt4r9vxz',
-    monthlyPriceId: 'pri_01kvhd59hydcrc7z94awczcsge',
-  },
-}
+const MONTHLY_PRICE_ID = process.env.PADDLE_MONTHLY_PRICE_ID!
+const PADDLE_PRODUCT_ID = process.env.PADDLE_PRODUCT_ID!
 
 const PADDLE_API_BASE =
   process.env.PADDLE_ENV === 'production'
@@ -45,9 +32,9 @@ async function getPaddlePriceAmount(priceId: string): Promise<number | null> {
   return cents != null ? Number(cents) / 100 : null
 }
 
-function applyDiscount(amount: number, coupon: Coupon | null, type: 'setup' | 'monthly'): number {
+function applyDiscount(amount: number, coupon: Coupon | null): number {
   if (!coupon) return amount
-  if (coupon.applies_to !== 'both' && coupon.applies_to !== type) return amount
+  if (coupon.applies_to !== 'both' && coupon.applies_to !== 'monthly') return amount
   if (coupon.discount_type === 'percent') {
     return Math.max(0, amount - (amount * coupon.discount_value) / 100)
   }
@@ -68,18 +55,12 @@ export async function POST(request: NextRequest) {
 
     const { data: pending } = await supabase
       .from('pending_signups')
-      .select('pricing_tier, subscription_status')
+      .select('subscription_status')
       .eq('user_id', user.id)
       .maybeSingle()
 
     if (pending?.subscription_status === 'active') {
       return NextResponse.json({ error: 'Already active' }, { status: 400 })
-    }
-
-    const tierId = pending?.pricing_tier || 'tier_a'
-    const paddleIds = PADDLE_IDS[tierId]
-    if (!paddleIds) {
-      return NextResponse.json({ error: 'Invalid pricing tier' }, { status: 400 })
     }
 
     let coupon: Coupon | null = null
@@ -105,42 +86,30 @@ export async function POST(request: NextRequest) {
     let items: any[]
 
     if (!coupon) {
-      items = [
-        { price_id: paddleIds.setupPriceId, quantity: 1 },
-        { price_id: paddleIds.monthlyPriceId, quantity: 1 },
-      ]
+      items = [{ price_id: MONTHLY_PRICE_ID, quantity: 1 }]
     } else {
-      const [setupCatalogPrice, monthlyCatalogPrice] = await Promise.all([
-        getPaddlePriceAmount(paddleIds.setupPriceId),
-        getPaddlePriceAmount(paddleIds.monthlyPriceId),
-      ])
+      const catalogPrice = await getPaddlePriceAmount(MONTHLY_PRICE_ID)
 
-      if (setupCatalogPrice == null || monthlyCatalogPrice == null) {
-        console.error('Could not fetch live Paddle prices for coupon calculation')
+      if (catalogPrice == null) {
+        console.error('Could not fetch live Paddle price for coupon calculation')
         return NextResponse.json({ error: 'Failed to create transaction' }, { status: 502 })
       }
 
-      const setupPrice = applyDiscount(setupCatalogPrice, coupon, 'setup')
-      const monthlyPrice = applyDiscount(monthlyCatalogPrice, coupon, 'monthly')
+      const price = applyDiscount(catalogPrice, coupon)
 
-      function buildDiscountedItem(amount: number, label: string) {
-        return {
+      items = [
+        {
           quantity: 1,
           price: {
-            product_id: paddleIds.productId,
-            description: label,
-            name: label,
+            product_id: PADDLE_PRODUCT_ID,
+            description: 'Monthly subscription',
+            name: 'Monthly subscription',
             unit_price: {
-              amount: Math.round(amount * 100).toString(),
+              amount: Math.round(price * 100).toString(),
               currency_code: 'USD',
             },
           },
-        }
-      }
-
-      items = [
-        buildDiscountedItem(setupPrice, 'Setup fee'),
-        buildDiscountedItem(monthlyPrice, 'Monthly subscription'),
+        },
       ]
     }
 
@@ -154,7 +123,6 @@ export async function POST(request: NextRequest) {
         items,
         custom_data: {
           user_id: user.id,
-          pricing_tier: tierId,
           coupon_code_used: coupon?.code || null,
         },
       }),

@@ -26,7 +26,6 @@ interface BillingInfo {
   subscription_status: string
   bypass_payment: boolean
   trial_started_at: string | null
-  pricing_tier: string
   next_billed_at: string | null
 }
 
@@ -85,7 +84,7 @@ export default function BillingPage() {
 
     const { data: restaurant } = await supabase
       .from('restaurants')
-      .select('id, subscription_status, bypass_payment, trial_started_at, pricing_tier, next_billed_at')
+      .select('id, subscription_status, bypass_payment, trial_started_at, next_billed_at')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -103,7 +102,7 @@ export default function BillingPage() {
     } else {
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('subscription_status, trial_started_at, pricing_tier')
+        .select('subscription_status, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 

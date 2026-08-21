@@ -36,7 +36,6 @@ export default function SetupPage() {
   const router = useRouter()
   const supabase = createClient()
   const [billing, setBilling] = useState({
-    pricing_tier: 'tier_a',
     subscription_status: 'pending',
     paddle_customer_id: null as string | null,
     paddle_subscription_id: null as string | null,
@@ -65,7 +64,7 @@ export default function SetupPage() {
 
       const { data: pending } = await supabase
         .from('pending_signups')
-        .select('pricing_tier, subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at')
+        .select('subscription_status, paddle_customer_id, paddle_subscription_id, coupon_code_used, trial_started_at')
         .eq('user_id', user.id)
         .maybeSingle()
 

@@ -2,15 +2,10 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface Tier {
+interface Pricing {
   id: string
   label: string
-  setup_fee: number
   monthly_price: number
-  intro_discount_active: boolean
-  intro_monthly_price: number | null
-  intro_duration_months: number
-  countries: string[]
 }
 
 function NumberField({ label, value, onChange }: {
@@ -39,33 +34,36 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   )
 }
 
-export default function PricingClient({ initialTiers }: { initialTiers: Tier[] }) {
+export default function PricingClient({ initialPricing }: { initialPricing: Pricing | null }) {
   const supabase = createClient()
-  const [tiers, setTiers] = useState<Tier[]>(initialTiers)
+  const [pricing, setPricing] = useState<Pricing | null>(initialPricing)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  function updateTier(id: string, field: keyof Tier, value: any) {
-    setTiers(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t))
+  function updateMonthlyPrice(value: string) {
+    setPricing(prev => prev ? { ...prev, monthly_price: Number(value) } : prev)
   }
 
   async function save() {
+    if (!pricing) return
+
     setSaving(true)
-    for (const t of tiers) {
-      await supabase
-        .from('pricing_tiers')
-        .update({
-          setup_fee: Number(t.setup_fee),
-          monthly_price: Number(t.monthly_price),
-          intro_discount_active: t.intro_discount_active,
-          intro_monthly_price: t.intro_monthly_price != null ? Number(t.intro_monthly_price) : null,
-          intro_duration_months: Number(t.intro_duration_months),
-        })
-        .eq('id', t.id)
+
+    const { error } = await supabase
+      .from('pricing_tiers')
+      .update({
+        monthly_price: Number(pricing.monthly_price),
+      })
+      .eq('id', 'standard')
+
+    if (error) {
+      console.error('Failed to save pricing:', error)
+    } else {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
     }
+
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
   }
 
   return (
@@ -84,60 +82,17 @@ export default function PricingClient({ initialTiers }: { initialTiers: Tier[] }
         </button>
       </div>
 
-      {tiers.map(tier => (
-        <Card key={tier.id} title={`${tier.label} (${tier.id})`}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <NumberField
-              label="One-time setup fee (USD)"
-              value={tier.setup_fee}
-              onChange={v => updateTier(tier.id, 'setup_fee', v)}
-            />
-            <NumberField
-              label="Monthly price (USD)"
-              value={tier.monthly_price}
-              onChange={v => updateTier(tier.id, 'monthly_price', v)}
-            />
-          </div>
-
-          <div style={{ borderTop: '1px solid #374151', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '13px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={tier.intro_discount_active}
-                onChange={e => updateTier(tier.id, 'intro_discount_active', e.target.checked)}
-              />
-              Enable intro discount (charges a lower price for the first few months, then switches to the price above)
-            </label>
-
-            {tier.intro_discount_active && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <NumberField
-                  label="Intro monthly price (USD)"
-                  value={tier.intro_monthly_price ?? ''}
-                  onChange={v => updateTier(tier.id, 'intro_monthly_price', v === '' ? null : v)}
-                />
-                <NumberField
-                  label="Intro duration (months)"
-                  value={tier.intro_duration_months}
-                  onChange={v => updateTier(tier.id, 'intro_duration_months', v)}
-                />
-              </div>
-            )}
-          </div>
-
-          <p style={{ color: '#6b7280', fontSize: '12px', margin: 0 }}>
-            Countries assigned to this tier: {tier.countries?.length ? tier.countries.join(', ') : 'none (default tier — applies to all countries not listed elsewhere)'}
-          </p>
+      {pricing && (
+        <Card title={`${pricing.label} (${pricing.id})`}>
+          <NumberField
+            label="Monthly price (USD)"
+            value={pricing.monthly_price}
+            onChange={updateMonthlyPrice}
+          />
         </Card>
-      ))}
+      )}
 
-      <div style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: '12px', padding: '16px' }}>
-        <p style={{ color: '#7DD3FC', fontSize: '12px', margin: 0, lineHeight: 1.6 }}>
-          ⓘ Note: the intro 3-month switch-over to the regular price is not automatic yet on existing subscriptions —
-          customers who already signed up keep paying their intro price until that feature is built. Changes here only
-          affect new signups going forward.
-        </p>
-      </div>
+
     </div>
   )
 }

@@ -4,18 +4,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-// const PRICE_ID_LOOKUP: Record<string, { tier: string; kind: 'setup' | 'monthly' }> = {
-//   pri_01kvkakwytrpft23tq4vs7sast: { tier: 'tier_a', kind: 'setup' },
-//   pri_01kvkar865vqnsabs6frwfatkg: { tier: 'tier_a', kind: 'monthly' },
-//   pri_01kvka7a5mtbnzmeh3mxdjyk85: { tier: 'tier_b', kind: 'setup' },
-//   pri_01kvka88sbchnykgxpba8f5r6w: { tier: 'tier_b', kind: 'monthly' },
+
 // }
 
-const PRICE_ID_LOOKUP: Record<string, { tier: string; kind: 'setup' | 'monthly' }> = {
-  pri_01kvhcswa3a0wf6me8v7tvj882: { tier: 'tier_a', kind: 'setup' },
-  pri_01kvhcz3hja1r3dem1kbeg4pbd: { tier: 'tier_a', kind: 'monthly' },
-  pri_01kvhd3q571p0k8cabxt4r9vxz: { tier: 'tier_b', kind: 'setup' },
-  pri_01kvhd59hydcrc7z94awczcsge: { tier: 'tier_b', kind: 'monthly' },
+const PRICE_ID_LOOKUP: Record<string, { kind: 'monthly' }> = {
+  [process.env.PADDLE_MONTHLY_PRICE_ID!]: { kind: 'monthly' },
 }
 
 function verifySignature(rawBody: string, paddleSignature: string, secretKey: string): boolean {
