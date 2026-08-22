@@ -8,16 +8,6 @@ import { getCurrencyForCountry, convertUsd, formatCurrency } from "@/lib/currenc
 
 export const dynamic = "force-dynamic";
 
-interface PricingTier {
-  id: string;
-  label: string;
-  setup_fee: number;
-  monthly_price: number;
-  intro_discount_active: boolean;
-  intro_monthly_price: number | null;
-  intro_duration_months: number;
-  countries: string[];
-}
 
 function isReservedIP(ip: string): boolean {
   if (!ip) return true;

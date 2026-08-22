@@ -144,21 +144,6 @@ export default function SetupPage() {
     const phoneCountry = ALL_COUNTRIES.find(c => c.isoCode === phoneCountryIso)
     const phoneDialCode = phoneCountry ? getDialCode(phoneCountry) : ''
 
-    // Read referral from server-side HTTP-only cookie — tamper-proof
-    let referredBy: string | null = null
-    let resolvedReferralCode: string | null = null
-    try {
-      const refRes = await fetch('/api/affiliates/apply-referral')
-      if (refRes.ok) {
-        const refData = await refRes.json()
-        if (refData.referral) {
-          referredBy = refData.referral.affiliate_id
-          resolvedReferralCode = refData.referral.code
-        }
-      }
-    } catch {
-      // Non-fatal
-    }
     const { data: newRestaurant, error } = await supabase.from('restaurants').insert({
       user_id: user.id,
       name,
@@ -173,8 +158,6 @@ export default function SetupPage() {
       country_code: countryCode,
       state: stateName,
       city: cityName,
-      referral_code: resolvedReferralCode,
-      referred_by: referredBy,
       ...billing,
     }).select('id').single()
 
@@ -209,9 +192,7 @@ export default function SetupPage() {
       }
 
       await supabase.from('pending_signups').delete().eq('user_id', user.id)
-      // Clear referral cookie now that it's been applied
-      try { await fetch('/api/affiliates/apply-referral', { method: 'DELETE' }) } catch { }
-
+      
       // ... rest of existing else block unchanged
 
       router.refresh()

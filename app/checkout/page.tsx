@@ -101,6 +101,14 @@ export default function CheckoutPage() {
       }
     }
 
+    const trialStartedAt = restaurant?.trial_started_at || pending?.trial_started_at || null
+    if (trialStartedAt) {
+      const elapsedDays = (Date.now() - new Date(trialStartedAt).getTime()) / (1000 * 60 * 60 * 24)
+      setTrialActive(elapsedDays < TRIAL_LENGTH_DAYS)
+    } else {
+      setTrialActive(false)
+    }
+
     // Currency estimate (display only — real local-currency billing
     // happens inside Paddle's own checkout once that's wired up)
     try {
@@ -153,6 +161,11 @@ export default function CheckoutPage() {
     if (data.max_redemptions && data.times_redeemed >= data.max_redemptions) { setCouponError('This coupon has reached its usage limit'); return }
 
     setCoupon(data)
+  }
+  
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/login')
   }
 
   async function handleContinueToPayment() {
@@ -218,6 +231,12 @@ export default function CheckoutPage() {
           )}
         </div>
 
+                <button
+          onClick={handleLogout}
+          style={{ display: 'block', margin: '0 auto 20px', background: 'none', border: 'none', color: '#64748b', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
+        >
+          Log out
+        </button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0', borderBottom: '1px solid rgba(56,189,248,0.1)' }}>
           <span style={{ color: '#7DD3FC', fontSize: 14 }}>Monthly</span>

@@ -10,10 +10,10 @@ export default async function PricingSettingsPage() {
   if (!user || user.email !== 'meerumairali@gmail.com') redirect('/dashboard')
 
   const { data: pricing } = await supabase
-  .from('pricing_tiers')
-  .select('id, label, monthly_price')
-  .eq('id', 'standard')
-  .single()
+    .from('pricing_tiers')
+    .select('id, label, monthly_price')
+    .eq('id', 'standard')
+    .single()
 
-return <PricingClient initialPricing={pricing} />
+  return <PricingClient initialPricing={pricing} />
 }

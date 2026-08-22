@@ -19,7 +19,6 @@ import {
   LifeBuoy,
   Contact,
   DollarSign,
-  Users2,
   Newspaper,
 } from 'lucide-react'
 
@@ -35,7 +34,6 @@ const navItems = [
   { label: 'Settings', href: '/super-admin/settings', icon: Settings },
   { label: 'Contact', href: '/super-admin/contact-submissions', icon: Contact },
   { label: 'Pricing', href: '/super-admin/pricing', icon: DollarSign },
-  { label: 'Affiliates', href: '/super-admin/affiliates', icon: Users2 },
 ]
 
 export default function SuperAdminLayout({
