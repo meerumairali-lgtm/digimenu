@@ -4,6 +4,15 @@ import rehypeSlug from 'rehype-slug'
 import type { Components } from 'react-markdown'
 
 const components: Components = {
+  h1: ({ children, ...props }) => (
+    <h2
+      {...props}
+      className="text-2xl md:text-[28px] font-bold text-[#0D1B2A] mt-12 mb-4 scroll-mt-24 leading-tight"
+    >
+      {children}
+    </h2>
+  ),
+  
   h2: ({ children, ...props }) => (
     <h2
       {...props}

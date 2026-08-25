@@ -13,13 +13,13 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Menuberg — Restaurant Website & Menu Builder | Live in Minutes',
   description: 'Build a beautiful digital menu website for your restaurant or café in minutes. No coding, no expensive web agency. QR code menus, custom themes, and your own website — all in one place.',
-  keywords: ['restaurant website builder', 'menu website maker', 'QR code menu', 'digital menu creator', 'cafe website builder', 'online menu for restaurant'],
   openGraph: {
     title: 'Menuberg — Restaurant Website & Menu Builder',
     description: 'Build a beautiful digital menu website for your restaurant in minutes. No coding required.',
     type: 'website',
     url: 'https://www.menuberg.com',
   },
+  alternates: { canonical: "https://www.menuberg.com" },
   twitter: {
     card: 'summary_large_image',
     title: 'Menuberg — Restaurant Website & Menu Builder',
@@ -103,121 +103,121 @@ export default async function Home() {
 
         <LandingNav />
 
-      {/* HERO */}
-      <section style={{ padding: "6rem 2rem 5rem", textAlign: "center", background: "#0D1B2A" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", color: "#38BDF8", fontSize: "12px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" as const, padding: "6px 16px", borderRadius: "20px", marginBottom: "2rem" }}>
-          {c.heroBadge}
-        </div>
-        <h1 style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.05, marginBottom: "1.5rem", letterSpacing: "-2px", color: "#ffffff" }}>
-          {c.heroLine1}<br />
-          <span style={{ color: "#38BDF8" }}>{c.heroLine2}</span><br />
-          {c.heroLine3}
-        </h1>
-        <p style={{ fontSize: "18px", color: "#7DD3FC", maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-          {c.heroSubtitle}
-        </p>
-       <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
-          <Link href="/signup" style={{ background: "#38BDF8", color: "#0D1B2A", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
-            {c.heroCta1}
-          </Link>
-          <a href="https://the-regent-room.menuberg.com" style={{ background: "transparent", color: "#ffffff", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}>
-            {c.heroCta2}
-          </a>
-        </div>
-        <p style={{ marginTop: "1.2rem", fontSize: "13px", color: "rgba(125,211,252,0.6)" }}>
-          Setup in under 5 minutes · No credit card required
-        </p>
-      </section>
-
-      {/* STATS */}
-      <div style={{ padding: "2.5rem 2rem", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", gap: "4rem", flexWrap: "wrap" as const, background: "#E0F2FE" }}>
-        {[
-          [c.stat1v, c.stat1l],
-          [c.stat2v, c.stat2l],
-          [c.stat3v, c.stat3l],
-          [c.stat4v, c.stat4l],
-        ].map(([num, label], i) => (
-          <div key={label} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0D1B2A", letterSpacing: "-1px" }}>
-              {i === 2 ? <LivePriceStat /> : num}
-            </div>
-            <div style={{ fontSize: "13px", color: "#1A3A5C", marginTop: "4px" }}>{label}</div>
+        {/* HERO */}
+        <section style={{ padding: "6rem 2rem 5rem", textAlign: "center", background: "#0D1B2A" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", color: "#38BDF8", fontSize: "12px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" as const, padding: "6px 16px", borderRadius: "20px", marginBottom: "2rem" }}>
+            {c.heroBadge}
           </div>
-        ))}
-      </div>
+          <h1 style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.05, marginBottom: "1.5rem", letterSpacing: "-2px", color: "#ffffff" }}>
+            {c.heroLine1}<br />
+            <span style={{ color: "#38BDF8" }}>{c.heroLine2}</span><br />
+            {c.heroLine3}
+          </h1>
+          <p style={{ fontSize: "18px", color: "#7DD3FC", maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
+            {c.heroSubtitle}
+          </p>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
+            <Link href="/signup" style={{ background: "#38BDF8", color: "#0D1B2A", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
+              {c.heroCta1}
+            </Link>
+            <a href="https://the-regent-room.menuberg.com" style={{ background: "transparent", color: "#ffffff", padding: "15px 32px", borderRadius: "10px", fontSize: "16px", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(255,255,255,0.2)" }}>
+              {c.heroCta2}
+            </a>
+          </div>
+          <p style={{ marginTop: "1.2rem", fontSize: "13px", color: "rgba(125,211,252,0.6)" }}>
+            Setup in under 5 minutes · No credit card required
+          </p>
+        </section>
 
-      {/* FEATURES */}
-      <div id="features">
-        <FeaturesCarousel features={features} />
-      </div>
-
-      {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ padding: "6rem 2rem", background: "#fafafa", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
-        <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 3.5rem" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>How it works</div>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", letterSpacing: "-1px" }}>
-            From zero to live website page<br />in 3 simple steps
-          </h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+        {/* STATS */}
+        <div style={{ padding: "2.5rem 2rem", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", gap: "4rem", flexWrap: "wrap" as const, background: "#E0F2FE" }}>
           {[
-            ["1", "Sign up free", "Create your account and choose your restaurant's unique URL in minutes."],
-            ["2", "Build your website", "Add your categories, dishes, prices, photos, and contact details. Choose a theme and layout."],
-            ["3", "Go live & Go", "Launch your website, download your QR code, and share your business with the world."],
-          ].map(([num, title, desc]) => (
-            <div key={String(num)} style={{ textAlign: "center" }}>
-              <div style={{ width: "52px", height: "52px", background: "#E0F2FE", border: "2px solid #7DD3FC", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.2rem", fontSize: "20px", fontWeight: 800, color: "#0D1B2A" }}>
-                {num}
+            [c.stat1v, c.stat1l],
+            [c.stat2v, c.stat2l],
+            [c.stat3v, c.stat3l],
+            [c.stat4v, c.stat4l],
+          ].map(([num, label], i) => (
+            <div key={label} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "30px", fontWeight: 800, color: "#0D1B2A", letterSpacing: "-1px" }}>
+                {i === 2 ? <LivePriceStat /> : num}
               </div>
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111", marginBottom: "0.5rem" }}>{title}</h3>
-              <p style={{ fontSize: "14px", color: "#888", lineHeight: 1.6, margin: 0 }}>{desc}</p>
+              <div style={{ fontSize: "13px", color: "#1A3A5C", marginTop: "4px" }}>{label}</div>
             </div>
           ))}
         </div>
-      </section>
 
-      {/* PRICING */}
-      <PricingBanner />
-
-      {/* CONTACT */}
-      <ContactSection
-        heading={c.contactHeading}
-        subheading={c.contactSubheading}
-        email={c.contactEmail}
-        phone={c.contactPhone}
-        address={c.contactAddress}
-      />
-
-      {/* CTA BANNER */}
-      <section style={{ margin: "5rem 2rem 5rem", background: "#0D1B2A", borderRadius: "20px", padding: "4rem 2rem", textAlign: "center" }}>
-        <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 800, color: "#fff", marginBottom: "1rem", letterSpacing: "-1px" }}>
-          {c.ctaTitle}
-        </h2>
-        <p style={{ fontSize: "16px", color: "#7DD3FC", marginBottom: "2rem" }}>
-          {c.ctaSubtitle}
-        </p>
-        <Link href="/signup" style={{ display: "inline-block", background: "#38BDF8", color: "#0D1B2A", padding: "15px 36px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
-          Start for free →
-        </Link>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={{ padding: "2rem", borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: "1rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Image src="/logo.png" alt="Menuberg" width={28} height={28} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: "18px", fontWeight: 700, color: "#0D1B2A" }}>Menuberg <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Every business deserve a website</span></span>
+        {/* FEATURES */}
+        <div id="features">
+          <FeaturesCarousel features={features} />
         </div>
-        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
-          <Link href="/pricing" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Pricing</Link>
-          <a href="#contact" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Contact</a>
-          <Link href="/terms" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Terms</Link>
-          <Link href="/privacy" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Privacy</Link>
-          <Link href="/refund" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Refund Policy</Link>
-        </div>
-        <p style={{ fontSize: "12px", color: "#ccc", width: "100%", margin: 0 }}>© 2025 Menuberg. Built for small restaurants worldwide.</p>
-      </footer>
 
-    </main>
+        {/* HOW IT WORKS */}
+        <section id="how-it-works" style={{ padding: "6rem 2rem", background: "#fafafa", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
+          <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 3.5rem" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" as const, color: "#38BDF8", marginBottom: "0.8rem" }}>How it works</div>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#111", letterSpacing: "-1px" }}>
+              From zero to live website page<br />in 3 simple steps
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+            {[
+              ["1", "Sign up free", "Create your account and choose your restaurant's unique URL in minutes."],
+              ["2", "Build your website", "Add your categories, dishes, prices, photos, and contact details. Choose a theme and layout."],
+              ["3", "Go live & Go", "Launch your website, download your QR code, and share your business with the world."],
+            ].map(([num, title, desc]) => (
+              <div key={String(num)} style={{ textAlign: "center" }}>
+                <div style={{ width: "52px", height: "52px", background: "#E0F2FE", border: "2px solid #7DD3FC", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.2rem", fontSize: "20px", fontWeight: 800, color: "#0D1B2A" }}>
+                  {num}
+                </div>
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111", marginBottom: "0.5rem" }}>{title}</h3>
+                <p style={{ fontSize: "14px", color: "#888", lineHeight: 1.6, margin: 0 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* PRICING */}
+        <PricingBanner />
+
+        {/* CONTACT */}
+        <ContactSection
+          heading={c.contactHeading}
+          subheading={c.contactSubheading}
+          email={c.contactEmail}
+          phone={c.contactPhone}
+          address={c.contactAddress}
+        />
+
+        {/* CTA BANNER */}
+        <section style={{ margin: "5rem 2rem 5rem", background: "#0D1B2A", borderRadius: "20px", padding: "4rem 2rem", textAlign: "center" }}>
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 800, color: "#fff", marginBottom: "1rem", letterSpacing: "-1px" }}>
+            {c.ctaTitle}
+          </h2>
+          <p style={{ fontSize: "16px", color: "#7DD3FC", marginBottom: "2rem" }}>
+            {c.ctaSubtitle}
+          </p>
+          <Link href="/signup" style={{ display: "inline-block", background: "#38BDF8", color: "#0D1B2A", padding: "15px 36px", borderRadius: "10px", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
+            Start for free →
+          </Link>
+        </section>
+
+        {/* FOOTER */}
+        <footer style={{ padding: "2rem", borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Image src="/logo.png" alt="Menuberg" width={28} height={28} style={{ objectFit: "contain" }} />
+            <span style={{ fontSize: "18px", fontWeight: 700, color: "#0D1B2A" }}>Menuberg <span style={{ color: "#bbb", fontSize: "14px", fontWeight: 400 }}>· Every business deserve a website</span></span>
+          </div>
+          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
+            <Link href="/pricing" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Pricing</Link>
+            <a href="#contact" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Contact</a>
+            <Link href="/terms" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Terms</Link>
+            <Link href="/privacy" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Privacy</Link>
+            <Link href="/refund" style={{ fontSize: "13px", color: "#aaa", textDecoration: "none" }}>Refund Policy</Link>
+          </div>
+          <p style={{ fontSize: "12px", color: "#ccc", width: "100%", margin: 0 }}>© 2025 Menuberg. Built for small restaurants worldwide.</p>
+        </footer>
+
+      </main>
     </>
   )
 }
