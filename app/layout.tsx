@@ -14,33 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.menuberg.com"),
   title: "Menuberg | Affordable Restaurant Website Builder & QR Menu",
 
   description:
     "Create a professional restaurant website in minutes. Menuberg is an affordable restaurant website builder with QR menus, online ordering links, menu management, and custom branding. A simple alternative to Wix for restaurants.",
 
-  keywords: [
-    "restaurant website builder",
-    "restaurant website",
-    "restaurant website creator",
-    "restaurant website software",
-    "restaurant website platform",
-    "QR menu",
-    "digital restaurant menu",
-    "restaurant menu website",
-    "Wix alternative for restaurants",
-    "restaurant website alternative",
-    "restaurant marketing",
-    "restaurant landing page",
-    "online menu",
-    "restaurant SaaS",
-    "small restaurant website"
-  ],
-
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+
+  openGraph: {
+    siteName: "Menuberg",
+    type: "website",
+    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image" },
+
 };
 
 export default function RootLayout({

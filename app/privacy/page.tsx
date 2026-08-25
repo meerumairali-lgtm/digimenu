@@ -3,6 +3,21 @@ import LandingNav from "@/app/components/LandingNav";
 
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Menuberg",
+  description: "How Menuberg collects, uses, and protects your data and your customers' data.",
+  alternates: { canonical: "https://www.menuberg.com/privacy" },
+  openGraph: {
+    title: "Privacy Policy | Menuberg",
+    description: "How Menuberg collects, uses, and protects your data and your customers' data.",
+    url: "https://www.menuberg.com/privacy",
+    type: "website",
+  },
+  twitter: { card: "summary", title: "Privacy Policy | Menuberg" },
+};
+
 export default async function PrivacyPage() {
     const supabase = await createClient();
     const { data: content } = await supabase

@@ -3,6 +3,28 @@ import LandingNav from "@/app/components/LandingNav";
 
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | Menuberg",
+  description:
+    "Read Menuberg's Terms of Service, including account responsibilities, subscriptions, payments, acceptable use, and other terms for using our restaurant website builder.",
+  alternates: {
+    canonical: "https://www.menuberg.com/terms",
+  },
+  openGraph: {
+    title: "Terms of Service | Menuberg",
+    description:
+      "Read Menuberg's Terms of Service, including account responsibilities, subscriptions, payments, acceptable use, and other terms for using our restaurant website builder.",
+    url: "https://www.menuberg.com/terms",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Service | Menuberg",
+  },
+};
+
 export default async function TermsPage() {
     const supabase = await createClient();
     const { data: content } = await supabase

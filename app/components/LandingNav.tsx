@@ -125,7 +125,8 @@ export default function LandingNav() {
             alt="Menuberg"
             width={62}
             height={62}
-            style={{ objectFit: 'contain', width: '44px', height: '44px' }}
+            priority
+          style={{ objectFit: 'contain', width: '44px', height: '44px' }}
           />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
             <span style={{ fontSize: '20px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>
@@ -230,6 +231,7 @@ export default function LandingNav() {
             <>
               <Link
                 href="/login"
+                rel="nofollow"
                 style={{
                   fontSize: 14,
                   color: '#7DD3FC',
@@ -242,6 +244,7 @@ export default function LandingNav() {
               </Link>
               <Link
                 href="/signup"
+                rel="nofollow"
                 style={{
                   background: '#38BDF8',
                   color: '#0D1B2A',
@@ -387,6 +390,7 @@ export default function LandingNav() {
               <>
                 <Link
                   href="/login"
+                  rel="nofollow"
                   onClick={() => setMenuOpen(false)}
                   style={{
                     fontSize: 15,
@@ -401,6 +405,7 @@ export default function LandingNav() {
                 </Link>
                 <Link
                   href="/signup"
+                  rel="nofollow"
                   onClick={() => setMenuOpen(false)}
                   style={{
                     background: '#38BDF8',

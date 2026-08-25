@@ -3,6 +3,28 @@ import LandingNav from "@/app/components/LandingNav";
 
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Refund Policy | Menuberg",
+  description:
+    "Learn about Menuberg's refund policy, eligibility, cancellation terms, and how to request a refund for your restaurant website subscription.",
+  alternates: {
+    canonical: "https://www.menuberg.com/refund",
+  },
+  openGraph: {
+    title: "Refund Policy | Menuberg",
+    description:
+      "Learn about Menuberg's refund policy, eligibility, cancellation terms, and how to request a refund for your restaurant website subscription.",
+    url: "https://www.menuberg.com/refund",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Refund Policy | Menuberg",
+  },
+};
+
 export default async function RefundPage() {
     const supabase = await createClient();
     const { data: content } = await supabase

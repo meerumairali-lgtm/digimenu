@@ -54,12 +54,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    { url: 'https://www.menuberg.com/privacy',lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: 'https://www.menuberg.com/refund', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: 'https://www.menuberg.com/terms', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     {
       url: `${SITE_URL}/blog`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
+
   ]
 
   return [...staticEntries, ...blogEntries, ...categoryEntries, ...restaurantEntries]
