@@ -42,18 +42,22 @@ function SignupClient() {
     setLoading(true)
 
     const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error || !data.user) {
-      setError(error?.message || 'Something went wrong. Please try again.')
-      setLoading(false)
-      return
-    }
+if (error || !data.user) {
+  setError(error?.message || 'Something went wrong. Please try again.')
+  setLoading(false)
+  return
+}
 
-    if (data.session) {
-      router.push('/dashboard/setup')
-    } else {
-      setConfirmationSent(true)
-      setLoading(false)
-    }
+if (typeof window !== 'undefined' && (window as any).gtag) {
+  (window as any).gtag('event', 'sign_up', { method: 'email' })
+}
+
+if (data.session) {
+  router.push('/dashboard/setup')
+} else {
+  setConfirmationSent(true)
+  setLoading(false)
+}
   }
 
   if (confirmationSent) {
