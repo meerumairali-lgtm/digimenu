@@ -8,7 +8,7 @@ import PricingBanner from './components/PricingBanner'
 import LivePriceStat from '@/app/components/LivePriceStat'
 import type { Metadata } from 'next'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Menuberg — Restaurant Website & Menu Builder | Live in Minutes',
