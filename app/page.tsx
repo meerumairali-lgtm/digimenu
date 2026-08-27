@@ -12,10 +12,10 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Menuberg — Restaurant Website & Menu Builder | Live in Minutes',
-  description: 'Build a beautiful digital menu website for your restaurant or café in minutes. No coding, no expensive web agency. QR code menus, custom themes, and your own website — all in one place.',
+  description: 'Build an affordable and beautiful restaurant website with a built-in QR digital menu, in minutes. No coding, no expensive web agency. QR code menus, custom themes — all in one place.',
   openGraph: {
     title: 'Menuberg — Restaurant Website & Menu Builder',
-    description: 'Build a beautiful digital menu website for your restaurant in minutes. No coding required.',
+    description: 'Build an afforable and beautiful website for your restaurant in minutes. No coding, Developer or agency required.',
     type: 'website',
     url: 'https://www.menuberg.com',
   },
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Menuberg — Restaurant Website & Menu Builder',
-    description: 'Build a beautiful digital menu website for your restaurant in minutes.',
+    description: 'Build an affordable and beautiful website for your restaurant in minutes.',
   },
 }
 
