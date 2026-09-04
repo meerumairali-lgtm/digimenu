@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { logAuditAction } from '@/lib/audit'
 import { NextResponse } from 'next/server'
-import { createPost, generateUniqueSlug, slugify, type PostInput } from '@/lib/blog'
+import { createPost, generateUniqueSlug, slugify, type PostInput , SITE_URL } from '@/lib/blog'
+import { submitToIndexNow } from '@/lib/indexnow'
 
 const SUPER_ADMIN_EMAIL = 'meerumairali@gmail.com'
 
@@ -41,6 +42,10 @@ export async function POST(req: Request) {
     target_id: post.id,
     target_name: post.title,
   })
+
+  if (post.status === 'published') {
+    submitToIndexNow(`${SITE_URL}/blog/${post.slug}`)
+    }
 
   return NextResponse.json({ post })
 }
